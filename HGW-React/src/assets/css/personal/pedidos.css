@@ -1,0 +1,78 @@
+.pedidos{
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+.pedidos button{
+    font-size: 1em;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #03624c;
+    color: #fff;
+    transition: background-color 0.5s ease;
+    text-transform: capitalize;
+}
+.pedidos button:hover{
+    background-color: #06302b;
+    font-weight: bolder;
+}
+.pedidos .volver button{
+    display: flex;
+    gap: 5px;
+}
+.secciones{
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    justify-items: center;
+    align-items: center;
+    gap: 15px;
+}
+.btn-section {
+    width: 100%;
+    height: 100%;
+}
+.btn-section button{
+    width: 100%;
+    height: 100%;
+}
+/*---- objetos ----*/
+.order-details {
+    width: 100%;
+    margin: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.order-number {
+    font-weight: bold;
+}
+.product-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.product-image {
+    width: 80px;
+    height: 80px;
+}
+.product-info {
+    flex: 1;
+}
+.product-name {
+    font-size: 16px;
+}
+.product-price {
+    font-size: 14px;
+    color: #666;
+}
+.product-quantity {
+    font-weight: bold;
+}
+.total-price {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: right;
+}

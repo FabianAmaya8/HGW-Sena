@@ -1,0 +1,209 @@
+/*-------- CIRCULO ---------*/
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #dce4ec !important;
+    text-align: center;
+    
+}
+.contenido img{
+    width: 80%;
+    border-radius: 20%;
+    
+}
+.banner{
+    margin: 20px;
+    background: url('/static/User/img/defban.png') no-repeat center center;
+    background-size: cover;
+    height: 80%;
+    width: 80%;
+    border-radius: 30px;
+    box-shadow: 8px 4px 8px rgba(0, 0, 0, 0.1);
+}
+.circle {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background-color: white;
+    margin: 50px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.circle a {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: rgb(79, 76, 76);
+    box-sizing: border-box;
+    transition: all 0.3s ease-in-out;
+}
+
+.circle a span {
+    display: block;
+    font-size: 0.9rem;
+    transform: rotate(0deg);
+    
+}
+.top-left {
+    top: 0;
+    left: 0;
+    border-radius: 20%;
+    background-color: #f6c23e;
+    clip-path: polygon(0% , 100% 100%, 0% 100%);
+    border-right: 3px solid white;
+    border-bottom: 3px solid white;
+}
+
+.top-right {
+    top: 0;
+    right: 0;
+    background-color: #1cc88a;
+    border-radius: 20%;
+    clip-path: polygon(0%, 100% 100%, 100% 0%);
+    border-left: 3px solid white;
+    border-bottom: 3px solid white;
+}
+
+.bottom-left {
+    bottom: 0;
+    left: 0;
+    background-color: #36b9cc;
+    border-radius: 20%;
+    clip-path: polygon(100% 100%, 0%,0%, 100% 0%);
+    border-right: 3px solid white;
+    border-top: 3px solid white;
+}
+
+.bottom-right {
+    bottom: 0;
+    right: 0;
+    background-color: #e56a54;
+    border-radius: 20%;
+    clip-path: polygon(0% 0%, 100%, 100% 100%);
+    border-left: 3px solid white;
+    border-top: 3px solid white;
+}
+/*-------- TEXTO ---------*/
+.title{
+    color: #063a2d;
+    font-size: 2.2em;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    padding: 20px;
+}
+p{
+    font-size: 1.25rem;
+    margin-top: 0;
+    margin-bottom: 1rem
+}
+div.p-text p {
+    font-size: 1.70rem;
+    color: gray;
+    margin-bottom: 3rem;
+}
+/*-------- SECCIONES ---------*/
+section{
+    color: aliceblue;
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    letter-spacing: 2px;
+}
+
+#inicio img,
+#liderazgo img,
+#productos img,
+#proceso img {
+    border-radius: 20px;
+}
+#inicio .imagenes-contenedor,
+#liderazgo .imagenes-contenedor,
+#productos .imagenes-contenedor,
+#proceso .imagenes-contenedor {
+    display: flex;
+    justify-content: center;
+    gap: 100px;
+    flex-wrap: wrap;
+
+}
+.sec1{
+    padding: 20px;
+    margin: 50px auto;
+    width: 100%;
+    background-color:#f6c23e;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+}
+.sec2{
+    padding: 20px;
+    margin: 50px auto;
+    width: 100%;
+    background-color:#1cc88a;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+}
+.sec3{
+    padding: 20px;
+    margin: 50px auto;
+    width: 100%;
+    background-color:#36b9cc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+}
+.sec4{
+    padding: 20px;
+    margin: 50px auto;
+    width: 100%;
+    background-color:#e56a54;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+}
+.circle a:hover {
+    background-color: rgba(230, 152, 152, 0.1);
+}
+.imagenes-contenedor a img:hover {
+    transform: scale(1.06);
+}
+/*-------- ANIMACION ---------*/
+/* Definir la animación */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+#inicio,
+#liderazgo,
+#productos,
+#proceso {
+    width: 90%;
+    opacity: 0;
+    animation: slideIn 1s ease-out forwards;
+}
+#liderazgo {
+    animation-delay: 0.2s;
+}
+
+#productos {
+    animation-delay: 0.4s;
+}
+
+#proceso {
+    animation-delay: 0.6s;
+}

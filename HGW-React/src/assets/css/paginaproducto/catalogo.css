@@ -1,0 +1,158 @@
+.contenedor-principal{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.catalogo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+    justify-items: center;
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    justify-content: center;
+}
+
+.categorias {
+    background-color: #527D5C;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    color: #ffffff;
+    padding: 15px;
+    width: 155px;
+    height: 250px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+    display: block;
+    overflow: hidden;
+}
+
+.categorias:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0.8;
+}
+.categorias img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+}
+.texto-categorias {
+    text-align: center;
+    margin-top: 20px;
+    width: 100%;
+    text-align: center;
+}
+.texto-categorias h3 {
+    font-size: 18px;
+    margin: 0;
+    color: #fff;
+}
+/*INFO*/
+.contenedor-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 90%;
+}
+.catalog-k {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.card {
+    background-color: #fff;
+    color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.card h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #333;
+}
+.card p {
+    margin-bottom: 20px;
+    color: #666;
+}
+.card .btn {
+    background-color: #527D5C;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.card .btn:hover {
+    background-color: #355E3B;
+}
+
+.KITS {
+    width: 100%;
+    max-width: 500px;
+}
+.slider-KITS {
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.slider-KITS ul {
+    display: flex;
+    animation: cambio 36s infinite;
+    padding: 0;
+    margin: 0;
+    width: 500%;
+}
+.slider-KITS li {
+    list-style: none;
+}
+.slider-KITS img {
+    width: 100%;
+    display: block;
+}
+@keyframes cambio {
+    0% {margin-left: 0;}
+    20% {margin-left: -0%;}
+    25% {margin-left: -100%;}
+    45% {margin-left: -100%;}
+    50% { margin-left: -200%;}
+    70% {margin-left: -200%;}
+    75% {margin-left: -300%;}
+    100% {margin-left: -300%;}
+}
+/* productos */
+.Alimentacion, .Cuidadopersonal, .Accesorios, .equipo, .cosmeticos, .merchandise, .todoslosproductos{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.productos-container {
+    width: 90%;
+    padding: 20px;
+}
+.productos-container>.carts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    justify-items: center;
+    gap: 30px;
+}
+
+/*----- media query -----*/
+@media (max-width: 768px){
+    .contenedor-info{
+        flex-direction: column;
+        align-items: center;
+    }
+}

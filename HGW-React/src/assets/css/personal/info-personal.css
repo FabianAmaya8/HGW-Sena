@@ -1,0 +1,79 @@
+.volver{
+    width: 90%;
+}
+.volver-item{
+    display: inline-block;
+}
+.volver-item button{
+    font-size: 1em;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #03624c;
+    color: #fff;
+    transition: background-color 0.5s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.volver-item button:hover{
+    background-color: #06302b;
+    font-weight: bolder;
+}
+/*----- datos-personales -----*/
+
+.datos-personales{
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+}
+.datos-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.datos-item{
+    width: 70%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-transform: capitalize;
+    padding: 10px 0;
+    border-bottom: #eeeeee88 solid 1px;
+}
+.dato-label{
+    font-weight: bolder;
+}
+.dato-dato{
+    text-transform: none;
+}
+.btns{
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+    margin-top: 15px;
+}
+.btns button{
+    font-size: 1em;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #03624c;
+    color: #fff;
+    transition: background-color 0.5s ease;
+}
+.btns button:hover{
+    background-color: #06302b;
+    font-weight: bolder;
+}
+/*----- media query -----*/
+@media (max-width: 768px){
+    .datos-item{
+        width: 100%;
+    }
+}

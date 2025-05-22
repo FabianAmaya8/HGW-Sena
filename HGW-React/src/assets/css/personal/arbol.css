@@ -1,0 +1,219 @@
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+   
+}
+.contenido {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    
+}
+
+.estadisticas,
+.formulario {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 48%;
+}
+
+h2,
+h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #2d2d2d;
+}
+
+h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.informacion .item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.informacion .etiqueta {
+    font-weight: bold;
+    color: #666;
+}
+
+.informacion .valor {
+    font-size: 16px;
+    color: #333;
+}
+
+.grupo-entrada {
+    margin-bottom: 20px;
+}
+
+.grupo-entrada label {
+    display: block;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.opciones-membresia {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.membresia {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 22%;
+}
+
+.membresia:hover {
+    background-color: #f0f0f0;
+}
+
+.btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+/*membresia*/
+.opciones-membresia {
+    display: flex;
+    justify-content: space-between;
+}
+
+.membresia {
+    padding: 8px 16px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.membresia:hover {
+    background-color: #f1f1f1;
+}
+
+.membresia.pre-junior {
+    background-color: #ffeb3b;
+}
+
+.membresia.junior {
+    background-color: #4caf50;
+}
+
+.membresia.senior {
+    background-color: #ff9800;
+}
+
+.membresia.master {
+    background-color: #f44336;
+    color: #fff;
+}
+
+
+.arbol {
+    width: 100%;
+    height: auto;
+    text-align: center;
+}
+
+.arbol ul {
+    padding-top: 20px;
+    position: relative;
+    transition: .5s;
+}
+
+.arbol li {
+    display: inline-table;
+    text-align: center;
+    list-style-type: none;
+    position: relative;
+    padding: 10px;
+    transition: .5s;
+}
+
+.arbol li::before,
+.arbol li::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 50%;
+    border-top: 1px solid #ccc;
+    width: 51%;
+    height: 10px;
+}
+
+.arbol li::after {
+    right: auto;
+    left: 50%;
+    border-left: 1px solid #ccc;
+}
+.arbol li:first-child::before,
+.arbol li:last-child::after {
+    border: 0 none;
+}
+
+.arbol li:last-child::before {
+    border-right: 1px solid #ccc;
+    border-radius: 0 5px 0 0;
+}
+
+.arbol li:first-child::after {
+    border-radius: 5px 0 0 0;
+}
+
+.arbol ul ul::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    border-left: 1px solid #ccc;
+    width: 0;
+    height: 20px;
+}
+
+.arbol li a {
+    border: 1px solid #ccc;
+    padding: 10px;
+    display: inline-grid;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: .5s;
+}
+
+.arbol li a:hover {
+    background: #c8e4f8;
+    color: #000;
+    border: 1px solid #94a0b4;
+}

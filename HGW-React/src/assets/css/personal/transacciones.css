@@ -1,0 +1,154 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #eeeeee;
+}
+
+.container {
+max-width: 900px;
+margin: 0 auto; /* antes tenía 2rem */
+background-color: #e3fbe3;
+border-radius: 20px;
+overflow: hidden;
+box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+
+  .header {
+    background-color: #c8f6c8;
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #a5e6a5;
+  }
+
+  .title-area h1 {
+    margin: 0;
+    font-size: 2rem;
+  }
+
+  .title-area p {
+    margin: 0.3rem 0 0;
+    color: #4d784d;
+  }
+
+  .search-icon {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .search-bar {
+    border-radius: 1rem;
+    padding: 0.4rem 1rem;
+    border: 1px solid #ccc;
+  }
+
+  .summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    background-color: #def8de;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .section {
+    flex: 1;
+    text-align: center;
+  }
+
+  .wallet {
+    color: #333;
+  }
+
+  .tag {
+    background-color: #c0e9c0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    margin-bottom: 0.4rem;
+  }
+
+  .amount {
+    font-weight: bold;
+    color: #666;
+    margin-top: 0.3rem;
+  }
+
+  .btn-new {
+    background-color: #007bff;
+    color: white;
+    padding: 0.7rem 1.4rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .btn-new:hover {
+    background-color: #0056cc;
+  }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 15px;
+    position: relative;
+  }
+
+  .close {
+    position: absolute;
+    top: 10px; right: 15px;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+  /* Tabla */
+  .history {
+    padding: 1rem 2rem;
+    background-color: #f5fff5;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  th, td {
+    padding: 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  th {
+    background-color: #d6f6d6;
+    font-weight: bold;
+    color: #333;
+  }
+
+  td {
+    color: #444;
+  }

@@ -1,0 +1,69 @@
+body {
+    background-color: var(--fondo);
+}
+.volver {
+    width: 90%;
+}
+
+.volver-item {
+    display: inline-block;
+}
+
+.volver-item button {
+    font-size: 1em;
+    padding: 10px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #fff;
+    transition: background-color 0.5s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.volver-item button:hover {
+    background-color: #06302b;
+    font-weight: bolder;
+}
+a.active {
+    border-bottom: 2px solid #55c57a;
+}
+
+.nav-link {
+    color: rgb(110, 110, 110);
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: #55c57a;
+}
+
+.nav-pills .nav-link.active {
+    color: black;
+    background-color: white;
+    border-radius: 0.1rem 0.5rem 0 0;
+    font-weight: 600;
+}
+
+.tab-content {
+    padding-bottom: 1.3rem;
+}
+
+.form-control {
+    background-color: rgb(241, 243, 247);
+    border: none;
+}
+.nav.nav-pills {
+    display: flex;
+    gap: 1rem;
+    /* Espacio entre los li */
+    justify-content: center;
+    flex-wrap: wrap;
+    /* Esto ayuda en pantallas pequeñas */
+}
+
+.nav-item {
+    /* Esto es opcional si usas gap, pero puedes dejarlo para fine tuning */
+    margin-bottom: 0.5rem;
+}

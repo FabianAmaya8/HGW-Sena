@@ -1,0 +1,65 @@
+.volver{
+    width: 90%;
+}
+.volver-item{
+    display: inline-block;
+}
+.volver-item button{
+    font-size: 1em;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #03624c;
+    color: #fff;
+    transition: background-color 0.5s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.volver-item button:hover{
+    background-color: #06302b;
+    font-weight: bolder;
+}
+/*----- rangos-----*/
+.conten-rangos{
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.conten-rangos h2{
+    font-size: 24px;
+}
+.rangos-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    justify-items: center;
+}
+.rango {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px #0000001a;
+    text-align: center;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.rango-img{
+    width: 90%;
+}
+.rango-img img {
+    width: 100%;
+    height: 100%;
+}
+.rango h3 {
+    font-size: 1.2em;
+    color: #03624c;
+}
+.rango p {
+    font-size: 0.9em;
+    color: #555;
+}
