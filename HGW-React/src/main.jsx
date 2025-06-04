@@ -6,7 +6,6 @@ import { RouterProvider } from 'react-router-dom'
 import router from './router.jsx'
 
 // Estilos y librerías (todo esto se queda igual)
-import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'boxicons/css/boxicons.min.css'
 import 'sweetalert2/dist/sweetalert2.min.css'

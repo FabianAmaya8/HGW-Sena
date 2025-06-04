@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import '../../../assets/css/fijos/login.css';
 import LoginForm from './loginForm';
@@ -18,7 +17,7 @@ return (
                     <Link to="/register" className="btn btn-outline-primary btn-login">
                         Registrarse
                     </Link>
-                    <Link to="/home" className="btn btn-outline-secondary btn-login">
+                    <Link to="/" className="btn btn-outline-secondary btn-login">
                         Volver al inicio
                     </Link>
                 </div>

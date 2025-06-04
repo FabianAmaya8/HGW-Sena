@@ -1,5 +1,3 @@
-// src/components/LoginModal.jsx
-import React from 'react';
 import { useModal } from '../../context/ModalContext';
 
 const LoginModal = () => {

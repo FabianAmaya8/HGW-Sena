@@ -144,10 +144,6 @@
     justify-content: center;
     gap: 15px;
 }
-.productos-container{
-    width: 90%;
-
-}
 .productos-container > .carts{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));

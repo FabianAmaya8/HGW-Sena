@@ -1,4 +1,3 @@
-import React from 'react';
 import useLoginForm from '../../hooks/useLoginForm';
 
 const LoginForm = () => {
@@ -19,6 +18,7 @@ return (
             className="form-control"
             value={usuario}
             onChange={e => setUsuario(e.target.value)}
+            placeholder="Ingresa tu usuario o correo"
             required
             />
         </div>
@@ -32,6 +32,7 @@ return (
                     className="form-control"
                     value={contrasena}
                     onChange={e => setContrasena(e.target.value)}
+                    placeholder="Ingresa tu contraseña"
                     required
                 />
                 <i

@@ -7,6 +7,7 @@ import soya from '../../assets/img/productos/soya.jpg';
 import te from '../../assets/img/productos/te.jpg';
 import teazul from '../../assets/img/productos/teazul.jpg';
 import unete from '../../assets/img/productos/unete.jpg';
+import { ProductsList } from './productos';
 
 const InicioView = () => {
 return (
@@ -66,7 +67,7 @@ return (
                     <div className="carousel-inner">
                     {[...Array(4)].map((_, i) => (
                         <div className={`carousel-item ${i === 0 ? 'active' : ''}`} key={i}>
-                            <div className="carts 4">{/* Contenido de productos destacados aquí */}</div>
+                            <ProductsList limit={4} />
                         </div>
                     ))}
                     </div>
@@ -92,7 +93,7 @@ return (
             <div className="productos">
                 <h2>Productos</h2>
                 <div className="productos-container">
-                    <div className="carts 12">{/* Aquí irán los productos dinámicamente */}</div>
+                    <ProductsList limit={12} />
                 </div>
             </div>
         </div>

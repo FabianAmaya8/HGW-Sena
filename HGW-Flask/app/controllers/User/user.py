@@ -3,17 +3,16 @@ from .utils.datosProductos import obtener_productos
 from .utils.datosUsuario import obtener_usuario_actual
 
 user_bp = Blueprint('user', __name__)
-@user_bp.route("/api/usuario/<id>")
-def api_obtener_usuarioX(id):
-    # try:
-    #     id = int(id)
-    # except ValueError:
-    #     return jsonify({'error': 'ID inválido'}), 400
-
-    usuario = obtener_usuario_actual(id)
-    if isinstance(usuario, str):
-        return jsonify({'error': usuario}), 404
-    return jsonify(usuario), 200
+@user_bp.route("/api/usuario")
+def usuarioX():
+    connection = current_app.config['MYSQL_CONNECTION']
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM usuarios")
+            paises = cursor.fetchall()
+            return jsonify(paises)
+    except Exception as e:
+        return str(e)
 
 
 @user_bp.route("/api/productos")

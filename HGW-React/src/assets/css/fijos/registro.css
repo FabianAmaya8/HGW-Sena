@@ -1,26 +1,19 @@
-:root {
-    --fondo: #eee;
-    --header: linear-gradient(90deg, #acd4c0, #1f5f39);
-    --footer: linear-gradient(90deg, rgba(11, 37, 48, 0.804) 0%, rgba(31, 95, 91, 0.751) 50%, rgba(73, 178, 101, 1) 100%);
-    --blanco: #eee;
-    --botones: #03624c;
-    --enlaces: #2cc295;
-    --negro: #333;
-    --login-fondo: radial-gradient(circle, #76ccb1 0%, #555 100%);
-    --sombra: #0000001a;
-    --sombra-dura: #0000004d;
-    --transicion: 0.3s;
-    --animacion-duracion: 0.6s;
-}
-
 body {
     background-color: var(--fondo);
 }
+#registration-form{
+    box-shadow: 0 0 10px var(--sombra);
+    border-radius: 10px;
+    padding: 15px;
+}
 
-.sidebar {
+.sidebarRegister {
     background: var(--Sidebar);
     color: var(--blanco);
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .sidebar-link {
@@ -42,27 +35,33 @@ body {
     padding: 30px;
     background-color: var(--blanco);
     border-radius: 10px;
-    box-shadow: 0 0 15px var(--sombra);
 }
 
-.navegacion .btn-navegacion {
+.btn-primary {
     background-color: var(--botones);
     border-color: var(--botones);
     color: var(--blanco);
 }
 
-.navegacion .btn-navegacion:hover {
+.btn-secondary {
+    background-color: var(--botones);
+    border-color: var(--botones);
+    color: var(--blanco);
+}
+
+.btn-primary:hover,
+.btn-secondary:hover {
     background-color: #004d40;
     border-color: #004d40;
 }
 
 .profile-pic-container {
-    width: 150px;
-    height: 150px;
-    margin: 0 auto 20px;
+    width: 250px;
+    height: 250px;
     border-radius: 50%;
     overflow: hidden;
     border: 5px solid var(--enlaces);
+    margin: 0 auto;
 }
 
 .profile-pic-container img {
@@ -75,8 +74,6 @@ body {
     background-color: var(--blanco);
     border-radius: 10px;
     padding: 30px;
-    text-align: center;
-    box-shadow: 0 0 15px var(--sombra);
 }
 
 .step-container {
@@ -85,4 +82,41 @@ body {
 
 .step-container.active {
     display: block;
+}
+
+.texto-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    text-align: center;
+}
+
+.mediaRegistro{
+    display: none;
+    border-top: 1px solid var(--negro);
+    padding-top: 10px;
+}
+.mediaRegistroOFF{
+    display: flex;
+}
+
+/* Estilos para dispositivos móviles */
+@media (max-width: 768px) {
+    .mediaRegistroOFF {
+        display: none;
+    }
+    .mediaRegistro{
+        display: flex;
+    }
+    .botonesAccion2{
+        display: flex;
+        flex-direction: column; 
+        order: 1;
+        gap: .5rem;
+    }
+    .profile-pic-container {
+        width: 200px;
+        height: 200px;
+    }
 }

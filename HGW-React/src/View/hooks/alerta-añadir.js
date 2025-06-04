@@ -1,3 +1,5 @@
+import Swal from 'sweetalert2';
+
 export function mostrarAlerta() {
     Swal.fire({
         title: '¡Producto añadido!',

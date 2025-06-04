@@ -132,15 +132,32 @@
     100% {margin-left: -300%;}
 }
 /* productos */
-.Alimentacion, .Cuidadopersonal, .Accesorios, .equipo, .cosmeticos, .merchandise, .todoslosproductos{
+.item-categorias h2{
+    text-align: center;
+    text-transform: capitalize;
+}
+
+.item-categorias{
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 15px;
+}
+
+.item-subcategoria{
+    width: 100%;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    box-shadow: 0 0 10px var(--sombra);
 }
 .productos-container {
-    width: 90%;
-    padding: 20px;
+    width: 100%;
 }
 .productos-container>.carts {
     display: grid;
