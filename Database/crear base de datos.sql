@@ -171,7 +171,7 @@ CREATE TABLE transacciones (
 
 
 -- ------------------------------------------------
---- Inserción inicial de datos  ---
+-- Inserción inicial de datos  ---
 -- ------------------------------------------------
 
 -- Membresías
