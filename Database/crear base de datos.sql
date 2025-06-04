@@ -28,7 +28,7 @@ CREATE TABLE ubicaciones (
 CREATE TABLE membresias (
     id_membresia INT PRIMARY KEY AUTO_INCREMENT,
     nombre_membresia VARCHAR(50),
-    precio_membresia DOUBLE
+    precio_membresia FLOAT
 );
 
 -- Tabla de usuarios
@@ -45,6 +45,7 @@ CREATE TABLE usuarios (
     membresia INT NOT NULL,
     medio_pago INT,
     rol INT NOT NULL,
+    activo BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (rol) REFERENCES roles(id_rol),
     FOREIGN KEY (membresia) REFERENCES membresias(id_membresia),
     FOREIGN KEY (medio_pago) REFERENCES medios_pago(id_medio)
@@ -65,7 +66,9 @@ CREATE TABLE direcciones (
 -- Tabla de categorías
 CREATE TABLE categorias (
     id_categoria INT PRIMARY KEY AUTO_INCREMENT,
-    nombre_categoria VARCHAR(40)
+    nombre_categoria VARCHAR(40),
+    img_categoria TEXT,
+    activo BOOLEAN DEFAULT TRUE
 );
 
 -- Tabla de subcategorías
@@ -73,6 +76,7 @@ CREATE TABLE subcategoria (
     id_subcategoria INT PRIMARY KEY AUTO_INCREMENT,
     nombre_subcategoria VARCHAR(50),
     categoria INT NOT NULL,
+    activo BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (categoria) REFERENCES categorias(id_categoria) ON DELETE CASCADE
 );
 
@@ -80,12 +84,14 @@ CREATE TABLE subcategoria (
 CREATE TABLE productos (
     id_producto INT PRIMARY KEY AUTO_INCREMENT,
     categoria INT NOT NULL,
-    subcategoria INT,
+    subcategoria INT NOT NULL,
     nombre_producto VARCHAR(50) NOT NULL,
     precio_producto FLOAT NOT NULL,
     imagen_producto TEXT NOT NULL,
+    imgs_publicidad TEXT,
     descripcion TEXT NOT NULL,
     stock INT NOT NULL,
+    activo BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (categoria) REFERENCES categorias(id_categoria) ON DELETE CASCADE,
     FOREIGN KEY (subcategoria) REFERENCES subcategoria(id_subcategoria) ON DELETE CASCADE
 );
@@ -165,7 +171,7 @@ CREATE TABLE transacciones (
 
 
 -- ------------------------------------------------
--- Inserción inicial de datos
+--- Inserción inicial de datos  ---
 -- ------------------------------------------------
 
 -- Membresías
