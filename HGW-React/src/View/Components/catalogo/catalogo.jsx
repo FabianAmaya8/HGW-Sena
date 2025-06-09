@@ -29,10 +29,14 @@ const Catalogo = () => {
         <div className="contenedor-principal">
             <div className="catalogo">
                 {categories.map((category) => (
-                    <a href={`#${category.nombre.replace(/\s+/g, '')}`} className="categorias">
+                    <a
+                        href={`#${category.nombre.replace(/\s+/g, '')}`}
+                        className="categorias"
+                        key={category.id}
+                    >
                         <img
-                        src= {urlimg}
-                        alt={`Imagen de la categoría de ${category.nombre}`}
+                            src={`/static/img/categorias/${category.img_categoria}`}
+                            alt={`Imagen de la categoría ${category.nombre}`}
                         />
                         <div className="texto-categorias">
                             <h3>{category.nombre}</h3>

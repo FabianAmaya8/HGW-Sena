@@ -1,0 +1,16 @@
+import Catalogo from "../../View/Components/catalogo/catalogo";
+import FooterView from "../../View/Components/footer";
+import HeaderView from "../../View/Components/header";
+import LoginModal from "../../View/Components/login/modalLogin";
+import { ModalProvider } from "../../View/context/ModalContext";
+
+export default function productopag() {
+    return (
+        <ModalProvider>
+            <HeaderView />
+            <Catalogo />
+            <FooterView />
+            <LoginModal />
+        </ModalProvider>
+    )
+};
