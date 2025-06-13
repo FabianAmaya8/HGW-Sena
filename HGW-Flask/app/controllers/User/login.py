@@ -42,7 +42,12 @@ def login():
                 }
                 destino = role_redirects.get(usuario_encontrado['role_id'], '/inicio')
 
-                return jsonify(success=True, redirect=destino)
+                return jsonify(success=True,
+                                redirect=destino,
+                                user={
+                                    'id': usuario_encontrado['id'],
+                                    'role': usuario_encontrado['role_id']
+                                })
 
             # Si usuario no existe o contraseña inválida:
             return jsonify(success=False, message="Usuario o contraseña incorrectos."), 401

@@ -1,4 +1,4 @@
 export const isLoggedIn = () => {
-    // Esto es solo un ejemplo, puedes cambiarlo por tu lógica real de login
-    return localStorage.getItem("auth") === "true";
+    if (localStorage.getItem('user')) return true;
+    return false;
 };

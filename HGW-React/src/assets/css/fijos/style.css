@@ -257,6 +257,8 @@ header h2{
 }
 .personal-img img{
     width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 .personal i{
     font-size: 50px;

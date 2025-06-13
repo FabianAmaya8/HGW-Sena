@@ -1,15 +1,14 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-
 // Imagenes
 import lactti from '../../assets/img/productos/lactti.jpg';
 import soya from '../../assets/img/productos/soya.jpg';
 import te from '../../assets/img/productos/te.jpg';
 import teazul from '../../assets/img/productos/teazul.jpg';
 import unete from '../../assets/img/productos/unete.jpg';
-import { ProductsList } from './productos';
 
-const InicioView = () => {
+
+const imagenes = [lactti, soya, te, teazul, unete];
+
+const InicioPrincipal = () => {
 return (
     <main className="contenido">
         {/* Primera Sección */}
@@ -19,22 +18,16 @@ return (
                     <h1>Descubre los Mejores Productos Naturales</h1>
                     <p>¡Es hora de transformar tu salud y tu vida!</p>
                     <p>
-                    Con los productos naturales de HGW, no solo fortaleces tu bienestar,
-                    sino que también abres las puertas a una oportunidad única para generar ingresos y alcanzar tu
-                    libertad financiera.
+                        Con los productos naturales de HGW, no solo fortaleces tu bienestar,sino que también abres las puertas a una oportunidad única para generar ingresos y alcanzar tulibertad financiera.
                     </p>
-                    <p>Cuidarte nunca fue tan gratificante. <b>¡Únete ahora!</b></p>
-                    <div className="bts">
-                        <Link to="/register" className="button">Únete</Link>
-                        <Link to="/login" className="button">Compra</Link>
-                    </div>
+                    <p>Cuidarte nunca fue tan gratificante.</p>
                 </div>
 
                 {/* Slider de imágenes */}
                 <div className="slider-conten">
                     <div className="slider">
                         <ul>
-                            {[lactti, soya, te, teazul, unete].map((img, i) => (
+                            {imagenes.map((img, i) => (
                             <li key={i}>
                                 <img src={img} alt={`anuncio-${i+1}`} />
                             </li>
@@ -67,7 +60,7 @@ return (
                     <div className="carousel-inner">
                     {[...Array(4)].map((_, i) => (
                         <div className={`carousel-item ${i === 0 ? 'active' : ''}`} key={i}>
-                            <ProductsList limit={4} />
+                            {/* Aqui van los productos */}
                         </div>
                     ))}
                     </div>
@@ -93,7 +86,7 @@ return (
             <div className="productos">
                 <h2>Productos</h2>
                 <div className="productos-container">
-                    <ProductsList limit={12} />
+                    {/* Aqui van los productos */}
                 </div>
             </div>
         </div>
@@ -101,4 +94,4 @@ return (
 );
 };
 
-export default InicioView;
+export default InicioPrincipal;
