@@ -4,20 +4,6 @@ import { alertaView } from '../hooks/alerta-añadir';
 function formatPrice(price) {
     return `$${price.toLocaleString()}`;
     }
-
-    /**
-     * ProductCard: componente que recibe un producto y lo renderiza como tarjeta.
-     * Props:
-     *   - product: {
-     *       id_producto,
-     *       nombre,
-     *       precio,
-     *       imagen,
-     *       categoria,
-     *       subcategoria,
-     *       stock
-     *     }
-     */
 function ProductCard({ product }) {
     const {
         nombre,
@@ -28,7 +14,6 @@ function ProductCard({ product }) {
         stock,
     } = product;
 
-  // Determina clases y texto para indicador de stock
     let stockIndicatorClass = '';
     let stockLabelText = '';
     let stockLabelClass = '';
@@ -92,12 +77,6 @@ function ProductCard({ product }) {
     );
 }
 
-/**
- * ProductsList: componente principal que renderiza toda la lista de productos sin límite.
- *
- * Ejemplo de uso en JSX:
- *   <ProductsList />
- */
 export function ProductsList() {
     const productos = useProducts();
 

@@ -1,12 +1,17 @@
 import { useState, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import { urlDB } from '../../urlDB';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../pages/Context/AuthContext';
 
 export default function useLoginForm() {
     const [usuario, setUsuario] = useState('');
     const [contrasena, setContrasena] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
     const togglePassword = useCallback(() => {
         setShowPassword(prev => !prev);
@@ -45,23 +50,25 @@ export default function useLoginForm() {
 
             // respuesta
             if (response.ok && result.success) {
-            await Swal.fire({
-                icon: 'success',
-                title: 'Inicio exitoso',
-                text: result.message || 'Bienvenido',
-                confirmButtonText: 'Ingresar',
-            });
+                login(result.user);
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Inicio exitoso',
+                    text: result.message || 'Bienvenido',
+                    confirmButtonText: 'Ingresar',
+                });
             
-            // Redirigir según la propiedad `redirect` que envía el backend
-            window.location.href = result.redirect || '/';
+                // Redirigir según la propiedad `redirect` que envía el backend
+                navigate(result.redirect || '/inicio');
             } else {
-            // Si no es OK o result.success === false
-            Swal.fire({
-                icon: 'error',
-                title: 'Credenciales no válidas',
-                text: result.message || 'Usuario o contraseña incorrectos.',
-                confirmButtonText: 'Reintentar',
-            });
+                // Si no es OK o result.success === false
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Credenciales no válidas',
+                    text: result.message || 'Usuario o contraseña incorrectos.',
+                    confirmButtonText: 'Reintentar',
+                });
             }
         } catch (error) {
             console.error('Error en login:', error);
@@ -75,7 +82,7 @@ export default function useLoginForm() {
             setLoading(false);
         }
         },
-        [usuario, contrasena]
+        [usuario, contrasena, navigate, login]
     );
 
     return {

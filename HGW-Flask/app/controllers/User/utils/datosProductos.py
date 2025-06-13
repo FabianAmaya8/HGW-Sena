@@ -1,6 +1,6 @@
 from flask import current_app
 
-def obtener_productos(limit=10):
+def obtener_productos(limit):
     connection = current_app.config['MYSQL_CONNECTION']
     try:
         with connection.cursor() as cursor:

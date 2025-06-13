@@ -132,7 +132,7 @@
     100% {margin-left: -300%;}
 }
 /* productos */
-.item-categorias h2{
+.item-categorias h2, .item-subcategoria h3{
     text-align: center;
     text-transform: capitalize;
 }

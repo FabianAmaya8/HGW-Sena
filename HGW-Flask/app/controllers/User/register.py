@@ -1,8 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, current_app,jsonify
+from flask import Blueprint, request,current_app,jsonify
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
 import os
-from .utils.datosUsuario import obtener_usuario_actual
 
 # Crear blueprint
 register_bp = Blueprint('register_bp', __name__)
@@ -93,7 +92,7 @@ def register():
         if foto and foto.filename:
             ext = os.path.splitext(foto.filename)[1]
             filename = secure_filename(f"{nombre_usuario}{ext}")
-            rel_path = os.path.join('uploads/profile_pictures', filename)
+            rel_path = os.path.join('static/uploads/profile_pictures', filename)
             abs_path = os.path.join(current_app.root_path, 'static', rel_path)
             os.makedirs(os.path.dirname(abs_path), exist_ok=True)
             foto.save(abs_path)
