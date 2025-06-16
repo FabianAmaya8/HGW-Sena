@@ -1,4 +1,4 @@
-import { useModal } from '../../context/ModalContext';
+import { useModal } from '../../../pages/Context/ModalContext';
 
 const LoginModal = () => {
   const { loginModalRef } = useModal();

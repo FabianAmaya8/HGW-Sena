@@ -11,9 +11,12 @@ import 'boxicons/css/boxicons.min.css'
 import 'sweetalert2/dist/sweetalert2.min.css'
 import './assets/css/fijos/index.css'
 import './assets/css/fijos/style.css'
+import { AuthProvider } from './pages/Context/AuthContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>
 )

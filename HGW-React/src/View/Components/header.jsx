@@ -1,29 +1,11 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useModal } from '../context/ModalContext';
+import { useModal } from '../../pages/Context/ModalContext';
 
 // Imagenes logo
 import logo from '../../assets/img/logo.png';
 
 const HeaderView = () => {
-    // const location = useLocation();
-
-    // useEffect(() => {
-    //     const currentPath = location.pathname;
-    //     const currentFolder = currentPath.includes('/')
-    //     ? currentPath.split('/').slice(1).join('/')
-    //     : 'root';
-
-    //     const navLinks = document.querySelectorAll('.nav-link');
-    //     navLinks.forEach(link => {
-    //     if (link.dataset.folder === currentFolder) {
-    //         link.classList.add('nav-selec');
-    //     } else {
-    //         link.classList.remove('nav-selec');
-    //     }
-    //     });
-    // }, [location]);
-
     const { showLoginModal } = useModal();
 
     useEffect(() => {
