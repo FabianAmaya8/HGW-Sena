@@ -98,14 +98,30 @@ function ProductCard({ product }) {
  * Ejemplo de uso en JSX:
  *   <ProductsList />
  */
-export function ProductsList() {
+export function ProductsList({ categoriaNombre, subcategoriaNombre }) {
     const productos = useProducts();
+
+    console.log("Productos antes del filtrado:", productos);
+    console.log(`Filtrando por categoría "${categoriaNombre}" y subcategoría "${subcategoriaNombre}"`);
+
+    const productosFiltrados = productos.filter(
+        prod => prod.categoria?.trim().toLowerCase() === categoriaNombre?.trim().toLowerCase() &&
+            prod.subcategoria?.trim().toLowerCase() === subcategoriaNombre?.trim().toLowerCase()
+    );
+
+
+    console.log("Productos después del filtrado:", productosFiltrados);
 
     return (
         <div className="carts">
-            {productos.map((p) => (
-                <ProductCard key={p.id_producto} product={p} />
-            ))}
+            {productosFiltrados.length > 0 ? (
+                productosFiltrados.map((p) => (
+                    <ProductCard key={p.id_producto} product={p} />
+                ))
+            ) : (
+                <p>No hay productos en esta subcategoría.</p>
+            )}
         </div>
     );
 }
+

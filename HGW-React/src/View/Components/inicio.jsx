@@ -34,7 +34,7 @@ return (
                 <div className="slider-conten">
                     <div className="slider">
                         <ul>
-                            {[lactti, soya, te, teazul, unete].map((img, i) => (
+                            {[ soya, te, teazul, unete].map((img, i) => (
                             <li key={i}>
                                 <img src={img} alt={`anuncio-${i+1}`} />
                             </li>

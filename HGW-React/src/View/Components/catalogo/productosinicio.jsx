@@ -100,21 +100,14 @@ function ProductCard({ product }) {
  */
 
 
-export function ProductsList({ idSubcategoria }) {
+export function ProductsList1() {
     const productos = useProducts();
-
-    // Filtrar por subcategoría
-    const productosFiltrados = productos.filter(p => p.id_subcategoria === idSubcategoria);
 
     return (
         <div className="carts">
-            {productosFiltrados.length === 0 ? (
-                <p>No hay productos en esta subcategoría.</p>
-            ) : (
-                productosFiltrados.map(producto => (
-                    <ProductCard key={producto.id_producto} producto={producto} />
-                ))
-            )}
+            {productos.map((p) => (
+                <ProductCard key={p.id_producto} product={p} />
+            ))}
         </div>
     );
 }
