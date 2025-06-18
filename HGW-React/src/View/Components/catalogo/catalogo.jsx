@@ -1,7 +1,7 @@
 import useCatalogo from '../../hooks/useCatalogo';
 import ItemCatalogo from './ItemCatalogo';
 import '../../../assets/css/paginaproducto/catalogo.css';
-import { urlDB } from '../../../urlDB';
+
 // importar imagenes del slider
 import pat1 from '../../../assets/img/catalogo/pat1.jpeg';
 import pat2 from '../../../assets/img/catalogo/pat2.jpeg';
@@ -23,7 +23,6 @@ const Catalogo = () => {
     
     const imagenes = [pat1, pat2, pat3, pat4, pat5];
 
-    const urlimg = 'http://localhost:3000/static/uploads/profile_pictures/Fabian_Amaya8.jpg'
     return (
         <main className="contenido">
         <div className="contenedor-principal">

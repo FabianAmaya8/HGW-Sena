@@ -1,5 +1,5 @@
-import { useProducts } from '../hooks/useProducts';
-import { alertaView } from '../hooks/alerta-añadir';
+import { useProducts } from '../../hooks/useProducts';
+import { alertaView } from '../../hooks/alerta-añadir';
 
 function formatPrice(price) {
     return `$${price.toLocaleString()}`;

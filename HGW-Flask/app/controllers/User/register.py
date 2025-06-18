@@ -92,11 +92,11 @@ def register():
         if foto and foto.filename:
             ext = os.path.splitext(foto.filename)[1]
             filename = secure_filename(f"{nombre_usuario}{ext}")
-            rel_path = os.path.join('static/uploads/profile_pictures', filename)
+            rel_path = os.path.join('uploads/profile_pictures', filename)
             abs_path = os.path.join(current_app.root_path, 'static', rel_path)
             os.makedirs(os.path.dirname(abs_path), exist_ok=True)
             foto.save(abs_path)
-            ruta_foto = rel_path.replace('\\', '/')
+            ruta_foto = "static/"+rel_path.replace('\\', '/')
 
         with connection.cursor() as cursor:
             # Insertar usuario (rol 3 = Usuario)
