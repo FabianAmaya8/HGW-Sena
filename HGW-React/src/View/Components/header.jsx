@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useModal } from '../../pages/Context/ModalContext';
 
 // Imagenes logo
@@ -53,7 +52,7 @@ const HeaderView = () => {
                 {/* Navegación */}
                 <nav className="nav-general">
                     <a href="/" className="nav-link">Inicio</a>
-                    <a href="/ViewCatalogo" className="nav-link">Catalogo</a>
+                    <a href="/Catalogo" className="nav-link">Catalogo</a>
 
                     {/* Desplegable */}
                     <div className="desplegable">

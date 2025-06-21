@@ -9,6 +9,7 @@ from .controllers.User.user import user_bp
 from .controllers.User.login import login_bp
 from .controllers.User.register import register_bp
 from .controllers.User.catalogo import catalogo_bp
+from .controllers.User.producto import stock_bp 
 
 def create_app():
     app = Flask(__name__)
@@ -33,5 +34,6 @@ def create_app():
     app.register_blueprint(login_bp)
     app.register_blueprint(register_bp)
     app.register_blueprint(catalogo_bp)
+    app.register_blueprint(stock_bp)
 
     return app

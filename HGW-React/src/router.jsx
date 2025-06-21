@@ -21,7 +21,7 @@ const router = createBrowserRouter([
         element: <RegistroPage />
     },
     {
-        path: "/ViewCatalogo",
+        path: "/Catalogo",
         element: <CatalogoPage />
     },
     {

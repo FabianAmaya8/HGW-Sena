@@ -1,5 +1,5 @@
-import { useProducts } from '../hooks/useProducts';
-import { alertaView } from '../hooks/alerta-añadir';
+import { useProducts } from '../../hooks/useProducts';
+import { alertaView } from '../../hooks/alerta-añadir';
 
 function formatPrice(price) {
     return `$${price.toLocaleString()}`;
@@ -98,30 +98,16 @@ function ProductCard({ product }) {
  * Ejemplo de uso en JSX:
  *   <ProductsList />
  */
-export function ProductsList({ categoriaNombre, subcategoriaNombre }) {
+
+
+export function ProductsList1() {
     const productos = useProducts();
-
-    console.log("Productos antes del filtrado:", productos);
-    console.log(`Filtrando por categoría "${categoriaNombre}" y subcategoría "${subcategoriaNombre}"`);
-
-    const productosFiltrados = productos.filter(
-        prod => prod.categoria?.trim().toLowerCase() === categoriaNombre?.trim().toLowerCase() &&
-            prod.subcategoria?.trim().toLowerCase() === subcategoriaNombre?.trim().toLowerCase()
-    );
-
-
-    console.log("Productos después del filtrado:", productosFiltrados);
 
     return (
         <div className="carts">
-            {productosFiltrados.length > 0 ? (
-                productosFiltrados.map((p) => (
-                    <ProductCard key={p.id_producto} product={p} />
-                ))
-            ) : (
-                <p>No hay productos en esta subcategoría.</p>
-            )}
+            {productos.map((p) => (
+                <ProductCard key={p.id_producto} product={p} />
+            ))}
         </div>
     );
 }
-

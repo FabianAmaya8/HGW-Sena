@@ -7,7 +7,7 @@ import soya from '../../assets/img/productos/soya.jpg';
 import te from '../../assets/img/productos/te.jpg';
 import teazul from '../../assets/img/productos/teazul.jpg';
 import unete from '../../assets/img/productos/unete.jpg';
-import { ProductsList } from './productos';
+import { ProductsList1 } from './catalogo/productosinicio';
 
 const InicioView = () => {
 return (
@@ -34,7 +34,7 @@ return (
                 <div className="slider-conten">
                     <div className="slider">
                         <ul>
-                            {[lactti, soya, te, teazul, unete].map((img, i) => (
+                            {[ lactti, soya, te, teazul, unete].map((img, i) => (
                             <li key={i}>
                                 <img src={img} alt={`anuncio-${i+1}`} />
                             </li>
@@ -44,45 +44,30 @@ return (
                 </div>
             </div>
         </div>
-
-        {/* Productos destacados */}
         <div className="conten-item">
             <div className="destacados">
                 <h2>Productos destacados</h2>
                 <div id="carouselExampleAutoplaying" className="carousel slide destacados-contenido" data-bs-ride="carousel">
-                    <div className="carousel-indicators">
-                    {[0, 1, 2, 3].map((index) => (
-                        <button
-                        key={index}
-                        type="button"
-                        data-bs-target="#carouselExampleAutoplaying"
-                        data-bs-slide-to={index}
-                        className={index === 0 ? 'active' : ''}
-                        aria-current={index === 0 ? 'true' : undefined}
-                        aria-label={`Slide ${index + 1}`}
-                        ></button>
-                    ))}
-                    </div>
-
                     <div className="carousel-inner">
-                    {[...Array(4)].map((_, i) => (
-                        <div className={`carousel-item ${i === 0 ? 'active' : ''}`} key={i}>
-                            <ProductsList limit={4} />
-                        </div>
-                    ))}
+                        {[0, 1, 2, 3].map((_, i) => (
+                            <div className={`carousel-item ${i === 0 ? 'active' : ''}`} key={i}>
+                                <ProductsList1 limit={4} />
+                            </div>
+                        ))}
                     </div>
 
                     <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
-                    <span className="carousel-control-prev-icon" aria-hidden="true">
-                        <i className='bx bxs-chevron-left'></i>
-                    </span>
-                    <span className="visually-hidden">Previous</span>
+                        <span className="carousel-control-prev-icon" aria-hidden="true">
+                            <i className="bx bxs-chevron-left"></i>
+                        </span>
+                        <span className="visually-hidden">Previous</span>
                     </button>
+
                     <button className="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
-                    <span className="carousel-control-next-icon" aria-hidden="true">
-                        <i className='bx bxs-chevron-right'></i>
-                    </span>
-                    <span className="visually-hidden">Next</span>
+                        <span className="carousel-control-next-icon" aria-hidden="true">
+                            <i className="bx bxs-chevron-right"></i>
+                        </span>
+                        <span className="visually-hidden">Next</span>
                     </button>
                 </div>
             </div>
@@ -93,7 +78,7 @@ return (
             <div className="productos">
                 <h2>Productos</h2>
                 <div className="productos-container">
-                    <ProductsList limit={12} />
+                    <ProductsList1 limit={12} />
                 </div>
             </div>
         </div>
