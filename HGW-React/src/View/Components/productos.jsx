@@ -1,23 +1,11 @@
 import { useProducts } from '../hooks/useProducts';
 import { alertaView } from '../hooks/alerta-añadir';
+import { isLoggedIn } from '../../auth';
 
 function formatPrice(price) {
     return `$${price.toLocaleString()}`;
-    }
+}
 
-    /**
-     * ProductCard: componente que recibe un producto y lo renderiza como tarjeta.
-     * Props:
-     *   - product: {
-     *       id_producto,
-     *       nombre,
-     *       precio,
-     *       imagen,
-     *       categoria,
-     *       subcategoria,
-     *       stock
-     *     }
-     */
 function ProductCard({ product }) {
     const {
         nombre,
@@ -26,9 +14,22 @@ function ProductCard({ product }) {
         categoria,
         subcategoria,
         stock,
+        id_producto
     } = product;
 
-  // Determina clases y texto para indicador de stock
+    const usuarioLogueado = isLoggedIn();
+    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+    const yaEstaEnCarrito = carrito.some(item => item.id_producto === id_producto);
+
+    const imagenProductoUrl = `static/${imagen}`;
+
+    const handleAgregar = () => {
+        alertaView();
+        const nuevoCarrito = [...carrito, product];
+        localStorage.setItem('carrito', JSON.stringify(nuevoCarrito));
+    };
+
+    // Clases y textos de stock
     let stockIndicatorClass = '';
     let stockLabelText = '';
     let stockLabelClass = '';
@@ -47,56 +48,52 @@ function ProductCard({ product }) {
         stockLabelClass = 'stock-label out-of-stock';
     }
 
-    const imagenProductoUrl = `static/${imagen}`;
-
     return (
         <article className="cart-producto">
-            {/* Indicador visual (punto de color) */}
             <span className={stockIndicatorClass}></span>
-
-            {/* Texto que muestra estado de stock */}
             <span className={stockLabelClass}>{stockLabelText}</span>
 
-            {/* Enlace a detalle de producto */}
             <a
                 href="/usuario/catalogo/paginaproducto.html"
                 aria-label={`Ver más sobre ${nombre}`}
             >
                 <figure className="baner-productos">
-                <img
-                    src={imagenProductoUrl}
-                    alt={`Imagen del producto ${nombre}`}
-                />
+                    <img src={imagenProductoUrl} alt={`Imagen del producto ${nombre}`} />
                 </figure>
 
                 <section className="info-producto">
-                <p className="categoria">{categoria}</p>
-                <p className="subcategoria">{subcategoria}</p>
-                <h3 className="nombre">{nombre}</h3>
-                <p className="precio">{formatPrice(precio)}</p>
+                    <p className="categoria">{categoria}</p>
+                    <p className="subcategoria">{subcategoria}</p>
+                    <h3 className="nombre">{nombre}</h3>
+                    <p className="precio">{formatPrice(precio)}</p>
                 </section>
             </a>
 
-        {/* Botón "Agregar al carrito" */}
-            <button
-                className={`btn-carrito ${stock <= 0 ? 'btn-deshabilitado' : ''}`}
-                aria-label={`Agregar ${nombre} al carrito`}
-                disabled={stock <= 0}
-                onClick={() => {
-                alertaView();
-                }}
-            >
-                Agregar al carrito
-            </button>
+            {/* Botón según login y carrito */}
+            {usuarioLogueado ? (
+                yaEstaEnCarrito ? (
+                    <button className="btn-carrito btn-deshabilitado" disabled>
+                        Ya está en el carrito
+                    </button>
+                ) : (
+                    <button
+                        className={`btn-carrito ${stock <= 0 ? 'btn-deshabilitado' : ''}`}
+                        aria-label={`Agregar ${nombre} al carrito`}
+                        disabled={stock <= 0}
+                        onClick={handleAgregar}
+                    >
+                        Agregar al carrito
+                    </button>
+                )
+            ) : (
+                <p className="mensaje-login">Inicia sesión para agregar productos</p>
+            )}
         </article>
     );
 }
 
 /**
- * ProductsList: componente principal que renderiza toda la lista de productos sin límite.
- *
- * Ejemplo de uso en JSX:
- *   <ProductsList />
+ * ProductsList: renderiza lista de productos por categoría y subcategoría.
  */
 export function ProductsList({ categoriaNombre, subcategoriaNombre }) {
     const productos = useProducts();
@@ -105,10 +102,10 @@ export function ProductsList({ categoriaNombre, subcategoriaNombre }) {
     console.log(`Filtrando por categoría "${categoriaNombre}" y subcategoría "${subcategoriaNombre}"`);
 
     const productosFiltrados = productos.filter(
-        prod => prod.categoria?.trim().toLowerCase() === categoriaNombre?.trim().toLowerCase() &&
+        prod =>
+            prod.categoria?.trim().toLowerCase() === categoriaNombre?.trim().toLowerCase() &&
             prod.subcategoria?.trim().toLowerCase() === subcategoriaNombre?.trim().toLowerCase()
     );
-
 
     console.log("Productos después del filtrado:", productosFiltrados);
 
@@ -124,4 +121,3 @@ export function ProductsList({ categoriaNombre, subcategoriaNombre }) {
         </div>
     );
 }
-
