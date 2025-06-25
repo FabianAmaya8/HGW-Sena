@@ -1,23 +1,8 @@
-import { useProducts } from '../hooks/useProducts';
 import { alertaView } from '../hooks/alerta-añadir';
-
 function formatPrice(price) {
     return `$${price.toLocaleString()}`;
-    }
+}
 
-    /**
-     * ProductCard: componente que recibe un producto y lo renderiza como tarjeta.
-     * Props:
-     *   - product: {
-     *       id_producto,
-     *       nombre,
-     *       precio,
-     *       imagen,
-     *       categoria,
-     *       subcategoria,
-     *       stock
-     *     }
-     */
 function ProductCard({ product }) {
     const {
         nombre,
@@ -70,47 +55,35 @@ function ProductCard({ product }) {
                 </figure>
 
                 <section className="info-producto">
-                <p className="categoria">{categoria}</p>
-                <p className="subcategoria">{subcategoria}</p>
-                <h3 className="nombre">{nombre}</h3>
-                <p className="precio">{formatPrice(precio)}</p>
+                    <p className="categoria">{categoria}</p>
+                    <p className="subcategoria">{subcategoria}</p>
+                    <h3 className="nombre">{nombre}</h3>
+                    <p className="precio">{formatPrice(precio)}</p>
                 </section>
             </a>
 
         {/* Botón "Agregar al carrito" */}
             <button
-                className={`btn-carrito ${stock <= 0 ? 'btn-deshabilitado' : ''}`}
+                className={`boton-carrito ${stock <= 0 ? 'btn-deshabilitado' : ''}`}
                 aria-label={`Agregar ${nombre} al carrito`}
                 disabled={stock <= 0}
                 onClick={() => {
                 alertaView();
                 }}
             >
-                Agregar al carrito
+                < i class='bx bx-cart-add'></i> 
             </button>
         </article>
     );
 }
 
-/**
- * ProductsList: componente principal que renderiza toda la lista de productos sin límite.
- *
- * Ejemplo de uso en JSX:
- *   <ProductsList />
- */
-export function ProductsList({ categoriaNombre, subcategoriaNombre }) {
-    const productos = useProducts();
-
-    console.log("Productos antes del filtrado:", productos);
-    console.log(`Filtrando por categoría "${categoriaNombre}" y subcategoría "${subcategoriaNombre}"`);
+export function ProductsList({categoriaNombre, subcategoriaNombre, productos}) {
 
     const productosFiltrados = productos.filter(
-        prod => prod.categoria?.trim().toLowerCase() === categoriaNombre?.trim().toLowerCase() &&
+        prod => 
+            prod.categoria?.trim().toLowerCase() === categoriaNombre?.trim().toLowerCase() &&
             prod.subcategoria?.trim().toLowerCase() === subcategoriaNombre?.trim().toLowerCase()
     );
-
-
-    console.log("Productos después del filtrado:", productosFiltrados);
 
     return (
         <div className="carts">
@@ -125,3 +98,14 @@ export function ProductsList({ categoriaNombre, subcategoriaNombre }) {
     );
 }
 
+export function ProductosLimitados({ limit, start=0 , productos }) {
+    const limitados = productos.slice(start,start + limit);
+
+    return (
+        <div className="carts">
+            {limitados.map((p) => (
+                <ProductCard key={p.id_producto} product={p} />
+            ))}
+        </div>
+    );
+}

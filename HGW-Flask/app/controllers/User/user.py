@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
+from app.controllers.db import get_db
 from decimal import Decimal
 
 from .utils.datosProductos import obtener_productos
@@ -12,8 +13,8 @@ def obtener_usuario():
     if not user_id:
         return jsonify({"success": False, "message": "ID de usuario no proporcionado"}), 400
 
-    connection = current_app.config['MYSQL_CONNECTION']
     try:
+        connection = get_db()
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT url_foto_perfil FROM usuarios
@@ -54,8 +55,7 @@ def obtener_usuario():
 @user_bp.route("/api/productos")
 def api_obtener_productos():
     try:
-        limit = int(request.args.get('limit', 30))
-        productos = obtener_productos(limit)
+        productos = obtener_productos()
         if isinstance(productos, str):
             return jsonify({'error': productos}), 500
         return jsonify(productos), 200

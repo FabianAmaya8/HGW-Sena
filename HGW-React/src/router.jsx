@@ -5,7 +5,7 @@ import LoginPege from "./pages/View/loginPage";
 import RegistroPage from "./pages/View/registroPage";
 import CatalogoPage from "./pages/View/catalogoPege";
 // Usuario
-import Inicio from "./pages/User/inicio";
+import Inicio from "./pages/User/InicioPege";
 
 const router = createBrowserRouter([
     {

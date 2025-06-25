@@ -1,5 +1,5 @@
 const PRIMERA_URL = "http://localhost:3000/";
-const SEGUNDA_URL = "https://hgw-sena-production.up.railway.app";
+const SEGUNDA_URL = "https://hgw-sena-production.up.railway.app/";
 
 // Función interna que prueba cuál base URL está viva
 export async function findWorkingBaseUrl() {

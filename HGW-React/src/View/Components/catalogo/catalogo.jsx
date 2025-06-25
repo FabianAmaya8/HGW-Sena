@@ -1,7 +1,8 @@
 import useCatalogo from '../../hooks/useCatalogo';
+import { useProducts } from '../../hooks/useProducts';
 import ItemCatalogo from './ItemCatalogo';
+import { Infinity } from 'ldrs/react'
 import '../../../assets/css/paginaproducto/catalogo.css';
-
 // importar imagenes del slider
 import pat1 from '../../../assets/img/catalogo/pat1.jpeg';
 import pat2 from '../../../assets/img/catalogo/pat2.jpeg';
@@ -12,13 +13,26 @@ import pat5 from '../../../assets/img/catalogo/pat5.jpeg';
 
 const Catalogo = () => {
     const { categories, subcategories, loading, error } = useCatalogo();
+    const productos = useProducts();
 
     if (loading) {
-        return <p>Cargando...</p>;
+        return <div className="cargando"> 
+            <Infinity
+                size="150"
+                stroke="10"
+                strokeLength="0.15"
+                bgOpacity="0.3"
+                speed="1.3"
+                color="#47BF26" 
+            />
+        </div>;
     }
 
     if (error) {
-        return <p>Error: {error}</p>;
+        return <div className="cargando"> 
+            <i className="bx bx-error"></i>
+            <p>Error: {error}</p>
+        </div>;
     }
     
     const imagenes = [pat1, pat2, pat3, pat4, pat5];
@@ -95,6 +109,7 @@ const Catalogo = () => {
                 key={cat.id}
                 category={cat}
                 subcategories={subsDeEstaCategoria}
+                productos={productos}
             />
             );
         })}
