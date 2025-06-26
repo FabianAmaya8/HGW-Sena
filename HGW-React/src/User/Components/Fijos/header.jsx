@@ -4,6 +4,7 @@ import { useAuth } from '../../../pages/Context/AuthContext';
 import { findWorkingBaseUrl, urlDB } from '../../../urlDB';
 // logo HGW
 import logo from '../../../assets/img/logo.png';
+import Buscador from './Buscador';
 
 export default function Header() {
     const { user, logout } = useAuth();
@@ -53,9 +54,11 @@ export default function Header() {
 
     const opciones = [
         { to: '/', text: 'Cerrar sesión', action: () => logout() },
-        ...(user?.role === 1 || user?.role === 2
-        ? [{ to: '/Admin', text: 'Administrador' }]
-        : []),
+        ...(
+            user?.role === 1 ? [{ to: '/Admin', text: 'Administrador' }]
+        :   user?.role === 2 ? [{ to: '/Moderador', text: 'Moderador' }] 
+        :   []),
+
         { to: '/Informacion-Personal', text: 'Información personal' },
         { to: '#', text: 'Referidos' },
         { to: '#', text: 'Descargar APP' },
@@ -71,24 +74,12 @@ export default function Header() {
             <h2>HGW</h2>
             <div className="header-content">
                 {/* Logo */}
-                <div className="logo">
+                <a href="/" className="logo">
                     <img src={logo} alt="logo" />
-                </div>
+                </a>
 
                 {/* Buscador */}
-                <div className="buscardor">
-                    <form>
-                        <input
-                            className="buscador-tex"
-                            id="buscador"
-                            type="text"
-                            placeholder="Buscador"
-                        />
-                        <button className="buscador-btn" type="submit">
-                            <i className="bx bx-search" />
-                        </button>
-                    </form>
-                </div>
+                <Buscador />
 
                 {/* Navegación */}
                 <nav className="nav-general">

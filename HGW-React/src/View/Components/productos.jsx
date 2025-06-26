@@ -3,7 +3,7 @@ function formatPrice(price) {
     return `$${price.toLocaleString()}`;
 }
 
-function ProductCard({ product }) {
+export function ProductCard({ product }) {
     const {
         nombre,
         precio,
@@ -71,7 +71,7 @@ function ProductCard({ product }) {
                 alertaView();
                 }}
             >
-                < i class='bx bx-cart-add'></i> 
+                < i className='bx bx-cart-add'></i> 
             </button>
         </article>
     );

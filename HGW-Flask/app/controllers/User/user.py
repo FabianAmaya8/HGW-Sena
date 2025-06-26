@@ -1,8 +1,6 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
 from app.controllers.db import get_db
 from decimal import Decimal
-
-from .utils.datosProductos import obtener_productos
 
 user_bp = Blueprint('user_bp', __name__)
 
@@ -51,15 +49,3 @@ def obtener_usuario():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-@user_bp.route("/api/productos")
-def api_obtener_productos():
-    try:
-        productos = obtener_productos()
-        if isinstance(productos, str):
-            return jsonify({'error': productos}), 500
-        return jsonify(productos), 200
-
-    except Exception:
-        current_app.logger.exception("Error en api_obtener_productos")
-        return jsonify({'error': 'Error interno al obtener productos'}), 500
