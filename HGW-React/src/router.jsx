@@ -7,6 +7,9 @@ import RegistroPage from "./pages/View/registroPage";
 import CatalogoPage from "./pages/View/catalogoPege";
 // Usuario
 import Inicio from "./pages/User/InicioPege";
+import PersonalPage from "./pages/User/personalPage";
+import EducacionPage from "./pages/User/educacionPage";
+
 
 const router = createBrowserRouter([
     {
@@ -33,6 +36,15 @@ const router = createBrowserRouter([
         path: "/inicio",
         element: <Inicio />
     }
+    ,
+    {
+        path: "/Personal",
+        element: <PersonalPage />,
+    },
+    {
+        path: "/Educacion",
+        element: <EducacionPage />,
+    },
 ]);
 
 export default router;
