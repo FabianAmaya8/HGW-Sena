@@ -1,11 +1,15 @@
 import { createBrowserRouter } from "react-router-dom";
+
 // Visitante
 import InicioWrapper from "./pages/View/inicioWrapper";
 import LoginPege from "./pages/View/loginPage";
 import RegistroPage from "./pages/View/registroPage";
 import CatalogoPage from "./pages/View/catalogoPege";
+
 // Usuario
 import Inicio from "./pages/User/inicio";
+import PersonalPage from "./pages/View/personalPage";  
+import EducacionPage from "./pages/View/educacionPage";
 
 const router = createBrowserRouter([
     {
@@ -18,16 +22,24 @@ const router = createBrowserRouter([
     },
     {
         path: "/register",
-        element: <RegistroPage />
+        element: <RegistroPage />,
     },
     {
         path: "/Catalogo",
-        element: <CatalogoPage />
+        element: <CatalogoPage />,
     },
     {
         path: "/inicio",
-        element: <Inicio />
-    }
+        element: <Inicio />,
+    },
+    {
+        path: "/Personal",
+        element: <PersonalPage />,   
+    },
+    {
+        path: "/Educacion",
+        element: <EducacionPage />,   
+    },
 ]);
 
 export default router;
