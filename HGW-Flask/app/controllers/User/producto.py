@@ -1,23 +1,30 @@
-from flask import Blueprint, jsonify
-import pymysql
-from .utils.datosUsuario import obtener_usuario_actual
+from flask import Blueprint, jsonify, current_app
+from app.controllers.db import get_db
+import traceback
 
-stock_bp = Blueprint('stock_bp', __name__)
+stock_bp = Blueprint("stock", __name__)
 
-@stock_bp.route('/api/productos')
-def obtener_productos():
-    conexion = pymysql.connect(
-        host='localhost',
-        user='tu_usuario',
-        password='tu_password',
-        db='tu_basededatos',
-        cursorclass=pymysql.cursors.DictCursor
-    )
-
+@stock_bp.route("/api/productos")
+def api_obtener_productos():
     try:
-        with conexion.cursor() as cursor:
-            cursor.execute("SELECT categoria, name, price, imageUrl, stock FROM productos")
+        connection = get_db()
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    p.id_producto, 
+                    c.nombre_categoria AS categoria,
+                    sc.nombre_subcategoria AS subcategoria,
+                    p.nombre_producto AS nombre,
+                    p.precio_producto AS precio, 
+                    p.imagen_producto AS imagen, 
+                    p.stock
+                FROM productos p
+                JOIN categorias c ON p.categoria = c.id_categoria
+                JOIN subcategoria sc ON p.subcategoria = sc.id_subcategoria
+            """)
             productos = cursor.fetchall()
-            return jsonify(productos)
-    finally:
-        conexion.close()
+            return jsonify(productos), 200
+
+    except Exception:
+        current_app.logger.exception("Error en api_obtener_productos")
+        return jsonify({'error': 'Error interno al obtener productos'}), 500

@@ -5,6 +5,9 @@ import { RouterProvider } from 'react-router-dom'
 // Importa tu router centralizado
 import router from './router.jsx'
 
+// importar loader
+import 'ldrs/react/Infinity.css'
+
 // Estilos y librerías (todo esto se queda igual)
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'boxicons/css/boxicons.min.css'

@@ -22,7 +22,9 @@ def create_app():
         user=app.config['MYSQL_USER'],
         password=app.config['MYSQL_PASSWORD'],
         database=app.config['MYSQL_DB'],
-        cursorclass=pymysql.cursors.DictCursor
+        port=app.config['MYSQL_PORT'],
+        cursorclass=pymysql.cursors.DictCursor,
+        autocommit=True
     )
     app.config['MYSQL_CONNECTION'] = connection
 

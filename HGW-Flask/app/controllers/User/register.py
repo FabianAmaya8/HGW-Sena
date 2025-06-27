@@ -1,4 +1,4 @@
-from flask import Blueprint, request,current_app,jsonify
+from flask import Blueprint, request,current_app,jsonify,render_template
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
 import os
@@ -7,9 +7,9 @@ import os
 register_bp = Blueprint('register_bp', __name__)
 bcrypt = Bcrypt()
 
-@register_bp.route('/api/status', methods=['HEAD', 'GET'])
+@register_bp.route('/', methods=['HEAD', 'GET'])
 def status():
-    return '', 200  
+    return render_template('index.html'), 200  
 
 @register_bp.route('/api/ubicacion/paises', methods=['GET', 'POST'])
 def api_ubicacion_paises():

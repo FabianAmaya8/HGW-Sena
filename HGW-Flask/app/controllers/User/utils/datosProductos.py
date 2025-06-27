@@ -1,8 +1,9 @@
-from flask import current_app
+from app.controllers.db import get_db
+import traceback
 
-def obtener_productos(limit):
-    connection = current_app.config['MYSQL_CONNECTION']
+def obtener_productos():
     try:
+        connection = get_db()
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT 
@@ -16,10 +17,9 @@ def obtener_productos(limit):
                 FROM productos p
                 JOIN categorias c ON p.categoria = c.id_categoria
                 JOIN subcategoria sc ON p.subcategoria = sc.id_subcategoria
-                ORDER BY RAND()
-                LIMIT %s
-            """, (limit,))
+            """)
             productos = cursor.fetchall()
             return productos
     except Exception as e:
-        return str(e)
+        print("Error en obtener_productos:\n", traceback.format_exc())
+        return f"{type(e).__name__}: {e}"

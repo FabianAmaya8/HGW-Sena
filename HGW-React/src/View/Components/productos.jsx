@@ -1,12 +1,9 @@
-import { useProducts } from '../hooks/useProducts';
 import { alertaView } from '../hooks/alerta-añadir';
-import { isLoggedIn } from '../../auth';
-
 function formatPrice(price) {
     return `$${price.toLocaleString()}`;
 }
 
-function ProductCard({ product }) {
+export function ProductCard({ product }) {
     const {
         nombre,
         precio,
@@ -14,22 +11,9 @@ function ProductCard({ product }) {
         categoria,
         subcategoria,
         stock,
-        id_producto
     } = product;
 
-    const usuarioLogueado = isLoggedIn();
-    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-    const yaEstaEnCarrito = carrito.some(item => item.id_producto === id_producto);
-
-    const imagenProductoUrl = `static/${imagen}`;
-
-    const handleAgregar = () => {
-        alertaView();
-        const nuevoCarrito = [...carrito, product];
-        localStorage.setItem('carrito', JSON.stringify(nuevoCarrito));
-    };
-
-    // Clases y textos de stock
+  // Determina clases y texto para indicador de stock
     let stockIndicatorClass = '';
     let stockLabelText = '';
     let stockLabelClass = '';
@@ -48,17 +32,26 @@ function ProductCard({ product }) {
         stockLabelClass = 'stock-label out-of-stock';
     }
 
+    const imagenProductoUrl = `static/${imagen}`;
+
     return (
         <article className="cart-producto">
+            {/* Indicador visual (punto de color) */}
             <span className={stockIndicatorClass}></span>
+
+            {/* Texto que muestra estado de stock */}
             <span className={stockLabelClass}>{stockLabelText}</span>
 
+            {/* Enlace a detalle de producto */}
             <a
                 href="/usuario/catalogo/paginaproducto.html"
                 aria-label={`Ver más sobre ${nombre}`}
             >
                 <figure className="baner-productos">
-                    <img src={imagenProductoUrl} alt={`Imagen del producto ${nombre}`} />
+                <img
+                    src={imagenProductoUrl}
+                    alt={`Imagen del producto ${nombre}`}
+                />
                 </figure>
 
                 <section className="info-producto">
@@ -69,45 +62,28 @@ function ProductCard({ product }) {
                 </section>
             </a>
 
-            {/* Botón según login y carrito */}
-            {usuarioLogueado ? (
-                yaEstaEnCarrito ? (
-                    <button className="btn-carrito btn-deshabilitado" disabled>
-                        Ya está en el carrito
-                    </button>
-                ) : (
-                    <button
-                        className={`btn-carrito ${stock <= 0 ? 'btn-deshabilitado' : ''}`}
-                        aria-label={`Agregar ${nombre} al carrito`}
-                        disabled={stock <= 0}
-                        onClick={handleAgregar}
-                    >
-                        Agregar al carrito
-                    </button>
-                )
-            ) : (
-                <p className="mensaje-login">Inicia sesión para agregar productos</p>
-            )}
+        {/* Botón "Agregar al carrito" */}
+            <button
+                className={`boton-carrito ${stock <= 0 ? 'btn-deshabilitado' : ''}`}
+                aria-label={`Agregar ${nombre} al carrito`}
+                disabled={stock <= 0}
+                onClick={() => {
+                alertaView();
+                }}
+            >
+                < i className='bx bx-cart-add'></i> 
+            </button>
         </article>
     );
 }
 
-/**
- * ProductsList: renderiza lista de productos por categoría y subcategoría.
- */
-export function ProductsList({ categoriaNombre, subcategoriaNombre }) {
-    const productos = useProducts();
-
-    console.log("Productos antes del filtrado:", productos);
-    console.log(`Filtrando por categoría "${categoriaNombre}" y subcategoría "${subcategoriaNombre}"`);
+export function ProductsList({categoriaNombre, subcategoriaNombre, productos}) {
 
     const productosFiltrados = productos.filter(
-        prod =>
+        prod => 
             prod.categoria?.trim().toLowerCase() === categoriaNombre?.trim().toLowerCase() &&
             prod.subcategoria?.trim().toLowerCase() === subcategoriaNombre?.trim().toLowerCase()
     );
-
-    console.log("Productos después del filtrado:", productosFiltrados);
 
     return (
         <div className="carts">
@@ -118,6 +94,18 @@ export function ProductsList({ categoriaNombre, subcategoriaNombre }) {
             ) : (
                 <p>No hay productos en esta subcategoría.</p>
             )}
+        </div>
+    );
+}
+
+export function ProductosLimitados({ limit, start=0 , productos }) {
+    const limitados = productos.slice(start,start + limit);
+
+    return (
+        <div className="carts">
+            {limitados.map((p) => (
+                <ProductCard key={p.id_producto} product={p} />
+            ))}
         </div>
     );
 }

@@ -4,3 +4,5 @@ PyMySQL==1.0.2
 Werkzeug==2.0.3
 mysql-connector-python==8.0.33
 Flask-Cors==3.0.10
+gunicorn==21.2.0
+python-dotenv==1.1.0

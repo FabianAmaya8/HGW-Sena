@@ -17,9 +17,9 @@ export function useProducts() {
 
                 const data = await res.json();
 
-                console.log("Total de productos recibidos desde la API:", data.length);
-                console.log("Productos completos antes de guardarlos:", data);
+                
 
+                // 🔥 Asegurar orden fijo por ID antes de guardarlos
                 const productosOrdenados = data.sort((a, b) => a.id_producto - b.id_producto);
 
                 setProducts(productosOrdenados);
