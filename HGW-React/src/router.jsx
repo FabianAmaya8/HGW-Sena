@@ -6,6 +6,8 @@ import Buquedapage from "./pages/User/buqueda";
 import LoginPege from "./pages/View/loginPage";
 import RegistroPage from "./pages/View/registroPage";
 import CatalogoPage from "./pages/View/catalogoPege";
+import Carritopage from "./pages/User/carritopag";
+
 
 // Usuario
 import Inicio from "./pages/User/InicioPege";
@@ -51,7 +53,12 @@ const router = createBrowserRouter([
     {
         path: "/producto/:id",
         element: <ProductoPag />
+    },
+    {
+        path: "/carrito",
+        element: <Carritopage />,
     }
+
 
 
 ]);

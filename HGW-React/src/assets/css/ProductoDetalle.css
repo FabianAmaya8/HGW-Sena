@@ -153,12 +153,13 @@
 }
 
 .buy-now {
-    background-color: goldenrod;
+    background-color: #204c3c;;
     color: white;
 }
 
 .buy-now:hover {
-    background-color: darkgoldenrod;
+    background-color: #163a2e;
+    color: white;
 }
 
 /* INFO EXTRA */

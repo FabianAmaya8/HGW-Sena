@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useProducts } from "../hooks/useProducts";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { CartContext } from "../../pages/Context/CartContext";
 import "../../assets/css/ProductoDetalle.css";
 
 export default function ProductoDetalle() {
@@ -38,6 +39,19 @@ export default function ProductoDetalle() {
         claseStock = "stock-out";
     }
 
+    const { agregarProducto } = useContext(CartContext);
+
+    const handleAgregar = () => {
+        agregarProducto({
+            id_producto: producto.id_producto, // 👈 debe ser distinto para cada producto
+            nombre: producto.nombre,
+            precio: producto.precio
+        }, cantidad);
+
+        alert(`🛒 ${producto.nombre} añadido al carrito`);
+    };
+
+
     return (
         <main className="product-container">
             <div className="product-card">
@@ -64,7 +78,6 @@ export default function ProductoDetalle() {
                         <span className="price">${producto.precio?.toLocaleString("es-CO")}</span>
                     </div>
 
-                    {/* Título de descripción */}
                     <p><strong>Descripcion:</strong> {producto.descripcion}</p>
 
                     <div className="quantity-actions">
@@ -77,14 +90,11 @@ export default function ProductoDetalle() {
                         <button
                             className="btn add-cart"
                             disabled={stockDisponible <= 0}
-                            onClick={() => alert("Añadido al carrito 🎉")}
+                            onClick={handleAgregar}
                         >
                             Añadir al Carrito
                         </button>
-                        <button
-                            className="btn buy-now"
-                            disabled={stockDisponible <= 0}
-                        >
+                        <button className="btn buy-now" disabled={stockDisponible <= 0}>
                             Comprar Ahora
                         </button>
                     </div>
@@ -98,5 +108,3 @@ export default function ProductoDetalle() {
         </main>
     );
 }
-
-
