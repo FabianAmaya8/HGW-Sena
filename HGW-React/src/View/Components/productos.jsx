@@ -1,3 +1,4 @@
+import { useImageUrl } from '../../User/Hooks/useImgUrl';
 import { alertaView } from '../hooks/alerta-añadir';
 function formatPrice(price) {
     return `$${price.toLocaleString()}`;
@@ -31,8 +32,8 @@ export function ProductCard({ product }) {
         stockLabelText = 'Agotado';
         stockLabelClass = 'stock-label out-of-stock';
     }
-
-    const imagenProductoUrl = `static/${imagen}`;
+    
+    const imagenProductoUrl = useImageUrl(imagen);
 
     return (
         <article className="cart-producto">

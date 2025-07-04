@@ -2,6 +2,7 @@ import useCatalogo from '../../hooks/useCatalogo';
 import { useProducts } from '../../hooks/useProducts';
 import ItemCatalogo from './ItemCatalogo';
 import { Infinity } from 'ldrs/react'
+import { useImageUrl } from '../../../User/Hooks/useImgUrl';
 import '../../../assets/css/paginaproducto/catalogo.css';
 // importar imagenes del slider
 import pat1 from '../../../assets/img/catalogo/pat1.jpeg';
@@ -10,6 +11,24 @@ import pat3 from '../../../assets/img/catalogo/pat3.jpeg';
 import pat4 from '../../../assets/img/catalogo/pat4.jpeg';
 import pat5 from '../../../assets/img/catalogo/pat5.jpeg';
 
+const CategoriaCard = ({ category }) => {
+    const imgUrl = useImageUrl(category.img);
+    return (
+        <a
+            href={`#${category.nombre.replace(/\s+/g, '')}`}
+            className="categorias"
+            key={category.id}
+        >
+            <img
+                src={imgUrl}
+                alt={`Imagen de la categoría ${category.nombre}`}
+            />
+            <div className="texto-categorias">
+                <h3>{category.nombre}</h3>
+            </div>
+        </a>
+    );
+};
 
 const Catalogo = () => {
     const { categories, subcategories, loading, error } = useCatalogo();
@@ -42,19 +61,7 @@ const Catalogo = () => {
         <div className="contenedor-principal">
             <div className="catalogo">
                 {categories.map((category) => (
-                    <a
-                        href={`#${category.nombre.replace(/\s+/g, '')}`}
-                        className="categorias"
-                        key={category.id}
-                    >
-                        <img
-                            src={`/static/img/categorias/${category.img_categoria}`}
-                            alt={`Imagen de la categoría ${category.nombre}`}
-                        />
-                        <div className="texto-categorias">
-                            <h3>{category.nombre}</h3>
-                        </div>
-                    </a>
+                    <CategoriaCard category={category} key={category.id} />
                 ))}
             </div>
 

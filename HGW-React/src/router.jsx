@@ -7,6 +7,8 @@ import RegistroPage from "./pages/View/registroPage";
 import CatalogoPage from "./pages/View/catalogoPege";
 // Usuario
 import Inicio from "./pages/User/InicioPege";
+import PersonalPege from "./pages/User/PersonalPege";
+import InfoPersonalPege from "./pages/User/InfoPersonalPege";
 
 const router = createBrowserRouter([
     {
@@ -32,6 +34,14 @@ const router = createBrowserRouter([
     {
         path: "/inicio",
         element: <Inicio />
+    },
+    {
+        path: "/personal",
+        element: <PersonalPege />
+    },
+    {
+        path: "/Informacion-Personal",
+        element: <InfoPersonalPege />
     }
 ]);
 

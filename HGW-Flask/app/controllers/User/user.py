@@ -2,9 +2,9 @@ from flask import Blueprint, request, jsonify
 from app.controllers.db import get_db
 from decimal import Decimal
 
-user_bp = Blueprint('user_bp', __name__)
+header_bp = Blueprint('header_bp', __name__)
 
-@user_bp.route("/api/header", methods=["GET"])
+@header_bp.route("/api/header", methods=["GET"])
 def obtener_usuario():
     user_id = request.args.get("id", type=int)
 

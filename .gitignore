@@ -14,8 +14,7 @@ dist-ssr
 venv/
 __pycache__/
 
-profile_pictures/
-product_images/
+uploads/
 
 # Editor directories and files
 .vscode/*

@@ -28,6 +28,7 @@ CREATE TABLE ubicaciones (
 CREATE TABLE membresias (
     id_membresia INT PRIMARY KEY AUTO_INCREMENT,
     nombre_membresia VARCHAR(50),
+    bv INT,
     precio_membresia FLOAT
 );
 
@@ -85,7 +86,7 @@ CREATE TABLE productos (
     id_producto INT PRIMARY KEY AUTO_INCREMENT,
     categoria INT NOT NULL,
     subcategoria INT NOT NULL,
-    nombre_producto VARCHAR(50) NOT NULL,
+    nombre_producto VARCHAR(50) NOT NULL UNIQUE,
     precio_producto FLOAT NOT NULL,
     imagen_producto TEXT NOT NULL,
     imgs_publicidad TEXT,
@@ -175,12 +176,12 @@ CREATE TABLE transacciones (
 -- ------------------------------------------------
 
 -- Membresías
-INSERT INTO membresias (nombre_membresia, precio_membresia) VALUES
-    ('Cliente', 10.0),
-    ('Pre Junior', 20.0),
-    ('Junior', 30.0),
-    ('Senior', 40.0),
-    ('Master', 50.0);
+INSERT INTO membresias (nombre_membresia, bv, precio_membresia) VALUES
+    ('Cliente',0, 10000.0),
+    ('Pre Junior',50, 20000.0),
+    ('Junior',100, 30000.0),
+    ('Senior',300, 40000.0),
+    ('Master',600, 50000.0);
 
 -- Medios de pago
 INSERT INTO medios_pago (nombre_medio) VALUES
