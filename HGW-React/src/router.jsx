@@ -12,6 +12,7 @@ import Carritopage from "./pages/User/carritopag";
 // Usuario
 import Inicio from "./pages/User/InicioPege";
 import PersonalPage from "./pages/User/personalPage";
+import InfoPersonalPege from "./pages/User/InfoPersonalPege";
 import EducacionPage from "./pages/User/educacionPage";
 import ProductoPag from "./pages/User/productopag";
 
@@ -45,6 +46,10 @@ const router = createBrowserRouter([
     {
         path: "/Personal",
         element: <PersonalPage />,
+    },
+    {
+        path: "/InfoPersonal",
+        element: <InfoPersonalPege />,
     },
     {
         path: "/Educacion",
