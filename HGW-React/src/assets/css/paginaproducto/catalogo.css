@@ -159,12 +159,6 @@
 .productos-container {
     width: 100%;
 }
-.productos-container>.carts {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    justify-items: center;
-    gap: 30px;
-}
 
 /*----- media query -----*/
 @media (max-width: 768px){

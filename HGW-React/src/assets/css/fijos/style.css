@@ -51,7 +51,9 @@
     --header : linear-gradient(90deg, #acd4c0, #1f5f39);
     --footer: linear-gradient(90deg, rgba(11, 37, 48, 0.804) 0%, rgba(31, 95, 91, 0.751) 50%, rgba(73, 178, 101, 1) 100%);
     --blanco: #eee; 
+    --peligro: #ff4545;
     --botones: #03624c; 
+    --boton-carucel: rgb(71, 191, 38);
     --enlaces: #2cc295;
     --negro: #333; 
     --Sidebar: linear-gradient( #555, #76ccb1);
@@ -457,8 +459,9 @@ footer{
 }
 /*----- Carta de producto -----*/
 .cart-producto {
-    width: 180px;
-    height: 400px;
+    min-width: 150px;
+    max-width: 150px;
+    height: 380px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -484,7 +487,7 @@ footer{
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 150px;
+    width: 100%;
 }
 .baner-productos {
     width: 95%;
@@ -505,32 +508,32 @@ footer{
     font-size: 12px;
     color: var(--negro);
     text-transform: uppercase;
-    margin: 2px 0;
+    margin: 5px 0;
 }
 .nombre {
     font-size: 16px;
     font-weight: bold;
     color: #333;
-    margin: 10px 0;
+    margin: 5px 0;
 }
 .precio {
     font-size: 18px;
     color: #333;
     font-weight: bold;
+    margin: 5px 0;
 }
 
-.btn-carrito {
+.boton-carrito {
     background: #2c3e50;
     border: 1px solid #ccc;
+    font-size: 24px;
     color: white;
     border-radius: 5px;
-    padding: 10px;
     cursor: pointer;
     font-weight: bold;
-    margin-top: 10px;
 }
 
-.btn-carrito:hover {
+.boton-carrito:hover {
     background: #acd4c0;
     color: #000;
 }
@@ -659,5 +662,6 @@ footer{
     }
     .conten-item > div{
         width: 100%;
+        padding: 10px;
     }
 }

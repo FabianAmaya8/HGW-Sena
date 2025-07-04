@@ -1,19 +1,18 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
+from app.controllers.db import get_db
 from decimal import Decimal
 
-from .utils.datosProductos import obtener_productos
+header_bp = Blueprint('header_bp', __name__)
 
-user_bp = Blueprint('user_bp', __name__)
-
-@user_bp.route("/api/header", methods=["GET"])
+@header_bp.route("/api/header", methods=["GET"])
 def obtener_usuario():
     user_id = request.args.get("id", type=int)
 
     if not user_id:
         return jsonify({"success": False, "message": "ID de usuario no proporcionado"}), 400
 
-    connection = current_app.config['MYSQL_CONNECTION']
     try:
+        connection = get_db()
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT url_foto_perfil FROM usuarios
@@ -50,16 +49,3 @@ def obtener_usuario():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-@user_bp.route("/api/productos")
-def api_obtener_productos():
-    try:
-        limit = int(request.args.get('limit', 30))
-        productos = obtener_productos(limit)
-        if isinstance(productos, str):
-            return jsonify({'error': productos}), 500
-        return jsonify(productos), 200
-
-    except Exception:
-        current_app.logger.exception("Error en api_obtener_productos")
-        return jsonify({'error': 'Error interno al obtener productos'}), 500

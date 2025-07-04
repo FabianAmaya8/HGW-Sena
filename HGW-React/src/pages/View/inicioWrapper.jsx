@@ -6,7 +6,7 @@ import FooterView from "../../View/Components/footer";
 import LoginModal from "../../View/Components/login/modalLogin";
 // Context
 import { ModalProvider } from "../Context/ModalContext";
-import Inicio from "../User/inicio";
+import Inicio from "../User/InicioPege";
 
 export default function InicioWrapper() {
     return isLoggedIn() ? (

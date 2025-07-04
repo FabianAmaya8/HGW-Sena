@@ -1,15 +1,15 @@
 import ChatBot from "../../User/Components/Fijos/chatBot";
-import Footer from "../../User/Components/Fijos/footer";
 import Header from "../../User/Components/Fijos/header";
-import InicioPrincipal from "../../User/Components/inicio";
+import PersonalInfo from "../../User/Components/Personal/PersonalInfo";
+import FooterView from "../../View/Components/footer";
 import PrivateRoute from "../Context/PrivateRoute";
 
-export default function Inicio(){
-    return(
+export default function InfoPersonalPege() {
+    return (
         <PrivateRoute>
             <Header />
-            <InicioPrincipal />
-            <Footer />
+            <PersonalInfo />
+            <FooterView />
             <ChatBot />
         </PrivateRoute>
     )

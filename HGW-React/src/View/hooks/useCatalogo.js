@@ -25,11 +25,16 @@ const useCatalogo = () => {
             data.forEach((item) => {
             const catId = item.id_categoria;
             const catName = item.nombre_categoria;
+            const catImg = item.img_categoria || '';
             const subId = item.id_subcategoria;
             const subName = item.nombre_subcategoria;
 
             if (!categoriesMap[catId]) {
-                categoriesMap[catId] = { id: catId, nombre: catName };
+                categoriesMap[catId] = { 
+                    id: catId, 
+                    nombre: catName,
+                    img: catImg,
+                };
             }
 
             subcategoriesList.push({

@@ -1,18 +1,23 @@
 import { ProductsList } from "../productos";
 
-const ItemCatalogo = ({ category, subcategories }) => {
+const ItemCatalogo = ({ category, subcategories, productos}) => {
     const nombreCategoria = category.nombre.replace(/\s+/g, '');
-    
+
     return (
         <div id={nombreCategoria} className="conten-item">
             <div className="item-categorias">
                 <h2>{category.nombre}</h2>
 
                 {subcategories.map((sub) => (
-                    <div key={sub.id} className="item-subcategoria">
+                    <div key={sub.id} id={sub.nombre} className="item-subcategoria">
                         <h3>{sub.nombre}</h3>
                         <div className="productos-container">
-                            <ProductsList />
+                            {}
+                            <ProductsList 
+                                categoriaNombre={category.nombre} 
+                                subcategoriaNombre={sub.nombre}
+                                productos={productos}
+                            />
                         </div>
                     </div>
                 ))}
@@ -22,3 +27,5 @@ const ItemCatalogo = ({ category, subcategories }) => {
 };
 
 export default ItemCatalogo;
+
+

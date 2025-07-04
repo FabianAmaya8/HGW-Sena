@@ -6,17 +6,24 @@ export function useProducts() {
 
     useEffect(() => {
         const fetchProducts = async () => {
-        try {
-            const endpoint = 'api/productos';
-            const urlFetch = await urlDB(endpoint);
+            try {
+                const endpoint = 'api/productos';
+                const urlFetch = await urlDB(endpoint);
+                const res = await fetch(urlFetch);
 
-            const res = await fetch(urlFetch);
-            const data = await res.json();
-            setProducts(data);
-        } catch (error) {
-            console.error('Error al obtener productos:', error);
-            setProducts([]);
-        }
+                if (!res.ok) {
+                    throw new Error(`Error en la petición: ${res.status} ${res.statusText}`);
+                }
+
+                const data = await res.json();
+
+                const productosOrdenados = data.sort((a, b) => a.id_producto - b.id_producto);
+
+                setProducts(productosOrdenados);
+            } catch (error) {
+                console.error("Error al obtener productos:", error);
+                setProducts([]);
+            }
         };
 
         fetchProducts();
