@@ -17,9 +17,6 @@ export function useProducts() {
 
                 const data = await res.json();
 
-                
-
-                // 🔥 Asegurar orden fijo por ID antes de guardarlos
                 const productosOrdenados = data.sort((a, b) => a.id_producto - b.id_producto);
 
                 setProducts(productosOrdenados);

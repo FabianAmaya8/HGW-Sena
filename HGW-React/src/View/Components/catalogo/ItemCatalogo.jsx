@@ -12,7 +12,7 @@ const ItemCatalogo = ({ category, subcategories, productos}) => {
                     <div key={sub.id} id={sub.nombre} className="item-subcategoria">
                         <h3>{sub.nombre}</h3>
                         <div className="productos-container">
-                            {/* 🔥 Aquí pasamos los nombres en lugar de los IDs */}
+                            {}
                             <ProductsList 
                                 categoriaNombre={category.nombre} 
                                 subcategoriaNombre={sub.nombre}

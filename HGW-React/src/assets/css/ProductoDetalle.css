@@ -1,0 +1,203 @@
+/* CONTENEDOR PRINCIPAL */
+.product-container {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    background: #f4f6f8;
+}
+
+/* CARD */
+.product-card {
+    display: flex;
+    gap: 40px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 1200px;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* IZQUIERDA */
+.product-left {
+    flex: 1;
+}
+
+.main-image img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 15px;
+}
+
+.thumbnails {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.thumbnails img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.thumbnails img:hover {
+    border-color: #2c3e50;
+}
+
+/* DERECHA */
+.product-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.category {
+    font-size: 0.9em;
+    color: #888;
+}
+
+.product-title {
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.availability {
+    color: green;
+    font-size: 0.9em;
+}
+
+.price-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.price {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #2e7d32;
+}
+
+.old-price {
+    font-size: 1.2em;
+    text-decoration: line-through;
+    color: #aaa;
+}
+
+.product-description {
+    font-size: 1.75rem;
+    color: #555;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    margin-top: 0.8rem;
+    font-weight: bold;
+    color: #444;
+}
+
+/* CANTIDAD */
+.quantity-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quantity-actions button {
+    padding: 5px 15px;
+    font-size: 1.2em;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.quantity-actions input {
+    width: 50px;
+    text-align: center;
+    font-size: 1em;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* BOTONES */
+.cta-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.btn {
+    padding: 12px 25px;
+    font-size: 1em;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+}
+
+.add-cart {
+    background-color: #2c3e50;
+    color: white;
+}
+
+.add-cart:hover {
+    background-color: #acd4c0;
+}
+
+.buy-now {
+    background-color: #204c3c;;
+    color: white;
+}
+
+.buy-now:hover {
+    background-color: #163a2e;
+    color: white;
+}
+
+/* INFO EXTRA */
+.extra-info {
+    font-size: 0.9em;
+    color: #333;
+}
+.product-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.availability-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 500;
+    border: 1px solid transparent;
+}
+
+/* Estados visuales */
+.stock-ok {
+    background-color: #e6f9f0;
+    color: #1a7f5a;
+    border-color: #c5f2dc;
+}
+
+.stock-low {
+    background-color: #fffbe6;
+    color: #b45309;
+    border-color: #fde68a;
+}
+
+.stock-out {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border-color: #fecaca;
+}

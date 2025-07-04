@@ -58,24 +58,18 @@ function ProductCard({ product }) {
             <span className={stockLabelClass}>{stockLabelText}</span>
 
             {/* Enlace a detalle de producto */}
-            <a
-                href="/usuario/catalogo/paginaproducto.html"
-                aria-label={`Ver más sobre ${nombre}`}
-            >
+            <Link to={`/producto/${product.id_producto}`} aria-label={`Ver más sobre ${nombre}`}>
                 <figure className="baner-productos">
-                <img
-                    src={imagenProductoUrl}
-                    alt={`Imagen del producto ${nombre}`}
-                />
+                    <img src={imagenProductoUrl} alt={`Imagen del producto ${nombre}`} />
                 </figure>
 
                 <section className="info-producto">
-                <p className="categoria">{categoria}</p>
-                <p className="subcategoria">{subcategoria}</p>
-                <h3 className="nombre">{nombre}</h3>
-                <p className="precio">{formatPrice(precio)}</p>
+                    <p className="categoria">{categoria}</p>
+                    <p className="subcategoria">{subcategoria}</p>
+                    <h3 className="nombre">{nombre}</h3>
+                    <p className="precio">{formatPrice(precio)}</p>
                 </section>
-            </a>
+            </Link>
 
         {/* Botón "Agregar al carrito" */}
             <button

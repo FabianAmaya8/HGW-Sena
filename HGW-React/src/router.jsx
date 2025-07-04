@@ -1,14 +1,21 @@
 import { createBrowserRouter } from "react-router-dom";
+
 // Visitante
 import InicioWrapper from "./pages/View/inicioWrapper";
 import Buquedapage from "./pages/User/buqueda";
 import LoginPege from "./pages/View/loginPage";
 import RegistroPage from "./pages/View/registroPage";
 import CatalogoPage from "./pages/View/catalogoPege";
+import Carritopage from "./pages/User/carritopag";
+
+
 // Usuario
 import Inicio from "./pages/User/InicioPege";
-import PersonalPege from "./pages/User/PersonalPege";
-import InfoPersonalPege from "./pages/User/InfoPersonalPege";
+import PersonalPage from "./pages/User/personalPage";
+import EducacionPage from "./pages/User/educacionPage";
+import ProductoPag from "./pages/User/productopag";
+
+
 
 const router = createBrowserRouter([
     {
@@ -25,24 +32,35 @@ const router = createBrowserRouter([
     },
     {
         path: "/register",
-        element: <RegistroPage />
+        element: <RegistroPage />,
     },
     {
         path: "/Catalogo",
-        element: <CatalogoPage />
+        element: <CatalogoPage />,
     },
     {
         path: "/inicio",
-        element: <Inicio />
+        element: <Inicio />,
     },
     {
-        path: "/personal",
-        element: <PersonalPege />
+        path: "/Personal",
+        element: <PersonalPage />,
     },
     {
-        path: "/Informacion-Personal",
-        element: <InfoPersonalPege />
+        path: "/Educacion",
+        element: <EducacionPage />,
+    },
+    {
+        path: "/producto/:id",
+        element: <ProductoPag />
+    },
+    {
+        path: "/carrito",
+        element: <Carritopage />,
     }
+
+
+
 ]);
 
 export default router;
