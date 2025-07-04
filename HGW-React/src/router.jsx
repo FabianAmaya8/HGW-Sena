@@ -48,7 +48,7 @@ const router = createBrowserRouter([
         element: <PersonalPage />,
     },
     {
-        path: "/InfoPersonal",
+        path: "/informacion-personal",
         element: <InfoPersonalPege />,
     },
     {
