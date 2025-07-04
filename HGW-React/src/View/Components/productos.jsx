@@ -1,4 +1,5 @@
 import { alertaView } from '../hooks/alerta-añadir';
+import { Link } from "react-router-dom";
 function formatPrice(price) {
     return `$${price.toLocaleString()}`;
 }
@@ -43,15 +44,10 @@ export function ProductCard({ product }) {
             <span className={stockLabelClass}>{stockLabelText}</span>
 
             {/* Enlace a detalle de producto */}
-            <a
-                href="/usuario/catalogo/paginaproducto.html"
-                aria-label={`Ver más sobre ${nombre}`}
-            >
+
+            <Link to={`/producto/${product.id_producto}`} aria-label={`Ver más sobre ${nombre}`}>
                 <figure className="baner-productos">
-                <img
-                    src={imagenProductoUrl}
-                    alt={`Imagen del producto ${nombre}`}
-                />
+                    <img src={imagenProductoUrl} alt={`Imagen del producto ${nombre}`} />
                 </figure>
 
                 <section className="info-producto">
@@ -60,7 +56,7 @@ export function ProductCard({ product }) {
                     <h3 className="nombre">{nombre}</h3>
                     <p className="precio">{formatPrice(precio)}</p>
                 </section>
-            </a>
+            </Link>
 
         {/* Botón "Agregar al carrito" */}
             <button
