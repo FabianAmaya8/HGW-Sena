@@ -1,24 +1,42 @@
 import { useParams } from "react-router-dom";
-import { useProducts } from "../hooks/useProducts";
 import { useState, useEffect, useContext } from "react";
+import { mostrarAlerta } from '../hooks/alerta-añadir';
 import { CartContext } from "../../pages/Context/CartContext";
+import { urlDB } from "../../urlDB";
 import "../../assets/css/ProductoDetalle.css";
 
 export default function ProductoDetalle() {
     const { id } = useParams();
-    const productos = useProducts();
-    const producto = productos.find(p => p.id_producto === parseInt(id));
+    const [producto, setProducto] = useState(null);
     const [imagenActual, setImagenActual] = useState("");
     const [cantidad, setCantidad] = useState(1);
+    const baseURL = "http://localhost:3000/";
+
+    const { agregarProducto } = useContext(CartContext);
 
     useEffect(() => {
-        if (producto?.imagen) {
-            setImagenActual(producto.imagen);
-        }
-    }, [producto]);
+        const fetchProducto = async () => {
+            try {
+                const url = await urlDB(`api/producto/${id}`);
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("Producto no encontrado");
+                const data = await res.json();
+                setProducto(data);
+                setImagenActual(data.imagen);
+            } catch (error) {
+                console.error("Error al cargar producto:", error);
+                setProducto(null);
+            }
+        };
+        fetchProducto();
+    }, [id]);
 
     if (!producto) {
-        return <main className="product-container"><h2>Producto no encontrado 😢</h2></main>;
+        return (
+            <main className="product-container">
+                <h2 className="product-title"></h2>
+            </main>
+        );
     }
 
     const aumentarCantidad = () => setCantidad(c => c + 1);
@@ -39,29 +57,63 @@ export default function ProductoDetalle() {
         claseStock = "stock-out";
     }
 
-    const { agregarProducto } = useContext(CartContext);
+    const handleAgregar = async () => {
+        try {
+            const rawUser = localStorage.getItem("user");
+            const usuario = rawUser ? JSON.parse(rawUser) : null;
+            const id_usuario = usuario?.id;
 
-    const handleAgregar = () => {
-        agregarProducto({
-            id_producto: producto.id_producto, // 👈 debe ser distinto para cada producto
-            nombre: producto.nombre,
-            precio: producto.precio
-        }, cantidad);
 
-        alert(`🛒 ${producto.nombre} añadido al carrito`);
+            if (!id_usuario) {
+                console.warn("⚠️ Usuario no encontrado en localStorage");
+                return;
+            }
+
+            await fetch("http://localhost:3000/api/carrito/agregar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id_usuario: id_usuario,   
+                    id_producto: producto.id_producto,
+                    cantidad: cantidad
+                })
+            });
+
+
+            agregarProducto({
+                id_producto: producto.id_producto,
+                nombre: producto.nombre,
+                precio: producto.precio
+            }, cantidad);
+
+            mostrarAlerta(producto.nombre, () => {
+                setTimeout(() => {
+                    window.location.href = "/carrito";
+                }, 100);
+            });
+
+        } catch (error) {
+            console.error("❌ Error al guardar el producto en la base:", error);
+        }
     };
 
+    console.log(localStorage.getItem("usuario"));
 
     return (
         <main className="product-container">
             <div className="product-card">
                 <div className="product-left">
                     <div className="main-image">
-                        <img src={imagenActual} alt={`Imagen de ${producto.nombre}`} />
+                        <img src={`${baseURL}${imagenActual}`} alt={`Imagen de ${producto.nombre}`} />
                     </div>
                     <div className="thumbnails">
-                        {(producto.imagenes || [producto.imagen]).map((img, i) => (
-                            <img key={i} src={img} alt={`Miniatura ${i + 1}`} onClick={() => setImagenActual(img)} />
+                        {[producto.imagen, ...(Array.isArray(producto.imagenes) ? producto.imagenes : [])].map((img, i) => (
+                            <img
+                                key={i}
+                                src={`${baseURL}${img}`}
+                                alt={`Miniatura ${i + 1}`}
+                                onClick={() => setImagenActual(img)}
+                            />
                         ))}
                     </div>
                 </div>
@@ -69,16 +121,14 @@ export default function ProductoDetalle() {
                 <div className="product-right">
                     <h2 className="product-title">
                         {producto.nombre}
-                        <span className={`availability-badge ${claseStock}`}>
-                            {estadoStock}
-                        </span>
+                        <span className={`availability-badge ${claseStock}`}>{estadoStock}</span>
                     </h2>
 
                     <div className="price-row">
                         <span className="price">${producto.precio?.toLocaleString("es-CO")}</span>
                     </div>
 
-                    <p><strong>Descripcion:</strong> {producto.descripcion}</p>
+                    <p><strong>Descripción:</strong> {producto.descripcion || "Sin descripción disponible"}</p>
 
                     <div className="quantity-actions">
                         <button onClick={disminuirCantidad}>−</button>

@@ -1,11 +1,14 @@
 import { useImageUrl } from '../../User/Hooks/useImgUrl';
-import { alertaView } from '../hooks/alerta-añadir';
+import { alertaView, mostrarAlerta } from '../hooks/alerta-añadir';
+import { useCart } from '../../pages/Context/CartContext';
+import { handleAgregarProducto } from '../hooks/carritoUtils';
 import { Link } from "react-router-dom";
 function formatPrice(price) {
     return `$${price.toLocaleString()}`;
 }
 
 export function ProductCard({ product }) {
+    
     const {
         nombre,
         precio,
@@ -14,6 +17,8 @@ export function ProductCard({ product }) {
         subcategoria,
         stock,
     } = product;
+
+    const { agregarProducto } = useCart();
 
   // Determina clases y texto para indicador de stock
     let stockIndicatorClass = '';
@@ -61,15 +66,33 @@ export function ProductCard({ product }) {
 
         {/* Botón "Agregar al carrito" */}
             <button
-                className={`boton-carrito ${stock <= 0 ? 'btn-deshabilitado' : ''}`}
-                aria-label={`Agregar ${nombre} al carrito`}
-                disabled={stock <= 0}
-                onClick={() => {
-                alertaView();
+                className="boton-carrito"
+                onClick={async () => {
+                    const resultado = await handleAgregarProducto({
+                        producto: {
+                            id_producto: product.id_producto,
+                            nombre: product.nombre,
+                            precio: product.precio
+                        },
+                        cantidad: 1
+                    });
+
+                    if (resultado.exito) {
+                        agregarProducto(product, 1); // 👈 actualiza el estado local del carrito
+                        mostrarAlerta(product.nombre, () => {
+                            setTimeout(() => {
+                                window.location.href = "/carrito";
+                            }, 100);
+                        });
+                    } else {
+                        alertaView(); // el usuario no está logueado
+                    }
                 }}
             >
-                < i className='bx bx-cart-add'></i> 
+                <i className="bx bx-cart-add"></i>
             </button>
+
+
         </article>
     );
 }

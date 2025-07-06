@@ -11,7 +11,7 @@ import './assets/css/fijos/index.css';
 import './assets/css/fijos/style.css';
 
 import { AuthProvider } from './pages/Context/AuthContext.jsx';
-import { CartProvider } from './pages/Context/CartContext.jsx'; // 📦 carrito
+import { CartProvider } from './pages/Context/CartContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -9,7 +9,7 @@
 /* CARD */
 .product-card {
     display: flex;
-    gap: 40px;
+    gap:50px;
     background: #fff;
     padding: 30px;
     border-radius: 20px;
@@ -20,7 +20,7 @@
 
 /* IZQUIERDA */
 .product-left {
-    flex: 1;
+    flex: 1.4;
 }
 
 .main-image img {
@@ -200,4 +200,15 @@
     background-color: #fef2f2;
     color: #dc2626;
     border-color: #fecaca;
+}
+.main-image img {
+    border-radius: 12px;
+    max-width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.main-image img:hover {
+    border-radius: 16px;
+    transition: border-radius 0.3s ease;
 }
