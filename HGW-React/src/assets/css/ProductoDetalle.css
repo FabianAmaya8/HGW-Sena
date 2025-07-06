@@ -212,3 +212,114 @@
     border-radius: 16px;
     transition: border-radius 0.3s ease;
 }
+@media (max-width: 768px) {
+    .product-container {
+        padding: 10px;
+    }
+
+    .product-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        gap: 20px;
+        box-shadow: none;
+        border: none;
+    }
+
+    .main-image {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .main-image img {
+        width: 100%;
+        max-height: 320px;
+        object-fit: contain;
+        border-radius: 0;
+    }
+
+    .thumbnails {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .thumbnails img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .product-right {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .product-title {
+        font-size: 1.4rem;
+        font-weight: bold;
+        width: 100%;
+    }
+
+    .price {
+        font-size: 1.5rem;
+        color: #b12704;
+        font-weight: bold;
+    }
+
+    .product-description {
+        font-size: 1rem;
+        color: #555;
+        line-height: 1.4;
+    }
+
+    .quantity-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .quantity-actions button,
+    .quantity-actions input {
+        font-size: 1rem;
+        padding: 5px 10px;
+    }
+
+    .cta-buttons {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .btn-comprar {
+        background-color: #ffa41c;
+        color: white;
+        border: none;
+    }
+
+    .btn-carrito {
+        background-color: #f0c14b;
+        color: #111;
+        border: 1px solid #a88734;
+    }
+}

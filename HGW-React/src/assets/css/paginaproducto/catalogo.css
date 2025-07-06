@@ -167,3 +167,10 @@
         align-items: center;
     }
 }
+@media (max-width: 480px) {
+    .catalogo {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 16px;
+        padding: 10px;
+    }
+}

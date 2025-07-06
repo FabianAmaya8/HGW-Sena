@@ -154,3 +154,93 @@ body {
     color: white;
     cursor: pointer;
 }
+@media (max-width: 768px) {
+    .video-section {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+        gap: 20px;
+    }
+
+    .video-container {
+        width: 100%;
+        margin-bottom: 16px;
+    }
+
+    .video-container video {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .video-content {
+        width: 100%;
+        text-align: left;
+        padding: 0;
+    }
+
+    .video-content h1 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.2;
+    }
+
+    .video-content p {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #555;
+    }
+
+    .dashboard {
+        flex-direction: column;
+        gap: 24px;
+        padding: 20px 16px;
+    }
+
+    .targeta-educacion {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn,
+    .btn-add,
+    .btn-watch {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+        margin-top: 12px;
+        border-radius: 8px;
+        background-color: #00b894;
+        color: white;
+        border: none;
+        font-weight: 500;
+    }
+
+    .cantidad-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .cantidad-btn {
+        padding: 4px 10px;
+        font-size: 14px;
+        border-radius: 6px;
+        background-color: #dfe6e9;
+        border: none;
+    }
+
+    .cantidad-text {
+        font-size: 14px;
+        min-width: 20px;
+        text-align: center;
+    }
+}
