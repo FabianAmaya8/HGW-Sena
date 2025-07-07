@@ -1,0 +1,151 @@
+/* === Lista de direcciones === */
+.lista-direcciones {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-direccion {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 1rem;
+    background-color: #fafafa;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.card-direccion p {
+    margin: 0.3rem 0;
+}
+
+.card-direccion .btn {
+    margin-top: 0.5rem;
+    background-color: #204c3c;
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.card-direccion .btn:hover {
+    background-color: #163a2e;
+}
+
+/* === Modal Nueva Dirección === */
+.modal-direccion {
+    background: #ffffff;
+    border: 1px solid #ccc;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-direccion input,
+.modal-direccion select,
+.modal-direccion textarea {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* === Botones del modal === */
+.botones-modal {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.botones-modal .btn-primary {
+    background-color: #204c3c;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.botones-modal .btn-primary:hover {
+    background-color: #163a2e;
+}
+
+.botones-modal .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.botones-modal .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.navegacion-pasos {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.navegacion-pasos .btn-outline-secondary {
+    background-color: transparent;
+    color: #204c3c;
+    border: 1px solid #28a745;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.navegacion-pasos .btn-outline-secondary:hover {
+    background-color: #204c3c;
+    color: white;
+}
+.btn-outline-primary {
+    background-color: transparent;
+    color: #204c3c;
+    border: 2px solid #204c3c;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+}
+
+.btn-outline-primary:hover {
+    background-color: #204c3c;
+    color: white;
+}
+button.btn.btn-outline-primary {
+    background-color: #204c3c;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+}
+
+button.btn.btn-outline-primary:hover {
+    background-color: #163a2e;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .paso-envio {
+        padding: 1rem;
+    }
+
+    .botones-modal {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .card-direccion {
+        padding: 0.8rem;
+    }
+}

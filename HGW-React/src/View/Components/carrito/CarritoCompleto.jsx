@@ -2,28 +2,15 @@ import { useContext } from "react";
 import { CartContext } from "../../../pages/Context/CartContext";
 import { useState } from "react";
 import "../../../assets/css/CarritoCompleto.css";
-export default function Carrito() {
-    const { carrito, quitarDelCarrito, aumentarCantidad, disminuirCantidad } = useContext(CartContext);
 
-    const [formularioEnvio, setFormularioEnvio] = useState({
-        nombreCompleto: "",
-        direccionEnvio: "",
-        ciudadEnvio: "",
-        telefonoContacto: "",
-    });
+export default function Carrito({ onNext }) {
+    const { carrito, quitarDelCarrito, aumentarCantidad, disminuirCantidad } = useContext(CartContext);
 
     const totalCantidad = carrito.reduce((total, prod) => total + prod.cantidad, 0);
     const totalParcial = carrito.reduce((total, prod) => total + prod.precio * prod.cantidad, 0);
     const costoEnvio = 0;
     const valorImpuestos = 0;
     const totalFinal = totalParcial + costoEnvio + valorImpuestos;
-
-    const manejarCambioEnvio = e => {
-        setFormularioEnvio({
-            ...formularioEnvio,
-            [e.target.name]: e.target.value
-        });
-    };
 
     return (
         <div className="contenedor-general">
@@ -45,30 +32,19 @@ export default function Carrito() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {carrito.map(prod => (
+                                {carrito.map((prod) => (
                                     <tr key={prod.id_producto}>
                                         <td>{prod.nombre}</td>
                                         <td>
                                             <div className="cantidad-controles">
-                                                <button
-                                                    className="btn-menos"
-                                                    onClick={() => disminuirCantidad(prod.id_producto)}
-                                                >−</button>
+                                                <button className="btn-menos" onClick={() => disminuirCantidad(prod.id_producto)}>−</button>
                                                 <span className="cantidad-numero">{prod.cantidad}</span>
-                                                <button
-                                                    className="btn-mas"
-                                                    onClick={() => aumentarCantidad(prod.id_producto)}
-                                                >+</button>
+                                                <button className="btn-mas" onClick={() => aumentarCantidad(prod.id_producto)}>+</button>
                                             </div>
                                         </td>
                                         <td>${prod.precio.toFixed(2)}</td>
                                         <td>
-                                            <button
-                                                className="boton-quitar"
-                                                onClick={() => quitarDelCarrito(prod.id_producto)}
-                                            >
-                                                Quitar
-                                            </button>
+                                            <button className="boton-quitar" onClick={() => quitarDelCarrito(prod.id_producto)}>Quitar</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -86,43 +62,19 @@ export default function Carrito() {
                     <p>Impuestos: ${valorImpuestos.toFixed(2)}</p>
                     <hr />
                     <p className="total-compra">Total: ${totalFinal.toFixed(2)}</p>
-                    <button className="boton-comprar">Proceder al Pago</button>
+                    <button
+                        className="boton-comprar"
+                        onClick={() => {
+                            if (typeof onNext === "function") {
+                                onNext();
+                            } else {
+                                console.warn("onNext no está definido");
+                            }
+                        }}
+                    >
+                        Continuar con Envío
+                    </button>
                 </div>
-            </div>
-
-            {/* Datos de envío */}
-            <div className="formulario-envio">
-                <h2 className="titulo-envio">Información de Envío</h2>
-                <form className="formulario-datos">
-                    <input
-                        type="text"
-                        name="nombreCompleto"
-                        value={formularioEnvio.nombreCompleto}
-                        onChange={manejarCambioEnvio}
-                        placeholder="Nombre completo"
-                    />
-                    <input
-                        type="text"
-                        name="direccionEnvio"
-                        value={formularioEnvio.direccionEnvio}
-                        onChange={manejarCambioEnvio}
-                        placeholder="Dirección"
-                    />
-                    <input
-                        type="text"
-                        name="ciudadEnvio"
-                        value={formularioEnvio.ciudadEnvio}
-                        onChange={manejarCambioEnvio}
-                        placeholder="Ciudad"
-                    />
-                    <input
-                        type="tel"
-                        name="telefonoContacto"
-                        value={formularioEnvio.telefonoContacto}
-                        onChange={manejarCambioEnvio}
-                        placeholder="Teléfono"
-                    />
-                </form>
             </div>
         </div>
     );

@@ -1,0 +1,34 @@
+.paso-pago {
+    padding: 2rem;
+}
+
+.info-envio,
+.resumen-productos,
+.resumen-total {
+    margin-bottom: 2rem;
+    background-color: #f3f3f3;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.tabla-resumen {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-resumen th,
+.tabla-resumen td {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+}
+
+.total-compra {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.botones-finales {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}

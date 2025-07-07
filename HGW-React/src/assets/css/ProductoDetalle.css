@@ -310,16 +310,4 @@
         border-radius: 6px;
         text-align: center;
     }
-
-    .btn-comprar {
-        background-color: #ffa41c;
-        color: white;
-        border: none;
-    }
-
-    .btn-carrito {
-        background-color: #f0c14b;
-        color: #111;
-        border: 1px solid #a88734;
-    }
 }
