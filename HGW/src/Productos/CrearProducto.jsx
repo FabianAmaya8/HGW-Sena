@@ -23,7 +23,7 @@ const CrearProducto = ({edit, padre})=>{
         { id: "imagen_producto", type: "img", label: "", dependency: "", childs: [], requirements: {minLength: 5}},
         { id: "categoria", type: "select", label: "Eliga la Categoria", changeTable: {table: "subcategoria", columnDependency: "categoria"}, childs: {table: "categorias"}, requirements: {}},
         { id: "subcategoria", type: "select", label: "Eliga la Subcategoria", dependency: {elemento: "categoria"}, childs: {table: "subcategoria"}, requirements: {}},
-        { variant: "contained", type: "submit", label: "Crear Producto", click: "", submit: "productos"},
+        { variant: "contained", type: "submit", label: edit && edit.estado ? "Editar Producto" : "Crear Producto", click: "", submit: "productos"},
     ], []);
     return (
         <DinamicForm form={form} consultas={consultas} edit={edit} padre={padre} />

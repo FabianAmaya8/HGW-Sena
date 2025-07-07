@@ -4,6 +4,8 @@ import HomeIcon from '@mui/icons-material/Home'
 import CategoryIcon from '@mui/icons-material/Category'
 import Inventory2Icon from '@mui/icons-material/Inventory2'
 import PeopleIcon from '@mui/icons-material/People'
+import CardMembershipIcon from '@mui/icons-material/CardMembership';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import { Title } from '@mui/icons-material';
 
 export const objeto = [
@@ -23,6 +25,16 @@ export const objeto = [
     {id: 7, value: "Usuarios", icon: <PeopleIcon />, colorText: "white", childs: [
         {id: 8, value: "Crear", icon: <></>, colorText: "white", click: "Usuarios/Crear" },
         {id: 9, value: "Ver Lista", icon: <></>, colorText: "white", click: "Usuarios/Lista" },
+      ]
+    },
+    {id: 10, value: "Membresias", icon: <CardMembershipIcon />, colorText: "white", childs: [
+        {id: 11, value: "Crear", icon: <></>, colorText: "white", click: "Membresias/Crear" },
+        {id: 12, value: "Ver Lista", icon: <></>, colorText: "white", click: "Membresias/Lista" },
+      ]
+    },
+    {id: 13, value: "Bonos", icon: <CardGiftcardIcon />, colorText: "white", childs: [
+        {id: 14, value: "Crear", icon: <></>, colorText: "white", click: "Bonos/Crear" },
+        {id: 15, value: "Ver Lista", icon: <></>, colorText: "white", click: "Bonos/Lista" },
       ]
     }
   ];

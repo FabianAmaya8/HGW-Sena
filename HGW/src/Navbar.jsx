@@ -3,7 +3,8 @@ import { Outlet } from 'react-router-dom'
 import { useMediaQuery, Typography, useTheme, Box, Accordion, AccordionSummary, AccordionDetails, 
   Button, IconButton, Drawer, SpeedDial, SpeedDialAction, Select,
   Alert, AlertTitle,  
-  Dialog} from '@mui/material'
+  Dialog,
+  DialogContent} from '@mui/material'
 import HomeIcon from '@mui/icons-material/Home'
 import SpeedDialIcon from '@mui/material/SpeedDialIcon'
 import Style from './App.module.scss'
@@ -18,123 +19,118 @@ import CloseIcon from '@mui/icons-material/Close';
 const Arboles = memo(({ elementos, hoverDrawer }) => {
   const { medidas: dispositivo, anchoDrawer } = useContext(AppContext);
   const navigate = useNavigate();
-
   const descendantsMap = useMemo(() => {
     const map = {};
     const collect = item => {
       const children = item.childs || [];
       let ids = [];
-      children.forEach(child => {
-        ids.push(child.id);
-        ids = ids.concat(collect(child));
-      });
+      for (let i = 0; i < children.length; i++) {
+        ids.push(children[i].id);
+        ids = ids.concat(collect(children[i]));
+      }
       map[item.id] = ids;
       return ids;
     };
-    elementos.forEach(el => collect(el));
+    for (let i = 0; i < elementos.length; i++) collect(elementos[i]);
     return map;
   }, [elementos]);
-
   const initial = useMemo(() => {
     const state = {};
-    elementos.forEach(function collect(el) {
+    const collect = el => {
       state[el.id] = false;
-      (el.childs || []).forEach(child => collect(child));
-    });
+      if (el.childs) for (let i = 0; i < el.childs.length; i++) collect(el.childs[i]);
+    };
+    for (let i = 0; i < elementos.length; i++) collect(elementos[i]);
     return state;
   }, [elementos]);
-
   const [expandedMap, setExpandedMap] = useState(initial);
-
-  const handleChange = useCallback(
-    (id, siblingIds) => (_e, isOpen) => {
-      setExpandedMap(prev => {
-        const next = { ...prev };
-        if (isOpen) {
-          siblingIds.forEach(sib => {
-            if (sib !== id) {
-              next[sib] = false;
-              descendantsMap[sib].forEach(d => (next[d] = false));
-            }
-          });
-          next[id] = true;
-        } else {
-          next[id] = false;
-          descendantsMap[id].forEach(d => (next[d] = false));
+  const handleChange = useCallback((id, siblingIds) => (_e, isOpen) => {
+    setExpandedMap(prev => {
+      const next = { ...prev };
+      if (isOpen) {
+        for (let i = 0; i < siblingIds.length; i++) {
+          const sib = siblingIds[i];
+          if (sib !== id) {
+            next[sib] = false;
+            for (let d of descendantsMap[sib]) next[d] = false;
+          }
         }
-        return next;
-      });
-    },
-    [descendantsMap]
-  );
-
-  const renderItems = useCallback(
-    items => {
-      const siblingIds = items.map(i => i.id);
-      return items.map(el => {
-        const open = !!expandedMap[el.id];
-        if (el.childs) {
-          return (
-            <Accordion
-              key={el.id}
-              expanded={open}
-              onChange={handleChange(el.id, siblingIds)}
-              disableGutters
-              sx={{ backgroundColor: 'transparent', boxShadow: 'none' }}
-            >
-              <AccordionSummary
-                disableRipple
-                focusRipple={false}
-                className={Style.butonNavbar}
-                expandIcon={
-                  <ExpandMoreIcon
-                    sx={{
-                      ...(anchoDrawer.isOpen || hoverDrawer ? { opacity: 1 } : { opacity: 0 }),
-                      color: el.colorText,
-                      transition: '350ms'
-                    }}
-                  />
-                }
-                sx={{
-                  transition: '360ms',
-                  width: '100%',
-                  justifyContent: 'center'
-                }}
-              >
-                <Box
-                  className={Style.boxElementsNavbar}
+        next[id] = true;
+      } else {
+        next[id] = false;
+        for (let d of descendantsMap[id]) next[d] = false;
+      }
+      return next;
+    });
+  }, [descendantsMap]);
+  const renderItems = useCallback(items => {
+    const siblingIds = items.map(i => i.id);
+    const out = new Array(items.length);
+    for (let i = 0; i < items.length; i++) {
+      const el = items[i];
+      const open = !!expandedMap[el.id];
+      if (el.childs) {
+        out[i] = (
+          <Accordion
+            key={el.id}
+            expanded={open}
+            onChange={handleChange(el.id, siblingIds)}
+            disableGutters
+            sx={{ backgroundColor: 'transparent', boxShadow: 'none' }}
+          >
+            <AccordionSummary
+              disableRipple
+              focusRipple={false}
+              className={Style.butonNavbar}
+              expandIcon={
+                <ExpandMoreIcon
                   sx={{
+                    ...(anchoDrawer.isOpen || hoverDrawer ? { opacity: 1 } : { opacity: 0 }),
                     color: el.colorText,
-                    backgroundColor: 'transparent',
-                    gap: anchoDrawer.isOpen ? '1rem' : '1.2rem',
-                    transition: 'gap 450ms'
+                    transition: '350ms'
                   }}
-                >
-                  {el.icon}
-                  <Typography variant="body1" noWrap>
-                    {el.value}
-                  </Typography>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails
+                />
+              }
+              sx={{
+                transition: '360ms',
+                width: '100%',
+                justifyContent: 'center'
+              }}
+            >
+              <Box
+                className={Style.boxElementsNavbar}
                 sx={{
-                  display: anchoDrawer.isOpen || hoverDrawer ? 'block' : 'none',
-                  position: 'relative',
-                  '&::before': {
-                    borderLeft: '3px solid white',
-                    content: '""',
-                    height: '100%',
-                    position: 'absolute',
-                    top: 0
-                  }
+                  color: el.colorText,
+                  backgroundColor: 'transparent',
+                  gap: anchoDrawer.isOpen ? '1rem' : '1.2rem',
+                  transition: 'gap 450ms'
                 }}
               >
-                {renderItems(el.childs)}
-              </AccordionDetails>
-            </Accordion>
-          );
-        }
-        return (
+                {el.icon}
+                <Typography variant="body1" noWrap>
+                  {el.value}
+                </Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails
+              sx={{
+                display: anchoDrawer.isOpen || hoverDrawer ? 'block' : 'none',
+                position: 'relative',
+                '&::before': {
+                  borderLeft: '3px solid white',
+                  content: '""',
+                  height: '100%',
+                  position: 'absolute',
+                  top: 0
+                }
+              }}
+            >
+              {renderItems(el.childs)}
+            </AccordionDetails>
+          </Accordion>
+        );
+      } else {
+        out[i] = (
           <Button
             key={el.id}
             onClick={() => navigate(el.click)}
@@ -149,12 +145,11 @@ const Arboles = memo(({ elementos, hoverDrawer }) => {
             </Box>
           </Button>
         );
-      });
-    },
-    [expandedMap, anchoDrawer.isOpen, hoverDrawer, handleChange, navigate, dispositivo]
-  );
-
-  return <>{renderItems(elementos)}</>;
+      }
+    }
+    return out;
+  }, [expandedMap, anchoDrawer.isOpen, hoverDrawer, handleChange, navigate, dispositivo]);
+  return renderItems(elementos);
 });
 
 
@@ -200,11 +195,14 @@ const App = memo(()=>{
   }, []);
   let objetoElementos = objeto;
   const objetoEstado = useMemo(()=> ({isOpen: isOpen, setIsOpen: setIsOpen}), [isOpen]);
-  const pintarSpeedDial = useCallback((elementos)=>{
-    return elementos.map((speedDial, index)=>{
-      return <SpeedDialAction onClick={()=>navigate(speedDial.rute)} key={"seppedDial_"+speedDial.rute+index} tooltipTitle={speedDial.arialLabel} icon={speedDial.icon} />
-    })
-  }, [navigate]);
+const pintarSpeedDial = useCallback(elementos => {
+  const out = new Array(elementos.length);
+  for (let i = 0; i < elementos.length; i++) {
+    const speedDial = elementos[i];
+    out[i] = <SpeedDialAction onClick={() => navigate(speedDial.rute)} key={"seppedDial_" + speedDial.rute + i} tooltipTitle={speedDial.arialLabel} icon={speedDial.icon} />
+  }
+  return out;
+}, [navigate]);
   const anchoNavbar = anchoDrawer.isOpen ? `calc(100% - ${(anchoDrawer.ancho.open)-14}rem)` : `calc(100% - ${(anchoDrawer.ancho.close)-3}rem)`;
   return (
     <>
@@ -212,7 +210,7 @@ const App = memo(()=>{
         ...(dispositivo == "movil" ? {right: "0rem", left: "0rem"}: {right: "1rem", left: "auto"}),
         width: dispositivo == "movil" ? "auto": dispositivo == "pc" && anchoNavbar,
         height: hiddenNavbar ? "0px" : "75px", backgroundColor: "", transition: "width 450ms" }}>
-        <Button onClick={() => {setIsOpen(!isOpen);}}>
+        <Button disableTouchRipple onClick={() => {setIsOpen(!isOpen);}}>
           {dispositivo == "movil" ?
           <HomeIcon sx={{color: "black", fontSize: "25px"}}/>:
           <Box
@@ -266,12 +264,11 @@ const App = memo(()=>{
   )
 });
 
-const BACKEND = 'http://127.0.0.1:5000'
+const BACKEND = 'http://127.0.0.1:3000'
 
 function Navbar({ alerta, setAlerta, imagenes }) {
   const tema = useTheme()
   const [anchoAlert, setAncho] = useState('-180px')
-
   useEffect(() => {
     const longitud = alerta.valor.content.length
     if (longitud > 0) {
@@ -279,13 +276,13 @@ function Navbar({ alerta, setAlerta, imagenes }) {
       setAncho('-' + ancho.toString().concat('px'))
     }
   }, [alerta])
-
-  if (alerta.estado) {
-    setTimeout(() => {
-      setAlerta({ ...alerta, estado: false })
-    }, 4000)
-  }
-
+  useEffect(() => {
+    if (!alerta.estado) return;
+    const t = setTimeout(() => {
+      setAlerta(a => ({ ...a, estado: false }))
+    }, 4000);
+    return () => clearTimeout(t);
+  }, [alerta.estado]);
   const safeSrc = useMemo(() => {
     const s = (imagenes.imagenes.file || '').trim()
     if (s.startsWith('http') || s.startsWith('data:image/')) return s
@@ -311,7 +308,7 @@ function Navbar({ alerta, setAlerta, imagenes }) {
         <AlertTitle>{alerta.valor.title}</AlertTitle>
         {alerta.valor.content}
       </Alert>
-      {imagenes.imagenes.estado && (
+      {imagenes.imagenes.estado && safeSrc && safeSrc !== `${BACKEND}/images/` && (
         <Dialog
           maxWidth={false}
           onClose={() => imagenes.setImagenes({ estado: false, file: '' })}

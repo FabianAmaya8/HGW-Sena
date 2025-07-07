@@ -12,7 +12,7 @@ const Nofound = ()=>{
             <Box className="box-contenidos" sx={{ width: medidas == "movil" ? "100%" : contenidoWidth, transition: "450ms" }}>
                 <Box
                     sx={{
-                       borderRadius: '10px', width: medidas === 'movil' ? '90%' : '98%', height: "80vh", marginTop: '3%', marginLeft: "2.8vh",
+                       borderRadius: '10px', width: medidas === 'movil' ? '90%' : '98%', height: "80vh", marginTop: medidas == "movil" ? '0%' : '3%', marginLeft: medidas != "movil" ? "2.8vh": 0,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
