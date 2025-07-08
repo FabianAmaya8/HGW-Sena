@@ -41,7 +41,14 @@ def create_app():
     app.register_blueprint(personal_bp)
     with app.app_context():
         from app.models.tablas import tablas, bp_tablas
-        tablas.prepare(db.engine, reflect=True)
+        tablas.prepare(
+            db.engine,
+            reflect=True,
+            name_for_scalar_relationship=lambda base, local_cls, referred_cls, constraint:
+                f"{referred_cls.__name__.lower()}_obj",
+            name_for_collection_relationship=lambda base, local_cls, referred_cls, constraint:
+                f"{referred_cls.__name__.lower()}_list"
+        )
         app.register_blueprint(bp_tablas)
         db.create_all()
     return app
