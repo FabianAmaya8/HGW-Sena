@@ -171,3 +171,50 @@ def eliminar_direccion(id_direccion):
     except Exception as e:
         current_app.logger.error(f"Error al eliminar dirección: {str(e)}")
         return jsonify({"error": "Error interno del servidor"}), 500
+    
+@carrito_bp.route("/api/ordenes", methods=["POST"])
+def crear_orden():
+    data = request.get_json() or {}
+    esperado = ["id_usuario","id_direccion","id_medio_pago","total","items"]
+    faltantes = [k for k in esperado if not data.get(k)]
+    if faltantes:
+        return jsonify({
+          "error": "Datos incompletos",
+          "faltan": faltantes,
+          "recibido": data
+        }), 400
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+              "INSERT INTO ordenes (id_usuario,id_direccion,id_medio_pago,total) VALUES (%s,%s,%s,%s)",
+              (id_usuario,id_direccion,id_medio,total)
+            )
+            conn.commit()
+            cur.execute("SELECT LAST_INSERT_ID() AS id_orden")
+            id_orden = cur.fetchone()["id_orden"]
+
+            sql = "INSERT INTO ordenes_productos (id_orden,id_producto,cantidad,precio_unitario) VALUES (%s,%s,%s,%s)"
+            for it in items:
+                cur.execute(sql,(id_orden,it["id_producto"],it["cantidad"],it["precio_unitario"]))
+            conn.commit()
+
+        return jsonify({"id_orden":id_orden}),201
+    except Exception as e:
+        current_app.logger.error(str(e))
+        return jsonify({"error":"Error interno"}),500
+    
+@carrito_bp.route("/api/medios-pago", methods=["GET"])
+def listar_medios_pago():
+
+    conn = current_app.config["MYSQL_CONNECTION"]
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT id_medio, nombre_medio FROM medios_pago")
+
+            medios = cursor.fetchall()
+        return jsonify(medios), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Error listando medios de pago: {e}")
+        return jsonify({"error": "No se pudieron cargar los medios"}), 500
