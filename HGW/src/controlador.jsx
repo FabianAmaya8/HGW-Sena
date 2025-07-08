@@ -59,8 +59,8 @@ const Controlador = () => {
           <Routes>
             <Route path='/' element={<Navbar imagenes={navImgs} alerta={alerta} setAlerta={setAlerta} />}>
               <Route path="*" element={<Nofound />} />
-              <Route index element={<Navigate to="home" replace />} />
-              <Route path="home" element={<Secure><Home /></Secure>} />
+              <Route index element={<Navigate to="Home" replace />} />
+              <Route path="Home" element={<Secure><Home /></Secure>} />
               <Route path="Categorias/Crear" element={<Secure><Categorias /></Secure>} />
               <Route path="Categorias/Lista" element={<Secure><ListaCategorias /></Secure>} />
               <Route path="Categorias/Subcategorias/Crear" element={<Secure><Subcategorias /></Secure>} />
