@@ -1,26 +1,15 @@
 from flask import Flask
-import pymysql.cursors
-from config import Config
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from config import Config
+import pymysql.cursors
 
-from .controllers.User.admin import admin_bp
-from .controllers.User.mod import mod_bp
-from .controllers.User.user import header_bp
-from .controllers.User.InicioSesion.login import login_bp
-from .controllers.User.InicioSesion.register import register_bp
-from .controllers.User.Catalogo.catalogo import catalogo_bp
-from .controllers.User.Catalogo.producto import stock_bp 
-from .controllers.User.Personal.membresia import membresia_bp 
-from .controllers.User.Personal.personal import personal_bp
-
-app = Flask(__name__)
-db = SQLAlchemy(app)
+db = SQLAlchemy()
 
 def create_app():
-
+    app = Flask(__name__)
     app.config.from_object(Config)
-
+    db.init_app(app)
     CORS(app, resources={r"/*": {"origins": ["http://localhost:5174", "http://127.0.0.1:5174"]}})
     connection = pymysql.connect(
         host=app.config['MYSQL_HOST'],
@@ -32,8 +21,15 @@ def create_app():
         autocommit=True
     )
     app.config['MYSQL_CONNECTION'] = connection
-
-    # Registrar Blueprints
+    from .controllers.User.admin import admin_bp
+    from .controllers.User.mod import mod_bp
+    from .controllers.User.user import header_bp
+    from .controllers.User.InicioSesion.login import login_bp
+    from .controllers.User.InicioSesion.register import register_bp
+    from .controllers.User.Catalogo.catalogo import catalogo_bp
+    from .controllers.User.Catalogo.producto import stock_bp
+    from .controllers.User.Personal.membresia import membresia_bp
+    from .controllers.User.Personal.personal import personal_bp
     app.register_blueprint(admin_bp)
     app.register_blueprint(mod_bp)
     app.register_blueprint(header_bp)
@@ -43,16 +39,9 @@ def create_app():
     app.register_blueprint(stock_bp)
     app.register_blueprint(membresia_bp)
     app.register_blueprint(personal_bp)
-
-    app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:@localhost/HGW_database"
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
     with app.app_context():
-        from app.models import tablas
-        from app.models.tablas import bp_tablas
+        from app.models.tablas import tablas, bp_tablas
+        tablas.prepare(db.engine, reflect=True)
         app.register_blueprint(bp_tablas)
-
-    with app.app_context():
         db.create_all()
-
     return app

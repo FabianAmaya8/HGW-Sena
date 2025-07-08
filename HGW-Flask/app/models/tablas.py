@@ -1,13 +1,12 @@
 import os
-from flask import Blueprint, request, jsonify, send_from_directory, Response
+from flask import Blueprint, request, jsonify, send_from_directory, Response, current_app
 from flask_cors import cross_origin
 from sqlalchemy import inspect
 from sqlalchemy.ext.automap import automap_base
-from app import db, app
+from app import db
 from werkzeug.utils import secure_filename
 
 tablas = automap_base()
-tablas.prepare(db.engine, reflect=True, generate_relationship=True)
 
 def get_fk_display(obj):
     cols = [c.name for c in obj.__table__.columns if 'name' in c.name.lower() or 'nombre' in c.name.lower()]
@@ -45,25 +44,17 @@ def serializar_con_fk_lookup(objetos):
         lista.append(data)
     return lista
 
-
 bp_tablas = Blueprint("tablas", __name__)
-UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
+UPLOAD_FOLDER = os.path.join(current_app.root_path, 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 
 @bp_tablas.route("/images/<path:filename>", methods=["GET", "OPTIONS"])
 @cross_origin(origins="http://localhost:5173")
 def images(filename):
     if request.method == "OPTIONS":
         return Response(status=200)
-    # Log para depuración
     ruta = os.path.join(UPLOAD_FOLDER, filename)
-    print(f"[IMAGEN] Buscando: {filename}")
-    print(f"[IMAGEN] Ruta completa: {ruta}")
     if not os.path.isfile(ruta):
-        print(f"[IMAGEN] No existe: {ruta}")
-        # Opcional: devuelve una imagen por defecto si no existe
-        # return send_from_directory(UPLOAD_FOLDER, "no-image.png")
         return jsonify({"error": "Imagen no encontrada", "filename": filename}), 404
     return send_from_directory(UPLOAD_FOLDER, filename)
 

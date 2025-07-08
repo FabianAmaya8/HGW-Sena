@@ -25,7 +25,7 @@ const Usuarios = ({edit, padre})=>{
                 maxLength: 9, minLength: 1, value: []
             }},
             { id: "numero_telefono", typeOf: "number", type: "input", label: "ingrese el numero de telefono", dependency: "", requirements: {
-                maxLength: 9, minLength: 1, value: ["@", ".com"]
+                maxLength: 9, minLength: 1, value: []
             }},
             { id: "url_foto_perfil", type: "img", label: "", dependency: "", childs: ["anoche", "ayer", "hoy"], requirements: {minLength: 5}},
             { id: "patrocinador", typeOf: "string", type: "input", label: "ingrese el patrocinador", dependency: "", requirements: {
