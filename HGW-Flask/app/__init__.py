@@ -10,7 +10,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     db.init_app(app)
-    CORS(app, resources={r"/*": {"origins": ["http://localhost:5174", "http://127.0.0.1:5174"]}})
+    CORS(app)
     connection = pymysql.connect(
         host=app.config['MYSQL_HOST'],
         user=app.config['MYSQL_USER'],

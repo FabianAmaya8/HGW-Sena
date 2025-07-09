@@ -28,6 +28,7 @@ def serializar_con_fk_lookup(objetos):
         data = {}
         for col in o.__table__.columns:
             valor = getattr(o, col.name)
+            
             if col.name in fk_tablas and valor is not None:
                 try:
                     clase_fk = getattr(tablas.classes, fk_tablas[col.name])
@@ -40,6 +41,7 @@ def serializar_con_fk_lookup(objetos):
                         continue
                 except Exception:
                     pass
+            
             data[col.name] = valor
         lista.append(data)
     return lista
@@ -49,7 +51,6 @@ UPLOAD_FOLDER = os.path.join(current_app.root_path, 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @bp_tablas.route("/images/<path:filename>", methods=["GET", "OPTIONS"])
-@cross_origin(origins="http://localhost:5173")
 def images(filename):
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -59,7 +60,6 @@ def images(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 @bp_tablas.route("/registro", methods=["POST","OPTIONS"])
-@cross_origin(origins="http://localhost:5173")
 def registros():
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -77,7 +77,6 @@ def registros():
     return jsonify({"respuesta": "se registro correctamente"})
 
 @bp_tablas.route("/consultas", methods=["POST","OPTIONS"])
-@cross_origin(origins="http://localhost:5173")
 def consultas():
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -100,7 +99,6 @@ def consultas():
     return jsonify(respuestas)
 
 @bp_tablas.route("/consultaTabla", methods=["POST","OPTIONS"])
-@cross_origin(origins="http://localhost:5173")
 def consultaTabla():
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -108,15 +106,15 @@ def consultaTabla():
     tabla = tablas.classes[req["table"]]
     objetos = db.session.query(tabla).all()
     filas = serializar_con_fk_lookup(objetos)
-    mapper = inspect(tabla)
-    fk_map = {col.name: rel.key for rel in mapper.relationships for col in rel.local_columns}
-    columnas = [{"name": col.name.replace("_", " ").title(),
-                 "field": fk_map.get(col.name, col.name)}
-                for col in tabla.__table__.columns]
+    # Solo usar el nombre real de la columna para 'field'
+    columnas = [{
+        "name": col.name.replace("_", " ").title(),
+        "field": col.name
+    } for col in tabla.__table__.columns]
+    print({"filas": filas, "columnas": columnas})
     return jsonify({"filas": filas, "columnas": columnas})
 
 @bp_tablas.route("/eliminar", methods=["POST","OPTIONS"])
-@cross_origin(origins="http://localhost:5173")
 def eliminar():
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -128,7 +126,6 @@ def eliminar():
     return jsonify({"respuesta": "se ha eliminado el registro"})
 
 @bp_tablas.route("/consultaFilas", methods=["POST","OPTIONS"])
-@cross_origin(origins="http://localhost:5173")
 def consultaFilas():
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -141,7 +138,6 @@ def consultaFilas():
     return jsonify(fila)
 
 @bp_tablas.route("/editar", methods=["POST","OPTIONS"])
-@cross_origin(origins="http://localhost:5173")
 def editar():
     if request.method == "OPTIONS":
         return Response(status=200)

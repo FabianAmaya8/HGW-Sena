@@ -20,6 +20,7 @@ const BACKEND = "http://127.0.0.1:3000"
 
 const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
   const [confirmacion, setConfirmacion] = useState({estado: false, table: "", filaDatos: "", columnas: ""});
+  console.log(datos)
   const columnas = useMemo(
     () => [...datos.columnas.map(c => c.field), 'Editar/Eliminar'],
     [datos.columnas]
@@ -55,7 +56,8 @@ const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
   datos.filas.map((filaDatos, rowIndex) => {
     return (
       <TableRow key={'fila_' + rowIndex}>
-        {columnas.map(col => (
+        {columnas.map(col => {
+        return(
           <TableCell key={rowIndex + '_' + col}>
             {col === 'Editar/Eliminar' ? (
               <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -91,7 +93,7 @@ const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
               </Box>
             )}
           </TableCell>
-        ))}
+        )})}
       </TableRow>
     )
   }), [datos.filas, columnas, edit, eliminar, padre, table, imagenes]);
