@@ -3,6 +3,8 @@ import { urlDB } from "../../urlDB";
 
 export function useCarrito() {
     const [carrito, setCarrito] = useState([]);
+    const [direccion, setDireccion] = useState([]);
+    const [mediosPago, setMediosPago] = useState([]);
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState(null);
 
@@ -120,16 +122,49 @@ export function useCarrito() {
         }
     }
 
+    async function obtenerDirecciones() {
+        if (!id_usuario) return;
+
+        try {
+            const url = await urlDB(`api/direcciones?id=${id_usuario}`);
+            const res = await fetch(url);
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setDireccion(data.direcciones);
+            } else {
+                console.error("Error al obtener direcciones:", data.error || data.mensaje);
+            }
+        } catch (err) {
+            console.error("Error al obtener direcciones:", err);
+        }
+    }
+
+    async function obtenerMediosPago() {
+        try {
+            const url = await urlDB("api/medios-pago");
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("Error al cargar métodos de pago");
+            const data = await res.json();
+            setMediosPago(data);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     function clearCart() {
         setCarrito([]);
     }
 
     return {
         carrito,
+        direccion,
+        mediosPago,
         cargando,
         error,
         agregarProductoAlCarrito,
         obtenerCarritoDesdeAPI,
+        obtenerDirecciones,
+        obtenerMediosPago,
         aumentarCantidad,
         disminuirCantidad,
         quitarDelCarrito,

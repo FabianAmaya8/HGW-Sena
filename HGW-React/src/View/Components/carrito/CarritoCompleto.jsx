@@ -1,16 +1,9 @@
 import { Link } from "react-router-dom";
 import "../../../assets/css/CarritoCompleto.css";
 import { useImageUrl } from "../../../User/Hooks/useImgUrl";
+import Resumen from "./Resumen";
 
 export default function Carrito({ carrito, aumentarCantidad, disminuirCantidad, quitarDelCarrito, onNext }) {
-    const totalCantidad = carrito.reduce((sum, p) => sum + p.cantidad, 0);
-    const totalParcial = carrito.reduce((sum, p) => sum + p.precio * p.cantidad, 0);
-    const costoEnvio = 0;
-    const impuestos = 0;
-    const totalFinal = totalParcial + costoEnvio + impuestos;
-
-    console.log(carrito);
-
     return (
         <div className="contenedor-general">
             <h2 className="titulo-principal">Resumen de Compra</h2>
@@ -33,6 +26,7 @@ export default function Carrito({ carrito, aumentarCantidad, disminuirCantidad, 
                             <tbody>
                                 {carrito.map(prod => (
                                     <CardProductoCarrito
+                                        key={prod.id_producto}
                                         prod={prod}
                                         quitarDelCarrito={quitarDelCarrito}
                                         aumentarCantidad={aumentarCantidad}
@@ -44,18 +38,15 @@ export default function Carrito({ carrito, aumentarCantidad, disminuirCantidad, 
                     )}
                 </div>
 
-                <div className="area-resumen">
-                    <h3 className="titulo-resumen">Detalle del Pedido</h3>
-                    <p>Productos: {totalCantidad}</p>
-                    <p>Subtotal: ${totalParcial.toFixed(2)}</p>
-                    <p>Envío: ${costoEnvio.toFixed(2)}</p>
-                    <p>Impuestos: ${impuestos.toFixed(2)}</p>
-                    <hr />
-                    <p className="total-compra">Total: ${totalFinal.toFixed(2)}</p>
-                    <button className="boton-comprar" onClick={onNext}>
-                        Continuar con Envío
-                    </button>
-                </div>
+                <Resumen
+                    carrito={carrito}
+                    taxRate={0} // Ajusta según sea necesario
+                    loading={false} // Cambia según tu lógica de carga
+                    medioPago={null} // Ajusta según tu lógica de pago
+                    dirSel={null} // Ajusta según tu lógica de dirección
+                    step="cart"
+                    onNext={onNext}
+                />
             </div>
         </div>
     );

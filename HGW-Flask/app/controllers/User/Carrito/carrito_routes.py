@@ -168,123 +168,29 @@ def actualizar_cantidad_carrito():
         current_app.logger.error(f"Error al actualizar cantidad: {str(e)}")
         return jsonify({"error": "Error interno al actualizar cantidad"}), 500
 
-@carrito_bp.route("/api/direcciones/<int:id_usuario>", methods=["GET"])
-def obtener_direcciones(id_usuario):
+@carrito_bp.route("/api/direcciones", methods=["GET"])
+def obtener_direcciones():
+    id_usuario = request.args.get("id", type=int)
     connection = get_db()
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT id_direccion, direccion, codigo_postal, id_ubicacion, lugar_entrega
-                FROM direcciones
-                WHERE id_usuario = %s
+                SELECT 
+                    d.id_usuario,d.id_direccion, d.direccion, d.codigo_postal, d.lugar_entrega,
+                    ciudad.id_ubicacion AS ciudad_id, pais.id_ubicacion AS pais_id,
+                    ciudad.nombre AS ciudad, pais.nombre AS pais
+                FROM direcciones d
+                LEFT JOIN ubicaciones ciudad ON d.id_ubicacion = ciudad.id_ubicacion
+                LEFT JOIN ubicaciones pais ON ciudad.ubicacion_padre = pais.id_ubicacion
+                WHERE d.id_usuario = %s
             """, (id_usuario,))
+            direcciones = cursor.fetchall()
 
-            columns = [desc[0] for desc in cursor.description]
-            direcciones = [dict(zip(columns, row)) for row in cursor.fetchall()]
-
-        return jsonify(direcciones), 200
+        return jsonify({"success": True, "direcciones": direcciones}), 200
     except Exception as e:
         current_app.logger.error(f"Error al obtener direcciones: {str(e)}")
-        return jsonify({"error": "Error al obtener direcciones"}), 500
+        return jsonify({"success": False, "error": "Error al obtener direcciones"}), 500
 
-@carrito_bp.route("/api/direcciones", methods=["POST"])
-def guardar_direccion():
-    connection = get_db()
-
-    try:
-        datos = request.get_json()
-        if not datos:
-            return jsonify({"error": "No se recibieron datos JSON"}), 400
-
-        campos_requeridos = ["id_usuario", "direccion", "codigo_postal", "id_ubicacion", "lugar_entrega"]
-        for campo in campos_requeridos:
-            valor = datos.get(campo)
-            if valor is None:
-                return jsonify({"error": f"Campo '{campo}' es requerido"}), 400
-            if isinstance(valor, str) and valor.strip() == "":
-                return jsonify({"error": f"Campo '{campo}' no puede estar vacío"}), 400
-
-        try:
-            id_ubicacion = int(datos["id_ubicacion"])
-        except (ValueError, TypeError):
-            return jsonify({"error": "id_ubicacion debe ser un número válido"}), 400
-
-        try:
-            id_usuario = int(datos["id_usuario"])
-        except (ValueError, TypeError):
-            return jsonify({"error": "id_usuario debe ser un número válido"}), 400
-
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT id_usuario FROM usuarios WHERE id_usuario = %s", (id_usuario,))
-            if not cursor.fetchone():
-                return jsonify({"error": "El usuario no existe"}), 400
-
-            cursor.execute("SELECT id_ubicacion FROM ubicaciones WHERE id_ubicacion = %s", (id_ubicacion,))
-            if not cursor.fetchone():
-                return jsonify({"error": "La ubicación no existe"}), 400
-
-        lugares_validos = ['Casa', 'Apartamento', 'Hotel', 'Oficina', 'Otro']
-        if datos["lugar_entrega"] not in lugares_validos:
-            return jsonify({"error": f"lugar_entrega debe ser uno de: {', '.join(lugares_validos)}"}), 400
-
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO direcciones (id_usuario, direccion, codigo_postal, id_ubicacion, lugar_entrega)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (
-                id_usuario,
-                datos["direccion"].strip(),
-                datos["codigo_postal"].strip(),
-                id_ubicacion,
-                datos["lugar_entrega"]
-            ))
-            connection.commit()
-
-            cursor.execute("SELECT LAST_INSERT_ID() AS id_direccion")
-            nueva_id = cursor.fetchone()["id_direccion"]
-
-            cursor.execute("""
-                SELECT id_direccion, direccion, codigo_postal, id_ubicacion, lugar_entrega
-                FROM direcciones
-                WHERE id_direccion = %s
-            """, (nueva_id,))
-
-            columns = [desc[0] for desc in cursor.description]
-            row = cursor.fetchone()
-            if not row:
-                return jsonify({"error": "Error al recuperar la dirección creada"}), 500
-
-            nueva_direccion = dict(zip(columns, row))
-
-        return jsonify(nueva_direccion), 201
-
-    except Exception as e:
-        current_app.logger.error(f"Error al guardar dirección: {str(e)}")
-        current_app.logger.error(f"Traceback: {traceback.format_exc()}")
-        return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
-
-@carrito_bp.route("/api/direcciones/<int:id_direccion>", methods=["DELETE"])
-def eliminar_direccion(id_direccion):
-    connection = get_db()
-
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT id_direccion FROM direcciones WHERE id_direccion = %s", (id_direccion,))
-            if not cursor.fetchone():
-                return jsonify({"error": "La dirección no existe"}), 404
-
-            cursor.execute("DELETE FROM direcciones WHERE id_direccion = %s", (id_direccion,))
-            connection.commit()
-
-            if cursor.rowcount == 0:
-                return jsonify({"error": "No se pudo eliminar la dirección"}), 400
-
-        return jsonify({"mensaje": "Dirección eliminada exitosamente"}), 200
-
-    except Exception as e:
-        current_app.logger.error(f"Error al eliminar dirección: {str(e)}")
-        return jsonify({"error": "Error interno del servidor"}), 500
-    
 @carrito_bp.route("/api/ordenes", methods=["POST"])
 def crear_orden():
     connection = get_db()

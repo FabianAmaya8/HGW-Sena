@@ -170,6 +170,29 @@ CREATE TABLE transacciones (
     FOREIGN KEY (nombre_usuario_receptor) REFERENCES usuarios(nombre_usuario) ON DELETE CASCADE
 );
 
+-- Tabla principal de órdenes
+CREATE TABLE ordenes (
+    id_orden INT PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    id_direccion INT NOT NULL,
+    id_medio_pago INT NOT NULL,
+    total DOUBLE NOT NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_direccion) REFERENCES direcciones(id_direccion) ON DELETE CASCADE,
+    FOREIGN KEY (id_medio_pago) REFERENCES medios_pago(id_medio)
+);
+
+-- Tabla intermedia productos por orden
+CREATE TABLE ordenes_productos (
+    id_orden_producto INT PRIMARY KEY AUTO_INCREMENT,
+    id_orden INT NOT NULL,
+    id_producto INT NOT NULL,
+    cantidad INT NOT NULL,
+    precio_unitario DOUBLE NOT NULL,
+    FOREIGN KEY (id_orden) REFERENCES ordenes(id_orden) ON DELETE CASCADE,
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto) ON DELETE CASCADE
+);
 
 -- ------------------------------------------------
 -- Inserción inicial de datos  ---

@@ -178,6 +178,10 @@
     background-color: #163a2e;
 }
 @media (max-width: 768px) {
+    .area-productos{
+        overflow: hidden;
+        overflow-x: auto;
+    }
     .seccion-carrito {
         flex-direction: column;
     }

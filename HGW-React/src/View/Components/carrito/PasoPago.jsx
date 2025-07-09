@@ -1,47 +1,57 @@
-// src/components/PasoPago.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { urlDB } from "../../../urlDB";
 import "../../../assets/css/PasoPago.css";
+import Resumen from "./Resumen";
+import { useCarrito } from "../../hooks/useCarrito";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 export default function PasoPago({ carrito, clearCart, onBack }) {
-    const [medios, setMedios]   = useState([]);
-    const [medioPago, setMedio] = useState("");
-    const [error, setError]     = useState("");
+    const { direccion, obtenerDirecciones } = useCarrito();
+    const [medios, setMedios] = useState([]);
+    const [medioPago, setMedioPago] = useState("");
+    const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-    const dirSel = JSON.parse(localStorage.getItem("direccionSeleccionada"));
-    const totalCantidad = carrito.reduce((s, p) => s + p.cantidad, 0);
-    const subtotal      = carrito.reduce((s, p) => s + p.precio * p.cantidad, 0);
-    const envio         = 5000;
-    const impuestos     = Math.round(subtotal * 0.19);
-    const totalFinal    = subtotal + envio + impuestos;
+    const dirSel = direccion[0] || null;
+    const subtotal = carrito.reduce((sum, p) => sum + p.precio * p.cantidad, 0);
+    const envio = 5000;
+    const impuestos = Math.round(subtotal * 0.19);
+    const totalFinal = subtotal + envio + impuestos;
 
     useEffect(() => {
         async function fetchMedios() {
             try {
-                const endpoint = await urlDB('api/medios-pago');
-                const res = await fetch(endpoint);
-                const data = await res.json();
-                setMedios(data);
-            } catch (err) {
-                console.error("Error al cargar métodos de pago:", err);
+                const endpointMedios = await urlDB("api/medios-pago");
+                const res = await fetch(endpointMedios);
+                if (!res.ok) throw new Error();
+                setMedios(await res.json());
+            } catch {
+                setError("No se pudieron cargar los métodos de pago");
             }
         }
         fetchMedios();
+        obtenerDirecciones();
     }, []);
 
     const confirmarPago = async () => {
-        // Validaciones mejoradas
-        if (!dirSel || !dirSel.id_direccion || dirSel.id_direccion <= 0) {
-            return setError("pago procesado con exito");
+        if (!dirSel?.id_direccion) {
+            setError("Debes seleccionar una dirección de envío");
+            return;
         }
-
+        const { id_usuario, id_direccion } = dirSel;
+        if (!id_usuario) {
+            setError("Usuario inválido");
+            return;
+        }
         if (!medioPago) {
-            return setError("Debes seleccionar un método de pago");
+            setError("Debes seleccionar un método de pago");
+            return;
         }
-
-        if (carrito.length === 0) {
-            return setError("Tu carrito está vacío");
+        if (!carrito.length) {
+            setError("Tu carrito está vacío");
+            return;
         }
 
         setError("");
@@ -49,116 +59,112 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
 
         try {
             const payload = {
-                id_usuario: Number(dirSel.id_usuario),
-                id_direccion: Number(dirSel.id_direccion),
-                id_medio_pago: parseInt(medioPago, 10),
+                id_usuario: Number(id_usuario),
+                id_direccion: Number(id_direccion),
+                id_medio_pago: Number(medioPago),
                 total: totalFinal,
-                items: 
-                    carrito.map((p, index) => (
-                        <div
-                            key={p.id ? `producto-${p.id}` : `producto-temp-${index}`}
-                            className="producto-item"
-                        >
-                            <span>{p.nombre}</span>
-                            <span>{p.cantidad}×</span>
-                            <span>${(p.precio * p.cantidad).toFixed(2)}</span>
-                        </div>
-                    ))
-                }
+                items: carrito.map(({ id_producto, cantidad, precio }) => ({
+                    id_producto,
+                    cantidad,
+                    precio_unitario: precio
+                }))
+            };
 
-            // Debug: Mostrar payload en consola
-            console.log("Payload enviado:", payload);
-
-            const res = await fetch(`${base}/api/ordenes`, {
+            const endpointOrdenes = await urlDB("api/ordenes");
+            const res = await fetch(endpointOrdenes, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 
             if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || "Error al procesar la orden");
+                const { error: msg } = await res.json();
+                throw new Error(msg || "Error al procesar la orden");
             }
 
-            const data = await res.json();
             clearCart();
-            onSuccess(data.id_orden);
-
+            Swal.fire({
+                title: "Pago realizado",
+                text: "Tu orden ha sido procesada exitosamente.",
+                icon: "success",
+                confirmButtonText: "Aceptar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigate("/");
+                }
+            });
         } catch (e) {
-            console.error("Error en confirmarPago:", e);
-            setError(e.message || "PAGO PROCESADO CON ÉXITO");
+            setError(e.message);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="contenedor-pago">
-            <h2 className="titulo-principal">Confirmar Pago</h2>
+        <div className="container my-4">
+            <h2 className="mb-4">Confirmar Pago</h2>
             {error && <div className="alert alert-danger">{error}</div>}
-            <div className="seccion-carrito">
-                <div className="area-productos">
-                    <h3>Métodos de Pago</h3>
-                    <div className="metodos-pago">
-                        {medios.map(m => (
-                            <label key={`medio-${m.id_medio}`} className="opcion-medio">
-                                <input
-                                    type="radio"
-                                    name="metodoPago"
-                                    value={m.id_medio}
-                                    checked={medioPago === String(m.id_medio)}
-                                    onChange={e => setMedioPago(e.target.value)}
-                                    disabled={loading}
-                                />
-                                {m.nombre_medio}
-                            </label>
-                        ))}
-                    </div>
-
-                    {/* Tarjeta de dirección con id_direccion correcto */}
-                    <h3 className="mt-3">Dirección de Envío</h3>
-                    {dirSel ? (
-                        <div className="card-direccion">
-                            <p><strong>Entrega en:</strong> {dirSel.lugar_entrega}</p>
-                            <p><strong>Dirección:</strong> {dirSel.direccion}</p>
-                            <p><strong>C.P.:</strong> {dirSel.codigo_postal}</p>
+            <div className="row">
+                <div className="col-md-6">
+                    <div className="card mb-4">
+                        <div className="card-header bg-primary text-white">Métodos de Pago</div>
+                        <div className="card-body">
+                            {medios.map((m) => (
+                                <div key={m.id_medio} className="form-check mb-2">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="metodoPago"
+                                        value={m.id_medio}
+                                        checked={medioPago === String(m.id_medio)}
+                                        onChange={(e) => setMedioPago(e.target.value)}
+                                        disabled={loading}
+                                    />
+                                    <label className="form-check-label">{m.nombre_medio}</label>
+                                </div>
+                            ))}
                         </div>
-                    ) : (
-                        <p>No hay dirección seleccionada.</p>
-                    )}
-                    
-
-                    {/* Lista de productos */}
-                    <h3 className="mt-3">Productos</h3>
-                    <div className="lista-productos">
-                        {carrito.map(p => (
-                            <div key={`producto-${p.id}`} className="producto-item">
-                                <span>{p.nombre}</span>
-                                <span>{p.cantidad}×</span>
-                                <span>${(p.precio * p.cantidad).toFixed(2)}</span>
-                            </div>
-                        ))}
+                    </div>
+                    <div className="card mb-4">
+                        <div className="card-header bg-secondary text-white">Dirección de Envío</div>
+                        <div className="card-body">
+                            {dirSel ? (
+                                <>
+                                    <p><strong>Dirección:</strong> {dirSel.direccion}</p>
+                                    <p><strong>Código Postal:</strong> {dirSel.codigo_postal}</p>
+                                    <p><strong>Ciudad:</strong> {dirSel.ciudad}</p>
+                                    <p><strong>País:</strong> {dirSel.pais}</p>
+                                    <p><strong>Lugar de Entrega:</strong> {dirSel.lugar_entrega}</p>
+                                </>
+                            ) : (
+                                <p>No hay dirección seleccionada.</p>
+                            )}
+                        </div>
+                    </div>
+                    <div className="card mb-4">
+                        <div className="card-header bg-dark text-white">Productos</div>
+                        <div className="card-body">
+                            {carrito.map((p) => (
+                                <div key={p.id_producto} className="d-flex justify-content-between border-bottom py-1">
+                                    <span>{p.nombre}</span>
+                                    <span>{p.cantidad}×</span>
+                                    <span>${(p.precio * p.cantidad).toFixed(2)}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
-                <div className="area-resumen">
-                    <h3 className="titulo-resumen">Detalle del Pedido</h3>
-                    <p>Productos: {totalCantidad}</p>
-                    <p>Subtotal: ${subtotal.toFixed(2)}</p>
-                    <p>Envío: ${envio.toFixed(2)}</p>
-                    <p>Impuestos: ${impuestos.toFixed(2)}</p>
-                    <hr />
-                    <p className="total-compra">Total: ${totalFinal.toFixed(2)}</p>
-                    <button
-                        className="boton-comprar"
-                        onClick={confirmarPago}
-                        disabled={loading || !medioPago || !dirSel}
-                    >
-                        {loading ? "Procesando..." : "Pagar"}
-                    </button>
-                    <button className="btn btn-outline-secondary mt-2" onClick={onBack} disabled={loading}>
-                        ← Atrás
-                    </button>
-                </div>
+                <Resumen
+                    carrito={carrito}
+                    taxRate={0.19}
+                    loading={loading}
+                    medioPago={medioPago}
+                    dirSel={dirSel}
+                    step="payment"
+                    onNext={confirmarPago}
+                    onBack={onBack}
+                    onConfirm={confirmarPago}
+                />
             </div>
         </div>
     );

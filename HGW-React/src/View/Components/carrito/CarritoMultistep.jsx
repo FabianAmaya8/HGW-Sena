@@ -9,9 +9,11 @@ export default function CarritoMultistep() {
     const [currentStep, setCurrentStep] = useState(1);
     const {
         carrito,
+        direccion,
         cargando,
         error,
         obtenerCarritoDesdeAPI,
+        obtenerDirecciones,
         agregarProductoAlCarrito,
         aumentarCantidad,
         disminuirCantidad,
@@ -21,6 +23,7 @@ export default function CarritoMultistep() {
 
     useEffect(() => {
         obtenerCarritoDesdeAPI();
+        obtenerDirecciones();
     }, []);
 
     const nextStep = () => setCurrentStep(prev => prev + 1);
@@ -59,6 +62,7 @@ export default function CarritoMultistep() {
             {currentStep === 2 && (
                 <PasoEnvio
                     carrito={carrito}
+                    direcciones={direccion}
                     onNext={nextStep}
                     onBack={prevStep}
                 />
