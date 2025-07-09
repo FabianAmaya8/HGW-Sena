@@ -32,16 +32,6 @@
     max-width: 50%;
 }
 
-.live-badge {
-    background-color: #ff4c4c;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-weight: bold;
-    display: inline-block;
-    margin-bottom: 10px;
-}
-
 .video-content h1 {
     margin: 0 0 10px 0;
 }
@@ -64,7 +54,7 @@
 
 .btn-watch {
     padding: 10px 20px;
-    background-color: #6a5acd;
+    background-color: #204c3c;
     border: none;
     border-radius: 10px;
     color: white;
@@ -106,47 +96,17 @@
     margin-bottom: 10px;
 }
 
-.change {
-    display: block;
-    margin-top: 10px;
-}
-
-.positive {
-    color: #4caf50;
-}
-
-.negative {
-    color: #f44336;
-}
-
-.closed {
-    color: red;
-    font-weight: bold;
-}
 
 .app-container .btn {
     margin-top: 10px;
     padding: 10px 20px;
-    background-color: #26a69a;
+    background-color: #204c3c;
     border: none;
     border-radius: 10px;
     color: white;
     cursor: pointer;
 }
 
-.config {
-    margin-top: 40px;
-    text-align: center;
-}
-
-.btn-add {
-    padding: 10px 20px;
-    background-color: #4caf50;
-    border: none;
-    border-radius: 10px;
-    color: white;
-    cursor: pointer;
-}
 @media (max-width: 768px) {
     .video-section {
         flex-direction: column;
@@ -234,5 +194,32 @@
         font-size: 14px;
         min-width: 20px;
         text-align: center;
+    }
+}
+@media (max-width: 768px) {
+    .video-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .video-content {
+        text-align: center;
+    }
+
+    .dashboard {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .targeta-educacion {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .btn,
+    .btn-add,
+    .btn-watch {
+        width: 100%;
+        font-size: 0.95rem;
     }
 }

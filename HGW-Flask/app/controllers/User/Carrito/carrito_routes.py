@@ -285,37 +285,70 @@ def eliminar_direccion(id_direccion):
         current_app.logger.error(f"Error al eliminar dirección: {str(e)}")
         return jsonify({"error": "Error interno del servidor"}), 500
     
-# @carrito_bp.route("/api/ordenes", methods=["POST"])
-# def crear_orden():
-#     data = request.get_json() or {}
-#     esperado = ["id_usuario","id_direccion","id_medio_pago","total","items"]
-#     faltantes = [k for k in esperado if not data.get(k)]
-#     if faltantes:
-#         return jsonify({
-#           "error": "Datos incompletos",
-#           "faltan": faltantes,
-#           "recibido": data
-#         }), 400
+@carrito_bp.route("/api/ordenes", methods=["POST"])
+def crear_orden():
+    connection = get_db()
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({"error": "No se recibieron datos"}), 400
 
-#     try:
-#         with conn.cursor() as cur:
-#             cur.execute(
-#               "INSERT INTO ordenes (id_usuario,id_direccion,id_medio_pago,total) VALUES (%s,%s,%s,%s)",
-#               (id_usuario,id_direccion,id_medio,total)
-#             )
-#             conn.commit()
-#             cur.execute("SELECT LAST_INSERT_ID() AS id_orden")
-#             id_orden = cur.fetchone()["id_orden"]
+    # Validar campos obligatorios
+    required_fields = ["id_usuario", "id_direccion", "id_medio_pago", "total", "items"]
+    missing_fields = [field for field in required_fields if field not in data]
+    
+    if missing_fields:
+        return jsonify({
+            "error": "Datos incompletos",
+            "faltan": missing_fields,
+            "recibido": data
+        }), 400
 
-#             sql = "INSERT INTO ordenes_productos (id_orden,id_producto,cantidad,precio_unitario) VALUES (%s,%s,%s,%s)"
-#             for it in items:
-#                 cur.execute(sql,(id_orden,it["id_producto"],it["cantidad"],it["precio_unitario"]))
-#             conn.commit()
+    try:
+        # Extraer datos del payload
+        id_usuario = int(data["id_usuario"])
+        id_direccion = int(data["id_direccion"])
+        id_medio_pago = int(data["id_medio_pago"])
+        total = float(data["total"])
+        items = data["items"]
 
-#         return jsonify({"id_orden":id_orden}),201
-#     except Exception as e:
-#         current_app.logger.error(str(e))
-#         return jsonify({"error":"Error interno"}),500
+        # Validar items
+        if not isinstance(items, list) or len(items) == 0:
+            return jsonify({"error": "Items debe ser una lista no vacía"}), 400
+
+        with connection.cursor() as cursor:
+            # Insertar orden principal
+            cursor.execute(
+                "INSERT INTO ordenes (id_usuario, id_direccion, id_medio_pago, total) VALUES (%s, %s, %s, %s)",
+                (id_usuario, id_direccion, id_medio_pago, total)
+            )
+            connection.commit()
+            
+            # Obtener ID de la orden creada
+            cursor.execute("SELECT LAST_INSERT_ID() AS id_orden")
+            id_orden = cursor.fetchone()["id_orden"]
+
+            # Insertar productos de la orden
+            sql = """
+                INSERT INTO ordenes_productos 
+                (id_orden, id_producto, cantidad, precio_unitario) 
+                VALUES (%s, %s, %s, %s)
+            """
+            for item in items:
+                cursor.execute(sql, (
+                    id_orden, 
+                    int(item["id_producto"]), 
+                    int(item["cantidad"]), 
+                    float(item["precio_unitario"])
+                ))
+            
+            connection.commit()
+
+        return jsonify({"id_orden": id_orden}), 201
+        
+    except Exception as e:
+        current_app.logger.error(f"Error al crear orden: {str(e)}")
+        return jsonify({"error": "Error interno al procesar la orden"}), 500
     
 @carrito_bp.route("/api/medios-pago", methods=["GET"])
 def listar_medios_pago():
