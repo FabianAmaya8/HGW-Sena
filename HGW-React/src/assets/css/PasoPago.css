@@ -1,3 +1,235 @@
+/* src/assets/css/PasoPago.css */
+.contenedor-pago {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+.titulo-principal {
+    text-align: center;
+    color: #204c3c;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    font-weight: 600;
+    position: relative;
+}
+
+.titulo-principal::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #204c3c, #27ae60);
+    border-radius: 2px;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.seccion-carrito {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.area-productos {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(32, 76, 60, 0.1);
+    border: 1px solid #e8f5e8;
+}
+
+.area-productos h3 {
+    color: #204c3c;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e8f5e8;
+}
+
+.metodos-pago {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.opcion-medio {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 2px solid #e8f5e8;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.opcion-medio:hover {
+    border-color: #204c3c;
+    background-color: #f8fdf9;
+}
+
+.opcion-medio input[type="radio"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    accent-color: #204c3c;
+}
+
+.opcion-medio input[type="radio"]:checked+span,
+.opcion-medio:has(input[type="radio"]:checked) {
+    color: #204c3c;
+    font-weight: 600;
+}
+
+.card-direccion {
+    background: #f8fdf9;
+    border: 1px solid #d4edda;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.card-direccion p {
+    margin-bottom: 8px;
+    color: #204c3c;
+}
+
+.card-direccion strong {
+    color: #1a3d2e;
+}
+
+.lista-productos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.producto-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 15px;
+    align-items: center;
+    padding: 15px;
+    background: #fafafa;
+    border-radius: 8px;
+    border-left: 4px solid #204c3c;
+}
+
+.producto-item span:last-child {
+    font-weight: 600;
+    color: #204c3c;
+}
+
+
+.total-compra {
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-top: 2px solid rgba(255, 255, 255, 0.3);
+    padding-top: 15px !important;
+    margin-top: 15px;
+}
+
+.boton-comprar {
+    width: 100%;
+    padding: 15px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.boton-comprar:hover:not(:disabled) {
+    background: #27ae60;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+.boton-comprar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    color: white;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.mt-2 {
+    margin-top: 10px;
+}
+
+.mt-3 {
+    margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .contenedor-pago {
+        padding: 15px;
+    }
+
+    .seccion-carrito {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .area-resumen {
+        order: -1;
+    }
+
+    .titulo-principal {
+        font-size: 1.5rem;
+    }
+
+    .producto-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        text-align: center;
+    }
+}
 .paso-pago {
     padding: 2rem;
 }

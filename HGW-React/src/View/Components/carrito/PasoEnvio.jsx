@@ -11,7 +11,7 @@ export default function PasoEnvio({ carrito, onNext, onBack }) {
     const [usuario, setUsuario]       = useState(null);
     const [direccion, setDireccion]   = useState("");
     const [codigoPostal, setCP]       = useState("");
-    const [idUbicacion, setIdUbic]    = useState("");
+    const [idUbic   , setIdUbic]    = useState("");
     const [lugarEntrega, setLugar]    = useState("Casa");
     const [error, setError]           = useState("");
 

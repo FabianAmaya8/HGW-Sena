@@ -1,151 +1,142 @@
-/* === Lista de direcciones === */
-.lista-direcciones {
-    display: grid;
-    gap: 1rem;
+/* src/assets/css/PasoEnvio.css */
+.contenedor-general {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    color: #333;
+}
+
+.titulo-principal {
+    color: #204c3c;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.seccion-carrito {
+    display: flex;
+    gap: 2rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.area-productos {
+    flex: 2;
+    border-right: 1px solid #eee;
+    padding-right: 2rem;
+}
+
+.area-resumen {
+    flex: 1;
+    padding: 1rem;
+}
+
+.form-group {
     margin-bottom: 1.5rem;
 }
 
-.card-direccion {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 1rem;
-    background-color: #fafafa;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.card-direccion p {
-    margin: 0.3rem 0;
-}
-
-.card-direccion .btn {
-    margin-top: 0.5rem;
-    background-color: #204c3c;
-    color: white;
-    border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.card-direccion .btn:hover {
-    background-color: #163a2e;
-}
-
-/* === Modal Nueva Dirección === */
-.modal-direccion {
-    background: #ffffff;
-    border: 1px solid #ccc;
-    padding: 1.5rem;
-    margin-top: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.modal-direccion input,
-.modal-direccion select,
-.modal-direccion textarea {
+.form-group label {
     display: block;
+    margin-bottom: 0.5rem;
+    color: #204c3c;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
     width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #204c3c;
+    box-shadow: 0 0 0 2px rgba(32, 76, 60, 0.2);
+}
+
+.titulo-resumen {
+    color: #204c3c;
     margin-bottom: 1rem;
-    padding: 0.6rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    font-size: 1.2rem;
 }
 
-/* === Botones del modal === */
-.botones-modal {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
+.total-compra {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #204c3c;
+    margin-top: 1rem;
 }
 
-.botones-modal .btn-primary {
+.boton-continuar {
+    width: 100%;
+    padding: 0.8rem;
     background-color: #204c3c;
     color: white;
     border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
+    border-radius: 5px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s;
+    margin-top: 1rem;
 }
 
-.botones-modal .btn-primary:hover {
-    background-color: #163a2e;
+.boton-continuar:hover {
+    background-color: #2d6a4f;
 }
 
-.botones-modal .btn-secondary {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
+.btn-outline-secondary {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: transparent;
+    color: #204c3c;
+    border: 1px solid #204c3c;
+    border-radius: 5px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s;
+    margin-top: 1rem;
 }
 
-.botones-modal .btn-secondary:hover {
-    background-color: #5a6268;
+.btn-outline-secondary:hover {
+    background-color: #f0f7f4;
 }
 
-.navegacion-pasos {
-    margin-top: 2rem;
+.alert {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 5px;
     text-align: center;
 }
 
-.navegacion-pasos .btn-outline-secondary {
-    background-color: transparent;
-    color: #204c3c;
-    border: 1px solid #28a745;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
 }
 
-.navegacion-pasos .btn-outline-secondary:hover {
-    background-color: #204c3c;
-    color: white;
-}
-.btn-outline-primary {
-    background-color: transparent;
-    color: #204c3c;
-    border: 2px solid #204c3c;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 1rem;
+hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 1rem 0;
 }
 
-.btn-outline-primary:hover {
-    background-color: #204c3c;
-    color: white;
-}
-button.btn.btn-outline-primary {
-    background-color: #204c3c;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 1rem;
-}
-
-button.btn.btn-outline-primary:hover {
-    background-color: #163a2e;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-    .paso-envio {
-        padding: 1rem;
-    }
-
-    .botones-modal {
+@media (max-width: 768px) {
+    .seccion-carrito {
         flex-direction: column;
-        align-items: stretch;
     }
 
-    .card-direccion {
-        padding: 0.8rem;
+    .area-productos {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 2rem;
     }
 }

@@ -5,7 +5,7 @@ import "../../../assets/css/PasoPago.css";
 
 export default function PasoPago({ carrito, clearCart, onBack }) {
     const [medios, setMedios]   = useState([]);
-    const [medioPago, setMedio] = useState("");
+    const [medioPago, setMedioPago] = useState("");
     const [error, setError]     = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -53,19 +53,14 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
                 id_direccion: Number(dirSel.id_direccion),
                 id_medio_pago: parseInt(medioPago, 10),
                 total: totalFinal,
-                items: 
-                    carrito.map((p, index) => (
-                        <div
-                            key={p.id ? `producto-${p.id}` : `producto-temp-${index}`}
-                            className="producto-item"
-                        >
-                            <span>{p.nombre}</span>
-                            <span>{p.cantidad}×</span>
-                            <span>${(p.precio * p.cantidad).toFixed(2)}</span>
-                        </div>
-                    ))
-                }
-
+                items: carrito.map((p) => ({
+                    id_producto: p.id,
+                    nombre: p.nombre,
+                    cantidad: p.cantidad,
+                    precio_unitario: p.precio,
+                    subtotal: (p.precio * p.cantidad).toFixed(2)
+                }))
+            };
             // Debug: Mostrar payload en consola
             console.log("Payload enviado:", payload);
 
@@ -131,14 +126,18 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
                     {/* Lista de productos */}
                     <h3 className="mt-3">Productos</h3>
                     <div className="lista-productos">
-                        {carrito.map(p => (
-                            <div key={`producto-${p.id}`} className="producto-item">
+                        {carrito.map((p, index) => (
+                            <div
+                                key={`producto-${p.id ?? index}`}
+                                className="producto-item"
+                            >
                                 <span>{p.nombre}</span>
                                 <span>{p.cantidad}×</span>
                                 <span>${(p.precio * p.cantidad).toFixed(2)}</span>
                             </div>
                         ))}
                     </div>
+
                 </div>
                 <div className="area-resumen">
                     <h3 className="titulo-resumen">Detalle del Pedido</h3>
