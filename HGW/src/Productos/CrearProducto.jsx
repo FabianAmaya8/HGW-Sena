@@ -9,16 +9,16 @@ const CrearProducto = ({edit, padre})=>{
     const form = useMemo(()=>[
         { title: edit && edit.estado ? "Editar Producto" : "Crear Producto", req: {table: "productos"}},
         { id: "nombre_producto", type: "input", label: "Nombre Producto", dependency: "", requirements: {
-            maxLength: 9, minLength: 1, value: []
+            maxLength: 25, minLength: 1, value: []
         }},
         { id: "precio_producto", typeOf: "number", type: "input", label: "Precio Producto", dependency: "", requirements: {
-            maxLength: 19, minLength: 1, value: []
+            maxLength: 7, minLength: 1, value: []
         }},
         { id: "stock", type: "input", label: "Stock", dependency: "", requirements: {
             maxLength: 100, minLength: 1, value: []
         }},
         { id: "descripcion", typeOf: "string", type: "input", label: "Descripción", dependency: "", requirements: {
-            maxLength: 19, minLength: 1, value: []
+            maxLength: 50, minLength: 1, value: []
         }},
         { id: "imagen_producto", type: "img", label: "", dependency: "", childs: [], requirements: {minLength: 5}},
         { id: "categoria", type: "select", label: "Eliga la Categoria", changeTable: {table: "subcategoria", columnDependency: "categoria"}, childs: {table: "categorias"}, requirements: {}},
