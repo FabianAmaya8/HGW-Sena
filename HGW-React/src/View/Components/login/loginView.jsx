@@ -14,7 +14,7 @@ return (
 
                 {/* Botones de acción */}
                 <div id='botonesAccion' className="mt-4 d-flex flex-column gap-2">
-                    <Link to="/register" className="btn btn-outline-primary btn-login">
+                    <Link to="/register" className="btn btn-outline-secondary btn-login">
                         Registrarse
                     </Link>
                     <Link to="/" className="btn btn-outline-secondary btn-login">

@@ -1,118 +1,124 @@
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { useState, useEffect, useContext } from "react";
-import { mostrarAlerta } from '../hooks/alerta-añadir';
-import { CartContext } from "../../pages/Context/CartContext";
+import { mostrarAlerta } from "../hooks/alerta-añadir";
 import { urlDB } from "../../urlDB";
+import { useImageUrls } from "../../User/Hooks/useImgUrl";
+import { useCarrito } from "../hooks/useCarrito";
+import { Infinity } from "ldrs/react";
 import "../../assets/css/ProductoDetalle.css";
 
 export default function ProductoDetalle() {
     const { id } = useParams();
-    const [producto, setProducto] = useState(null);
-    const [imagenActual, setImagenActual] = useState("");
-    const [cantidad, setCantidad] = useState(1);
-    const baseURL = "http://localhost:3000/";
+    const { agregarProductoAlCarrito, cargando } = useCarrito();
 
-    const { agregarProducto } = useContext(CartContext);
+    const [detalle, setDetalle] = useState(null);
+    const [imagenActual, setImagenActual] = useState(null);
+    const [cantidad, setCantidad] = useState(1);
 
     useEffect(() => {
-        const fetchProducto = async () => {
+        async function fetchProducto() {
             try {
-                const url = await urlDB(`api/producto/${id}`);
-                const res = await fetch(url);
+                const apiUrl = await urlDB(`api/producto/unico?id=${id}`);
+                const res    = await fetch(apiUrl);
                 if (!res.ok) throw new Error("Producto no encontrado");
-                const data = await res.json();
-                setProducto(data);
-                setImagenActual(data.imagen);
-            } catch (error) {
-                console.error("Error al cargar producto:", error);
-                setProducto(null);
+                const data   = await res.json();
+                setDetalle(data);
+            } catch (err) {
+                console.error("Error al cargar producto:", err);
+                setDetalle(null);
             }
-        };
+        }
         fetchProducto();
     }, [id]);
 
-    if (!producto) {
+    const imgs       = useMemo(() => detalle
+        ? [detalle.imagen, ...(detalle.imagenes || [])]
+        : []
+    , [detalle]);
+    const urlsImgs   = useImageUrls(imgs);
+    const mainImgUrl = urlsImgs[0];
+
+    useEffect(() => {
+        if (mainImgUrl) setImagenActual(mainImgUrl);
+    }, [mainImgUrl]);
+
+    if (cargando || !detalle) {
         return (
-            <main className="product-container">
-                <h2 className="product-title"></h2>
-            </main>
+            <div className="cargando">
+                <Infinity
+                    size="150"
+                    stroke="10"
+                    strokeLength="0.15"
+                    bgOpacity="0.3"
+                    speed="1.3"
+                    color="#47BF26"
+                />
+            </div>
         );
     }
 
-    const aumentarCantidad = () => setCantidad(c => c + 1);
-    const disminuirCantidad = () => setCantidad(c => (c > 1 ? c - 1 : 1));
+    const {
+        nombre,
+        precio,
+        descripcion = "Sin descripción disponible",
+        stock = 0,
+        categoria,
+        subcategoria,
+        etiquetas = []
+    } = detalle;
 
-    const stockDisponible = producto.stock ?? 0;
-    let estadoStock = "";
-    let claseStock = "";
-
-    if (stockDisponible > 10) {
-        estadoStock = "En stock";
-        claseStock = "stock-ok";
-    } else if (stockDisponible > 0) {
-        estadoStock = "¡Quedan pocas unidades!";
-        claseStock = "stock-low";
+    let estadoStock = "", claseStock = "";
+    if (stock > 10) {
+        estadoStock = "En stock"; claseStock = "stock-ok";
+    } else if (stock > 0) {
+        estadoStock = "¡Quedan pocas unidades!"; claseStock = "stock-low";
     } else {
-        estadoStock = "No disponible";
-        claseStock = "stock-out";
+        estadoStock = "No disponible"; claseStock = "stock-out";
     }
 
-    const handleAgregar = async () => {
-        try {
-            const rawUser = localStorage.getItem("user");
-            const usuario = rawUser ? JSON.parse(rawUser) : null;
-            const id_usuario = usuario?.id;
+    const incrementar = () => {
+        if (cantidad < stock) setCantidad(c => c + 1);
+    };
+    const decrementar = () => {
+        if (cantidad > 1) setCantidad(c => c - 1);
+    };
 
-
-            if (!id_usuario) {
-                console.warn("⚠️ Usuario no encontrado en localStorage");
-                return;
-            }
-
-            await fetch("http://localhost:3000/api/carrito/agregar", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id_usuario: id_usuario,   
-                    id_producto: producto.id_producto,
-                    cantidad: cantidad
-                })
-            });
-
-
-            agregarProducto({
-                id_producto: producto.id_producto,
-                nombre: producto.nombre,
-                precio: producto.precio
-            }, cantidad);
-
-            mostrarAlerta(producto.nombre, () => {
-                setTimeout(() => {
-                    window.location.href = "/carrito";
-                }, 100);
-            });
-
-        } catch (error) {
-            console.error("❌ Error al guardar el producto en la base:", error);
+    const onAgregar = async () => {
+        const res = await agregarProductoAlCarrito(detalle, cantidad);
+        if (res.exito) {
+            mostrarAlerta(
+                `${nombre} x${cantidad} agregado`,
+                () => setTimeout(() => window.location.href = "/carrito", 100)
+            );
+        } else {
+            console.error("Error al agregar:", res.mensaje);
         }
     };
 
-    console.log(localStorage.getItem("usuario"));
-
     return (
+        <>
+        <div className="volver">
+                <button type="button" className="btn btn-secondary" onClick={() => window.history.back()}>
+                    <i className='bx bx-left-arrow-alt'></i> Volver
+                </button>
+            </div>
+        
         <main className="product-container">
             <div className="product-card">
                 <div className="product-left">
                     <div className="main-image">
-                        <img src={`${baseURL}${imagenActual}`} alt={`Imagen de ${producto.nombre}`} />
+                        <img
+                            src={imagenActual}
+                            alt={`Imagen de ${nombre}`}
+                        />
                     </div>
                     <div className="thumbnails">
-                        {[producto.imagen, ...(Array.isArray(producto.imagenes) ? producto.imagenes : [])].map((img, i) => (
+                        {urlsImgs.map((url, idx) => (
                             <img
-                                key={i}
-                                src={`${baseURL}${img}`}
-                                alt={`Miniatura ${i + 1}`}
-                                onClick={() => setImagenActual(img)}
+                                key={idx}
+                                src={url}
+                                alt={`Miniatura ${idx + 1}`}
+                                onClick={() => setImagenActual(url)}
                             />
                         ))}
                     </div>
@@ -120,41 +126,61 @@ export default function ProductoDetalle() {
 
                 <div className="product-right">
                     <h2 className="product-title">
-                        {producto.nombre}
-                        <span className={`availability-badge ${claseStock}`}>{estadoStock}</span>
+                        {nombre}
+                        <span className={`availability-badge ${claseStock}`}>
+                            {estadoStock}
+                        </span>
                     </h2>
 
                     <div className="price-row">
-                        <span className="price">${producto.precio?.toLocaleString("es-CO")}</span>
+                        <span className="price">
+                            ${precio.toLocaleString("es-CO")}
+                        </span>
                     </div>
 
-                    <p><strong>Descripción:</strong> {producto.descripcion || "Sin descripción disponible"}</p>
+                    <p>
+                        <strong>Descripción:</strong> {descripcion}
+                    </p>
 
                     <div className="quantity-actions">
-                        <button onClick={disminuirCantidad}>−</button>
-                        <input type="text" value={cantidad} readOnly />
-                        <button onClick={aumentarCantidad}>+</button>
+                        <button
+                            onClick={decrementar}
+                            disabled={cantidad <= 1}
+                        >−</button>
+                        <input
+                            type="text"
+                            value={cantidad}
+                            readOnly
+                        />
+                        <button
+                            onClick={incrementar}
+                            disabled={cantidad >= stock}
+                        >+</button>
                     </div>
 
                     <div className="cta-buttons">
                         <button
                             className="btn add-cart"
-                            disabled={stockDisponible <= 0}
-                            onClick={handleAgregar}
+                            disabled={stock <= 0}
+                            onClick={onAgregar}
                         >
-                            Añadir al Carrito
+                            Añadir {cantidad} al Carrito
                         </button>
-                        <button className="btn buy-now" disabled={stockDisponible <= 0}>
+                        <button
+                            className="btn buy-now"
+                            disabled={stock <= 0}
+                        >
                             Comprar Ahora
                         </button>
                     </div>
 
                     <div className="extra-info">
-                        <p><strong>Categoría:</strong> {producto.categoria}</p>
-                        <p><strong>Etiquetas:</strong> {producto.etiquetas?.join(", ") || "Sin etiquetas"}</p>
+                        <p><strong>Categoría:</strong> {categoria}</p>
+                        <p><strong>Subcategoría:</strong> {subcategoria}</p>
                     </div>
                 </div>
             </div>
         </main>
+        </>
     );
 }

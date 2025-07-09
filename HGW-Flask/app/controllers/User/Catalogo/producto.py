@@ -21,6 +21,7 @@ def api_obtener_productos():
                 FROM productos p
                 JOIN categorias c ON p.categoria = c.id_categoria
                 JOIN subcategoria sc ON p.subcategoria = sc.id_subcategoria
+                WHERE p.stock > 0 AND p.activo = 1
             """)
             productos = cursor.fetchall()
             return jsonify(productos), 200

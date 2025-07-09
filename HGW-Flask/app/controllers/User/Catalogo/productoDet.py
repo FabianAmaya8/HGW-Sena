@@ -1,8 +1,9 @@
-from flask import jsonify, current_app
+from flask import jsonify, current_app, request
 from .catalogo import catalogo_bp  # usa el blueprint ya registrado
 
-@catalogo_bp.route('/api/producto/<int:id>', methods=['GET'])
-def obtener_producto(id):
+@catalogo_bp.route('/api/producto/unico', methods=['GET'])
+def obtener_producto():
+    id = request.args.get('id', type=int)
     connection = current_app.config['MYSQL_CONNECTION']
     try:
         with connection.cursor() as cursor:
@@ -20,7 +21,7 @@ def obtener_producto(id):
                 FROM productos p
                 JOIN categorias c ON p.categoria = c.id_categoria
                 JOIN subcategoria s ON p.subcategoria = s.id_subcategoria
-                WHERE p.id_producto = %s AND p.activo = TRUE
+                WHERE p.id_producto = %s AND p.activo = 1
             """, (id,))
             producto = cursor.fetchone()
 

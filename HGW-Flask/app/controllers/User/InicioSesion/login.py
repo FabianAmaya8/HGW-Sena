@@ -27,7 +27,7 @@ def login():
             cursor.execute("""
                 SELECT id_usuario AS id, pss AS password, rol AS role_id 
                 FROM usuarios 
-                WHERE correo_electronico = %s OR nombre_usuario = %s
+                WHERE correo_electronico = %s OR nombre_usuario = %s AND activo = 1
             """, (usuario, usuario))
             usuario_encontrado = cursor.fetchone()
 
