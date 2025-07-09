@@ -6,7 +6,6 @@ function Educacion() {
         <div className="video-section-card">
             <div className="video-section">
                 <div className="video-content">
-                    <span className="live-badge">En Vivo</span>
                     <h1>Sistema Multinivel y Plataforma de Aprendizaje</h1>
                     <p>Educación Multinivel y Productos Naturistas</p>
                     <div className="tags">
@@ -27,21 +26,24 @@ function Educacion() {
             {videoSection}
 
             <section className="dashboard">
-                <a href="/temperatura" className="targeta-educacion">
+                <a href="/multinivel" className="targeta-educacion">
                     <h3>Capacitación Básica</h3>
-                    
+                    <p>Aprende lo esencial para iniciar en el mundo del marketing multinivel. Conoce cómo funciona el sistema, cómo invitar personas y cómo generar ingresos desde tu red.
+
+                        Formación clara, práctica y pensada para que empieces con paso firme.</p>
+                    <button className="btn">ver mas</button>
                 </a>
 
-                <a href="/humedad" className="targeta-educacion">
+                <a href="/productos" className="targeta-educacion">
                     <h3>Productos Naturistas</h3>
-                    <p>Primero conoces la línea. Luego eliges según tu necesidad. Después descubres beneficios reales. A continuación conectas con tu bienestar. Finalmente compartes lo que amas.</p>
-                    <span className="change negative">-5% desde ayer</span>
+                    <p>Ofrecemos productos naturales que apoyan tu bienestar y salud de forma integral. Desde suplementos hasta soluciones herbales, cada producto está pensado para cuidar tu cuerpo de manera natural y efectiva.</p>
+                    <button className="btn">ver mas</button>
                 </a>
 
-                <a href="/valvula" className="targeta-educacion">
-                    <h3>Herramientas de Gestión</h3>
-                    <p className="closed">Cerrada</p>
-                    <button className="btn">Cambiar Estado</button>
+                <a href="/" className="targeta-educacion">
+                    <h3>Explicacion menmbresias</h3>
+                    <p className="closed">Accede a contenido exclusivo, herramientas de crecimiento y capacitaciones personalizadas según tu nivel. Con nuestras membresías, obtienes beneficios únicos para avanzar en tu camino dentro del sistema educativo y potenciar tu red.</p>
+                    <button className="btn">ver mas</button>
                 </a>
             </section>
 
