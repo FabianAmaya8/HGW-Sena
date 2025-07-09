@@ -153,6 +153,7 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
                             ))}
                         </div>
                     </div>
+
                 </div>
                 <Resumen
                     carrito={carrito}
