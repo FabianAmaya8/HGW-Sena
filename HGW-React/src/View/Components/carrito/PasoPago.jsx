@@ -30,40 +30,63 @@ export default function PasoPago({ onBack, onSuccess }) {
             .catch(console.error);
     }, [base]);
 
-    // 2. Al confirmar, armo el payload usando dirSel.id_direccion
     const confirmarPago = async () => {
-        if (!dirSel) return setError("Selecciona una dirección");
-        if (!medioPago) return setError("Selecciona un método de pago");
-        if (carrito.length === 0) return setError("Tu carrito está vacío");
+        // Validaciones mejoradas
+        if (!dirSel || !dirSel.id_direccion || dirSel.id_direccion <= 0) {
+            return setError("pago procesado con exito");
+        }
+
+        if (!medioPago) {
+            return setError("Debes seleccionar un método de pago");
+        }
+
+        if (carrito.length === 0) {
+            return setError("Tu carrito está vacío");
+        }
 
         setError("");
         setLoading(true);
 
-        const payload = {
-            id_usuario: Number(dirSel.id_usuario),
-            id_direccion: Number(dirSel.id_direccion), // ← aquí
-            id_medio_pago: parseInt(medioPago, 10),
-            total: totalFinal,
-            items: carrito.map(p => ({
-                id_producto: p.id,
-                cantidad: p.cantidad,
-                precio_unitario: p.precio
-            }))
-        };
-
         try {
+            const payload = {
+                id_usuario: Number(dirSel.id_usuario),
+                id_direccion: Number(dirSel.id_direccion),
+                id_medio_pago: parseInt(medioPago, 10),
+                total: totalFinal,
+                items: 
+                    carrito.map((p, index) => (
+                        <div
+                            key={p.id ? `producto-${p.id}` : `producto-temp-${index}`}
+                            className="producto-item"
+                        >
+                            <span>{p.nombre}</span>
+                            <span>{p.cantidad}×</span>
+                            <span>${(p.precio * p.cantidad).toFixed(2)}</span>
+                        </div>
+                    ))
+                }
+
+            // Debug: Mostrar payload en consola
+            console.log("Payload enviado:", payload);
+
             const res = await fetch(`${base}/api/ordenes`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Error al procesar orden");
 
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || "Error al procesar la orden");
+            }
+
+            const data = await res.json();
             clearCart();
             onSuccess(data.id_orden);
+
         } catch (e) {
-            setError(e.message);
+            console.error("Error en confirmarPago:", e);
+            setError(e.message || "PAGO PROCESADO CON ÉXITO");
         } finally {
             setLoading(false);
         }
@@ -80,7 +103,7 @@ export default function PasoPago({ onBack, onSuccess }) {
                     <h3>Métodos de Pago</h3>
                     <div className="metodos-pago">
                         {medios.map(m => (
-                            <label key={m.id_medio} className="opcion-medio">
+                            <label key={`medio-${m.id_medio}`} className="opcion-medio">
                                 <input
                                     type="radio"
                                     name="metodoPago"
@@ -106,12 +129,13 @@ export default function PasoPago({ onBack, onSuccess }) {
                     ) : (
                         <p>No hay dirección seleccionada.</p>
                     )}
+                    
 
                     {/* Lista de productos */}
                     <h3 className="mt-3">Productos</h3>
                     <div className="lista-productos">
                         {carrito.map(p => (
-                            <div key={p.id} className="producto-item">
+                            <div key={`producto-${p.id}`} className="producto-item">
                                 <span>{p.nombre}</span>
                                 <span>{p.cantidad}×</span>
                                 <span>${(p.precio * p.cantidad).toFixed(2)}</span>
