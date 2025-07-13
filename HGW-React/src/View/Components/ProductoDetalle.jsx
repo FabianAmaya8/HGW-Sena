@@ -96,91 +96,104 @@ export default function ProductoDetalle() {
     };
 
     return (
-        <>
-        <div className="volver">
-                <button type="button" className="btn btn-secondary" onClick={() => window.history.back()}>
-                    <i className='bx bx-left-arrow-alt'></i> Volver
+        <div className="producto-detalle container">
+            <div className="volver ">
+                <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => window.history.back()}
+                >
+                    <i className="bx bx-left-arrow-alt" /> Volver
                 </button>
             </div>
-        
-        <main className="product-container">
-            <div className="product-card">
-                <div className="product-left">
-                    <div className="main-image">
-                        <img
-                            src={imagenActual}
-                            alt={`Imagen de ${nombre}`}
-                        />
-                    </div>
-                    <div className="thumbnails">
+
+            <div className="row bg-white shadow-sm rounded p-4">
+                {/* IZQUIERDA: imágenes */}
+                <div className="col-md-6 ">
+                    <img
+                        src={imagenActual}
+                        alt={`Imagen de ${nombre}`}
+                        className="img-fluid rounded "
+                        style={{ objectFit: "cover", aspectRatio: "1 / 1" }}
+                    />
+                    <div className="d-flex gap-2">
                         {urlsImgs.map((url, idx) => (
                             <img
                                 key={idx}
                                 src={url}
                                 alt={`Miniatura ${idx + 1}`}
                                 onClick={() => setImagenActual(url)}
+                                className="img-thumbnail"
+                                style={{ width: 70, height: 70, cursor: "pointer" }}
                             />
                         ))}
                     </div>
                 </div>
 
-                <div className="product-right">
-                    <h2 className="product-title">
-                        {nombre}
-                        <span className={`availability-badge ${claseStock}`}>
-                            {estadoStock}
-                        </span>
-                    </h2>
+                {/* DERECHA: detalles */}
+                <div className="col-md-6 d-flex flex-column">
+                    <div>
+                        <h2 className="h3 d-flex align-items-center gap-2">
+                            {nombre}
+                            <span className={`badge ${claseStock}`}>
+                                {estadoStock}
+                            </span>
+                        </h2>
 
-                    <div className="price-row">
-                        <span className="price">
-                            ${precio.toLocaleString("es-CO")}
-                        </span>
+                        <div className="">
+                            <span className="h4 text-success">
+                                ${precio.toLocaleString("es-CO")}
+                            </span>
+                        </div>
+
+                        <p>
+                            <strong>Descripción:</strong> {descripcion}
+                        </p>
+
+                        <div className="d-flex align-items-center ">
+                            <button
+                                className="btn btn-outline-secondary"
+                                onClick={decrementar}
+                                disabled={cantidad <= 1}
+                            >−</button>
+                            <input
+                                type="text"
+                                value={cantidad}
+                                readOnly
+                                className="form-control text-center mx-2"
+                                style={{ width: 60 }}
+                            />
+                            <button
+                                className="btn btn-outline-secondary"
+                                onClick={incrementar}
+                                disabled={cantidad >= stock}
+                            >+</button>
+                        </div>
                     </div>
 
-                    <p>
-                        <strong>Descripción:</strong> {descripcion}
-                    </p>
-
-                    <div className="quantity-actions">
+                    <div className="d-flex flex-column flex-sm-row gap-2">
                         <button
-                            onClick={decrementar}
-                            disabled={cantidad <= 1}
-                        >−</button>
-                        <input
-                            type="text"
-                            value={cantidad}
-                            readOnly
-                        />
-                        <button
-                            onClick={incrementar}
-                            disabled={cantidad >= stock}
-                        >+</button>
-                    </div>
-
-                    <div className="cta-buttons">
-                        <button
-                            className="btn add-cart"
+                            className="btn btn-dark flex-fill"
                             disabled={stock <= 0}
                             onClick={onAgregar}
                         >
                             Añadir {cantidad} al Carrito
                         </button>
                         <button
-                            className="btn buy-now"
+                            className="btn btn-success flex-fill"
                             disabled={stock <= 0}
                         >
                             Comprar Ahora
                         </button>
                     </div>
 
-                    <div className="extra-info">
+                    <div className="mt-3 text-muted small">
                         <p><strong>Categoría:</strong> {categoria}</p>
                         <p><strong>Subcategoría:</strong> {subcategoria}</p>
                     </div>
                 </div>
             </div>
-        </main>
-        </>
+        </div>
     );
+
 }

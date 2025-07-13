@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { urlDB } from "../../../urlDB";
-import "../../../assets/css/PasoPago.css";
 import Resumen from "./Resumen";
 import { useCarrito } from "../../hooks/useCarrito";
 import Swal from "sweetalert2";

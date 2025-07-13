@@ -250,6 +250,14 @@ def crear_orden():
             
             connection.commit()
 
+            # Eliminar carrito
+            cursor.execute("DELETE FROM carrito_compras WHERE id_usuario = %s", (id_usuario,))
+            connection.commit()
+
+            # Crear carrito vacio
+            cursor.execute("INSERT INTO carrito_compras (id_usuario) VALUES (%s)", (id_usuario,))
+            connection.commit()
+
         return jsonify({"id_orden": id_orden}), 201
         
     except Exception as e:

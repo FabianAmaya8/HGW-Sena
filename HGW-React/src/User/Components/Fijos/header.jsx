@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../../pages/Context/AuthContext';
 import { findWorkingBaseUrl, urlDB } from '../../../urlDB';
 // logo HGW
@@ -7,7 +7,7 @@ import logo from '../../../assets/img/logo.png';
 import Buscador from './Buscador';
 
 export default function Header() {
-    const { user, logout } = useAuth();
+    const { user, logout ,token } = useAuth();
 
     const [cartCount, setCartCount] = useState(0);
     const [profileUrl, setProfileUrl] = useState(null);
@@ -41,7 +41,7 @@ export default function Header() {
         };
 
         fetchDatos();
-        }, [user]);
+    }, [user]);
 
 
     const links = [
