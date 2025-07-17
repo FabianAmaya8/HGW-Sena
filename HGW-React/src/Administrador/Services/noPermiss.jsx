@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Style from '../Dinamics/Listas/ListaDinamic.module.scss'
 import { useContext } from 'react';
-import { AppContext } from '../controlador';
+import { AppContext } from '../../controlador';
 
 const NoPermiss = ()=>{
     const { medidas, anchoDrawer, alerta } = useContext(AppContext);

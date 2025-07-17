@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Box, Container, Typography, Avatar, Slide, keyframes } from '@mui/material';
 import HandshakeIcon from '@mui/icons-material/Handshake';
-import { AppContext } from "../controlador";
+import { AppContext } from "../../controlador";
 import Style from './Home.module.scss';
 
 const wave = keyframes`

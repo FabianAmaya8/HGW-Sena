@@ -1,27 +1,25 @@
 import {
-    InputLabel, Slide, Box, TextField, Select, Button, FormControl, MenuItem, Typography,
-    Alert, AlertTitle
+  InputLabel, Slide, Box, TextField, Select, Button, FormControl, MenuItem, Typography
 } from '@mui/material'
 import { useState, useEffect, useRef, useReducer, useCallback, memo, useMemo, useContext } from 'react'
-import { AppContext } from '../../admin/context.jsx';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { CircularProgress } from '@mui/material';
+import { AppContext } from '../../../controlador'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import Carga from '../../intermedias/carga'
 import Style from './Dinamics.module.scss'
-import Carga from '../../intermedias/carga';
-import LinearProgress from '@mui/material/LinearProgress';
 
 const BACKEND = 'http://127.0.0.1:3000'
 
 const Form = memo(({ form, consultas, edit, padre, alerta }) => {
-  const editara = Object.entries(edit).length > 0 ? edit.estado : false
+  const editara = Boolean(edit?.estado)
   const datosEdit = edit?.datos || {}
-  const { medidas, anchoDrawer } = useContext(AppContext)
+  const { medidas } = useContext(AppContext)
   const [consultasCargadas, setConsultasCargadas] = useState({})
   const didReset = useRef(false)
   const didAutoChange = useRef(false)
+
   useEffect(() => {
-    let ignore = false
     if (!consultas) return
+    let ignore = false
     fetch(`${BACKEND}/consultas`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -31,7 +29,8 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
       .then(data => { if (!ignore) setConsultasCargadas(data) })
     return () => { ignore = true }
   }, [consultas])
-  const normalizaUrlImagen = (valor) => {
+
+  const normalizaUrlImagen = useCallback((valor) => {
     if (!valor) return ''
     if (valor.startsWith('http')) {
       try {
@@ -42,44 +41,32 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
       }
     }
     return `${BACKEND}/images/${valor}`
-  }
-  const crearObjeto = useCallback(
-    datos => {
-      const objeto = {}
-      for (let i = 0; i < datos.length; i++) {
-        const el = datos[i]
-        if (!el.id) continue
-        let initialValue = ''
-        if (editara) {
-          if (el.type === 'img') {
-            const filename = datosEdit[el.id]
-            if (typeof filename === 'string' && filename) {
-              const url = normalizaUrlImagen(filename)
-              objeto[el.id] = {
-                value: url,
-                preview: url,
-                error: false,
-                helperText: '',
-                id: el.id
-              }
-              continue
-            }
-          } else if (el.type === 'select') {
-            if (datosEdit[el.id] && typeof datosEdit[el.id] === 'object' && 'id' in datosEdit[el.id]) {
-              initialValue = datosEdit[el.id].id
-            } else {
-              initialValue = ''
-            }
-          } else {
-            initialValue = datosEdit[el.id] ?? ''
+  }, [])
+
+  const crearObjeto = useCallback(datos => {
+    const obj = {}
+    for (const el of datos) {
+      if (!el.id) continue
+      let initialValue = ''
+      if (editara) {
+        if (el.type === 'img') {
+          const filename = datosEdit[el.id]
+          if (typeof filename === 'string' && filename) {
+            const url = normalizaUrlImagen(filename)
+            obj[el.id] = { value: url, preview: url, error: false, helperText: '', id: el.id }
+            continue
           }
+        } else if (el.type === 'select') {
+          initialValue = (datosEdit[el.id]?.id) || ''
+        } else {
+          initialValue = datosEdit[el.id] ?? ''
         }
-        objeto[el.id] = { value: initialValue, error: false, helperText: '', id: el.id }
       }
-      return objeto
-    },
-    [editara, datosEdit]
-  )
+      obj[el.id] = { value: initialValue, error: false, helperText: '', id: el.id }
+    }
+    return obj
+  }, [editara, datosEdit, normalizaUrlImagen])
+
   const asignarValores = useCallback((estado, action) => {
     if (action.type === 'RESET') return action.objeto
     if ('error' in action) {
@@ -91,7 +78,11 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
     if ('value' in action) {
       return {
         ...estado,
-        [action.id]: { ...estado[action.id], value: action.value, ...(action.preview !== undefined && { preview: action.preview }) }
+        [action.id]: {
+          ...estado[action.id],
+          value: action.value,
+          ...(action.preview !== undefined && { preview: action.preview })
+        }
       }
     }
     return estado
@@ -99,12 +90,10 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
 
   const [valores, dispatch] = useReducer(asignarValores, form, crearObjeto)
 
-  useEffect(() => {
-    didReset.current = false
-  }, [edit])
+  useEffect(() => { didReset.current = false }, [edit])
 
   useEffect(() => {
-    if (editara && Object.keys(datosEdit).length > 0 && !didReset.current) {
+    if (editara && Object.keys(datosEdit).length && !didReset.current) {
       dispatch({ type: 'RESET', objeto: crearObjeto(form) })
       didReset.current = true
       didAutoChange.current = false
@@ -114,7 +103,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
   useEffect(() => {
     if (!editara || didAutoChange.current) return
     for (const elemento of form) {
-      if (elemento.type === 'select' && 'changeTable' in elemento) {
+      if (elemento.type === 'select' && elemento.changeTable) {
         const padreValue = valores[elemento.id]?.value
         if (padreValue) {
           setValuesChilds(elemento, padreValue)
@@ -123,40 +112,43 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
       }
     }
   }, [editara, form, valores])
+
   const validaciones = useCallback((datos, manejador, formArray) => {
     let valido = true
-    for (let i = 0; i < formArray.length; i++) {
-      const element = formArray[i]
+    for (const element of formArray) {
       if (!element.id || !element.requirements) continue
       const valor = datos[element.id].value
       const req = element.requirements
       let error = false
       let helperText = ''
+
       if ('maxLength' in req || 'minLength' in req) {
-        const max = req.maxLength || 99999
-        const min = req.minLength || 0
+        const max = req.maxLength ?? 99999
+        const min = req.minLength ?? 0
         if (valor.length > max || valor.length < min) {
           error = true
           helperText = `debe tener entre ${min} y ${max} caracteres`
         }
       }
+
       if ('value' in req) {
         const faltan = req.value.filter(v => !valor.includes(v))
-        if (faltan.length > 0) {
+        if (faltan.length) {
           error = true
           helperText = 'Debe contener: ' + faltan.join(', ')
         }
       }
+
       manejador({ id: element.id, error, helperText })
       if (error) valido = false
     }
     return valido
   }, [])
+
   const valoresRef = useRef(valores)
-  useEffect(() => {
-    valoresRef.current = valores
-  }, [valores])
-  const setValuesChilds = (elemento, valorPadre, resetHijo = false) => {
+  useEffect(() => { valoresRef.current = valores }, [valores])
+
+  const setValuesChilds = useCallback((elemento, valorPadre, resetHijo = false) => {
     const data = elemento.changeTable
     fetch(`${BACKEND}/consultas`, {
       method: 'POST',
@@ -168,44 +160,36 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
         setConsultasCargadas(prev => ({ ...prev, ...r }))
         const tabla = data.table
         const opciones = Object.values(r)[0] || []
-        const hijoId = tabla
         if (resetHijo) {
-          dispatch({ id: hijoId, value: '' })
+          dispatch({ id: tabla, value: '' })
           return
         }
-        const valueActual = valoresRef.current[hijoId]?.value
+        const valueActual = valoresRef.current[tabla]?.value
         const existeValorActual = opciones.some(opt => String(opt.id) === String(valueActual))
         if (existeValorActual) {
-          dispatch({ id: hijoId, value: valueActual })
+          dispatch({ id: tabla, value: valueActual })
         } else {
-          const valorGuardado = datosEdit[hijoId]?.id ?? ''
+          const valorGuardado = datosEdit[tabla]?.id ?? ''
           const existeValorGuardado = opciones.some(opt => String(opt.id) === String(valorGuardado))
-          if (existeValorGuardado) {
-            dispatch({ id: hijoId, value: valorGuardado })
-          } else {
-            dispatch({ id: hijoId, value: '' })
-          }
+          dispatch({ id: tabla, value: existeValorGuardado ? valorGuardado : '' })
         }
       })
-  }
+  }, [datosEdit])
 
   const verDependencia = useCallback(dep => {
     if (!dep) return true
-    if (!valores[dep.elemento]) return false
-    const v = valores[dep.elemento].value
-    return v !== '' && v !== 0
+    const val = valores[dep.elemento]?.value
+    return val !== '' && val !== 0 && val !== undefined
   }, [valores])
 
   const handle = useCallback((e, tipo, id) => {
     if (tipo === 'img') {
-      const file = e
-      if (!file) return
-      const preview = URL.createObjectURL(file)
-      dispatch({ id, value: file, preview })
+      if (!e) return
+      dispatch({ id, value: e, preview: URL.createObjectURL(e) })
     } else {
       dispatch({ id, value: e })
     }
-  }, [dispatch])
+  }, [])
 
   const opcionesPorTabla = useMemo(() => {
     const out = {}
@@ -217,39 +201,33 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
           const nombreKey = Object.keys(row).find(k => k.toLowerCase().includes('nombre'))
           return { id: row[idKey], nombre: row[nombreKey] }
         })
-      } else {
-        out[tabla] = []
-      }
+      } else out[tabla] = []
     }
     return out
   }, [consultasCargadas])
-  useEffect(() => {
-    if (!editara) return
-    for (const elemento of form) {
-      if (elemento.type === 'select' && 'changeTable' in elemento) {
-        const padreValue = valores[elemento.id]?.value
-        if (
-          padreValue &&
-          (!opcionesPorTabla[elemento.changeTable.table] || !opcionesPorTabla[elemento.changeTable.table].length)
-        ) {
-          setValuesChilds(elemento, padreValue)
-        }
-      }
-    }
-  }, [editara, form, valores, opcionesPorTabla])
 
   useEffect(() => {
     if (!editara) return
     for (const elemento of form) {
-      if (elemento.type === 'select' && 'changeTable' in elemento) {
+      if (elemento.type === 'select' && elemento.changeTable) {
+        const padreValue = valores[elemento.id]?.value
+        if (padreValue && (!opcionesPorTabla[elemento.changeTable.table]?.length)) {
+          setValuesChilds(elemento, padreValue)
+        }
+      }
+    }
+  }, [editara, form, valores, opcionesPorTabla, setValuesChilds])
+
+  useEffect(() => {
+    if (!editara) return
+    for (const elemento of form) {
+      if (elemento.type === 'select' && elemento.changeTable) {
         const padreValue = valores[elemento.id]?.value
         const hijoTable = elemento.changeTable.table
         if (
           padreValue &&
           opcionesPorTabla[hijoTable]?.length &&
-          datosEdit[hijoTable] &&
-          typeof datosEdit[hijoTable] === 'object' &&
-          'id' in datosEdit[hijoTable]
+          datosEdit[hijoTable]?.id !== undefined
         ) {
           const valorEdit = datosEdit[hijoTable].id
           if (valores[hijoTable]?.value !== valorEdit) {
@@ -270,22 +248,21 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
           variant="standard"
           fullWidth
           margin="normal"
-          sx={{maxWidth: medidas == "movil" ? "90%" : "40%"}}
-          type={elemento.typeOf && elemento.typeOf !== '' ? elemento.typeOf : 'string'}
-          value={valores[elemento.id].value}
-          error={valores[elemento.id].error}
-          helperText={valores[elemento.id].helperText}
+          sx={{ maxWidth: medidas === "movil" ? "90%" : "40%" }}
+          type={elemento.typeOf || 'string'}
+          value={valores[elemento.id]?.value ?? ''}
+          error={valores[elemento.id]?.error ?? false}
+          helperText={valores[elemento.id]?.helperText ?? ''}
           onChange={e => handle(e.target.value, 'input', elemento.id)}
-          InputLabelProps={{ shrink: Boolean(valores[elemento.id].value) }}
+          InputLabelProps={{ shrink: Boolean(valores[elemento.id]?.value) }}
           autoComplete="off"
         />
       )
     }
     if (elemento.type === 'select' && verDependencia(elemento.dependency)) {
-      const opciones = opcionesPorTabla[elemento.childs.table] || [];
-      let valorSelect = valores[elemento.id]?.value ?? '';
-      const existeOpcion = opciones.some(opt => String(opt.id) === String(valorSelect));
-      if (!existeOpcion && valorSelect !== '') valorSelect = '';
+      const opciones = opcionesPorTabla[elemento.childs?.table] || []
+      let valorSelect = valores[elemento.id]?.value ?? ''
+      if (!opciones.some(opt => String(opt.id) === String(valorSelect))) valorSelect = ''
       return (
         <FormControl key={elemento.id} fullWidth margin="normal" size="small" sx={{ position: 'relative' }}>
           <InputLabel id={`${elemento.id}-label`}>{elemento.label}</InputLabel>
@@ -294,47 +271,54 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
             label={elemento.label}
             value={valorSelect}
             onChange={e => {
-              if ('changeTable' in elemento) {
-                handle("", "select", elemento.changeTable.table);
-                setValuesChilds(elemento, e.target.value);
+              if (elemento.changeTable) {
+                handle("", "select", elemento.changeTable.table)
+                setValuesChilds(elemento, e.target.value)
               }
-              handle(e.target.value, 'select', elemento.id);
+              handle(e.target.value, 'select', elemento.id)
             }}
             variant="filled"
-            MenuProps={{
-              disablePortal: true,
-            }}
-            sx={{maxWidth: medidas == "movil" ? "90%" : "40%"}}
+            MenuProps={{ disablePortal: true }}
+            sx={{ maxWidth: medidas === "movil" ? "90%" : "40%" }}
           >
             {opciones.map(opt => <MenuItem key={opt.id} value={opt.id}>{opt.nombre}</MenuItem>)}
           </Select>
         </FormControl>
-      );
+      )
     }
     if (elemento.type === 'img') {
       return (
         <Button
           key={elemento.id}
           component="label"
-          sx={{ background: 'rgb(232,248,230)', maxWidth: medidas == "movil" ? "90%" : "40%", height: '90px', mt: 2, position: 'relative', overflow: 'hidden' }}
+          sx={{
+            background: 'rgb(232,248,230)',
+            maxWidth: medidas === "movil" ? "90%" : "40%",
+            height: 90,
+            mt: 2,
+            position: 'relative',
+            overflow: 'hidden'
+          }}
         >
           <CloudUploadIcon />
-          <input type="file" accept="image/*" hidden onChange={e => handle(e.target.files[0], 'img', elemento.id)} />
-          {valores[elemento.id].preview ? (
+          <input type="file" accept="image/*" hidden onChange={e => handle(e.target.files?.[0], 'img', elemento.id)} />
+          {(valores[elemento.id]?.preview || valores[elemento.id]?.value) && (
             <Box
               component="img"
-              src={valores[elemento.id].preview}
-              sx={{ pointerEvents: 'none', width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, objectFit: 'cover', transition: 'opacity 0.2s' }}
+              src={valores[elemento.id]?.preview || valores[elemento.id]?.value}
+              sx={{
+                pointerEvents: 'none',
+                width: '100%',
+                height: '100%',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                objectFit: 'cover',
+                transition: 'opacity 0.2s'
+              }}
               loading="lazy"
             />
-          ) : valores[elemento.id].value ? (
-            <Box
-              component="img"
-              src={valores[elemento.id].value}
-              sx={{ pointerEvents: 'none', width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, objectFit: 'cover', transition: 'opacity 0.2s' }}
-              loading="lazy"
-            />
-          ) : null}
+          )}
         </Button>
       )
     }
@@ -343,30 +327,37 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
         <Button
           key="submit"
           variant={elemento.variant}
-          sx={{ color: 'white', mt: 2, mr: medidas == "movil" ? "auto" : 0, ml: "auto", borderRadius: "30px", height: "40px" }}
+          sx={{
+            color: 'white',
+            mt: 2,
+            mr: medidas === "movil" ? "auto" : 0,
+            ml: "auto",
+            borderRadius: 30,
+            height: 40
+          }}
           onClick={async () => {
             if (!validaciones(valores, dispatch, form)) return
             const payload = new FormData()
-            Object.entries(valores).forEach(([key, campo]) => {
+            for (const [key, campo] of Object.entries(valores)) {
               if (campo.value instanceof File) {
                 payload.append(key, campo.value)
-              } else if (campo.value !== undefined && campo.value !== null) {
+              } else if (campo.value != null) {
                 payload.append(key, String(campo.value))
               }
-            })
+            }
             payload.append('table', elemento.submit)
             if (editara) {
-              padre.setRender(!padre.render)
-              const idEdit = Object.entries(datosEdit).find(([k]) => k.toLowerCase().includes('id'))[1]
-              payload.append('id', idEdit)
+              padre.setRender(r => !r)
+              const idEdit = Object.entries(datosEdit).find(([k]) => k.toLowerCase().includes('id'))?.[1]
+              if (idEdit) payload.append('id', idEdit)
             }
             const url = editara ? `${BACKEND}/editar` : `${BACKEND}/registro`
             const res = await fetch(url, { method: 'POST', body: payload })
             const json = await res.json()
             if (json.uploaded) {
-              Object.entries(json.uploaded).forEach(([campoId, filename]) => {
+              for (const [campoId, filename] of Object.entries(json.uploaded)) {
                 dispatch({ id: campoId, value: `${BACKEND}/images/${filename}`, preview: undefined })
-              })
+              }
             }
             alerta.setAlerta({
               estado: true,
@@ -381,36 +372,74 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
       )
     }
     return null
-  }), [form, consultasCargadas, valores, handle, validaciones, verDependencia, editara, datosEdit, padre, alerta])
+  }), [form, consultasCargadas, valores, handle, validaciones, verDependencia, editara, datosEdit, padre, alerta, medidas])
+
   return (
     <Slide in direction="left" timeout={400}>
-      <Box sx={{height: '100%' ,width: medidas === 'movil' ? '90%' : '98%', ...(editara && { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }) }}>
-        <Box sx={{
-          position: "relative",
-          overflowY: 'auto',
-          minHeight: '0px',
-          minWidth: '340px',
-          display: "flex",
-          flexDirection: 'column',
-          margin: !editara ? '3.5vh 1%' : '0vh 1% 3.5vh 3%',
-          background: 'white',
-          width: editara ? '70%' : '100%',
-          height: '80vh',
-          boxSizing: "border-box",
-          padding: "2rem 2rem 2rem 2rem",
-          ...(editara && { display: "flex", alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', borderRadius: '8px' }),
-          '&::-webkit-scrollbar': { width: '2.5px' },
-          '&::-webkit-scrollbar-thumb': { background: '#7e9e4a', borderRadius: '5px' }
-        }}>
-          {form == undefined || form.length <= 0 && 
-            <Carga />
-          }
-          <Box sx={{ background: "#7e9e4a", color: 'beige', borderRadius: "10px", minHeight: '4rem', maxHeight: '4rem', display: "flex", justifyContent: 'flex-start', boxSizing: "border-box", ...(!editara ? {paddingLeft: "2rem"}: {px: "1rem"}), alignItems: 'center', flexBasis: '850px', overflow: 'auto' }}>
-            <Typography variant="h6" >
+      <Box
+        sx={{
+          height: '100%',
+          width: medidas === 'movil' ? '90%' : '98%',
+          ...(editara && {
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden'
+          })
+        }}
+      >
+        <Box
+          sx={{
+            position: "relative",
+            overflowY: 'auto',
+            minHeight: 0,
+            minWidth: 340,
+            display: "flex",
+            flexDirection: 'column',
+            margin: !editara ? '3.5vh 1%' : '0vh 1% 3.5vh 3%',
+            background: 'white',
+            width: editara ? '70%' : '100%',
+            height: '80vh',
+            boxSizing: "border-box",
+            padding: "2rem",
+            ...(editara && { boxShadow: '0 2px 8px rgba(0,0,0,0.1)', borderRadius: 8, alignItems: 'center' }),
+            '&::-webkit-scrollbar': { width: '2.5px' },
+            '&::-webkit-scrollbar-thumb': { background: '#7e9e4a', borderRadius: 5 }
+          }}
+        >
+          {(form == null || form.length === 0) && <Carga />}
+          <Box
+            sx={{
+              background: "#7e9e4a",
+              color: 'beige',
+              borderRadius: 2,
+              minHeight: 64,
+              maxHeight: 64,
+              justifyContent: 'flex-start',
+              boxSizing: "border-box",
+              display: "flex",
+              ...(!editara && medidas !== "movil" ? {paddingLeft: "2rem"}: {justifyContent: "center", px: "1rem"}),
+              alignItems: 'center',
+              flexBasis: 850,
+              overflow: 'auto'
+            }}
+          >
+            <Typography variant="h6">
               {Array.isArray(form) && form.length > 0 ? form[0].title : ''}
             </Typography>
           </Box>
-          <Box className={Style.formulario} sx={{position: "relative", flex: 1, background: 'white', borderRadius: 8, padding: "2rem", boxSizing: "border-box", display: 'flex', flexDirection: 'column', minWidth: "100%" }}>
+          <Box className={Style.formulario} sx={{
+            position: "relative",
+            flex: 1,
+            background: 'white',
+            borderRadius: 2,
+            padding: "2rem",
+            boxSizing: "border-box",
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: "100%"
+          }}>
             {renderCampos}
           </Box>
         </Box>
@@ -420,16 +449,25 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
 })
 
 const DinamicForm = ({ form, consultas, edit, padre }) => {
-    let editara = edit ? edit.estado : false;
-    const { medidas, anchoDrawer, alerta } = useContext(AppContext);
-    const contenidoWidth = anchoDrawer.isOpen
-        ? `calc(100% - ${anchoDrawer.ancho.open - 15}rem)`
-        : `calc(100% - ${anchoDrawer.ancho.close - 4}rem)`;
-    return (
-        <Box className="box-contenidos" sx={{ width: medidas == "movil" || editara ? "100%" : contenidoWidth, transition: "450ms" }}>
-            <Form form={form} consultas={consultas} edit={edit ? edit : {}} padre={padre} alerta={alerta} />
-        </Box>
-    )
+  const editara = Boolean(edit?.estado)
+  const { medidas, anchoDrawer, alerta } = useContext(AppContext)
+  const contenidoWidth = useMemo(() => (
+    anchoDrawer.isOpen
+      ? `calc(100% - ${anchoDrawer.ancho.open - 15}rem)`
+      : `calc(100% - ${anchoDrawer.ancho.close - 4}rem)`
+  ), [anchoDrawer])
+
+  return (
+    <Box
+      className="box-contenidos"
+      sx={{
+        width: (medidas === "movil" || editara) ? "100%" : contenidoWidth,
+        transition: "450ms"
+      }}
+    >
+      <Form form={form} consultas={consultas} edit={edit || {}} padre={padre} alerta={alerta} />
+    </Box>
+  )
 }
 
-export default memo(DinamicForm);
+export default memo(DinamicForm)

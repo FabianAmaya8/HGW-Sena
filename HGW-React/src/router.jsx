@@ -16,6 +16,9 @@ import InfoPersonalPege from "./pages/User/InfoPersonalPege";
 import EducacionPage from "./pages/User/educacionPage";
 import ProductoPag from "./pages/User/productopag";
 
+//Admin
+
+import Controlador from "./controlador";
 
 
 const router = createBrowserRouter([
@@ -62,9 +65,10 @@ const router = createBrowserRouter([
     {
         path: "/carrito",
         element: <Carritopage />,
+    },
+    {
+        path: "/Administrador/*", element: <Controlador />,
     }
-
-
 
 ]);
 

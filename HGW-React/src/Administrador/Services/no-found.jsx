@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { useContext } from 'react';
-import { AppContext } from '../controlador';
+import { AppContext } from '../../controlador';
 
 const Nofound = ()=>{
     const { medidas, anchoDrawer, alerta } = useContext(AppContext);
