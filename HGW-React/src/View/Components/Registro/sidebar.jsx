@@ -43,7 +43,7 @@ export const Sidebar = ({ currentStep, goToStep }) => (
     </div>
       {/* Botones de acción */}
       <div className="mt-4 flex-column gap-2 mediaRegistroOFF">
-          <Link to="/login" className="btn btn-outline-primary btn-login">
+          <Link to="/login" className="btn btn-outline-secondary btn-login">
               Inicio de sesión
           </Link>
           <Link to="/" className="btn btn-outline-secondary btn-login">
@@ -53,7 +53,7 @@ export const Sidebar = ({ currentStep, goToStep }) => (
   </div>
   <div className="mediaRegistro botonesAccion2">
     <p className="mb-2 text-center">¿Ya tienes una cuenta?</p>
-    <Link to="/login" className="btn btn-outline-primary btn-login">
+    <Link to="/login" className="btn btn-outline-secondary btn-login">
         Inicio de sesión
     </Link>
     <p className="mb-2 text-center">¿Quieres volver al inicio?</p>

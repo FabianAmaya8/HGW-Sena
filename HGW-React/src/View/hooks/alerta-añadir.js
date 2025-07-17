@@ -1,9 +1,9 @@
 import Swal from 'sweetalert2';
 
-export function mostrarAlerta() {
+export function mostrarAlerta(nombre, irAlCarrito) {
     Swal.fire({
         title: '¡Producto añadido!',
-        text: 'El producto se ha añadido al carrito.',
+        text: `Se ha añadido "${nombre}" al carrito.`,
         icon: 'success',
         showCancelButton: true,
         confirmButtonText: 'Ir al carrito',
@@ -11,8 +11,8 @@ export function mostrarAlerta() {
         confirmButtonColor: '#03624c',
         cancelButtonColor: '#03624c'
     }).then((result) => {
-        if (result.isConfirmed) {
-            window.location.href = '/carrito';
+        if (result.isConfirmed && typeof irAlCarrito === 'function') {
+            irAlCarrito();
         }
     });
 }

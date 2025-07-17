@@ -20,3 +20,24 @@ export function useImageUrl(path) {
 
     return url;
 }
+
+export function useImageUrls(paths) {
+    const [urls, setUrls] = useState([]);
+
+    useEffect(() => {
+        if (!paths || paths.length === 0) return;
+
+        (async () => {
+            try {
+                const base = await findWorkingBaseUrl();
+                const cleanBase = base.replace(/\/$/, '');
+                const result = paths.map(path => `${cleanBase}/${path.replace(/^\//, '')}`);
+                setUrls(result);
+            } catch (e) {
+                console.error('Error construyendo URLs:', e);
+            }
+        })();
+    }, [paths]);
+
+    return urls;
+}

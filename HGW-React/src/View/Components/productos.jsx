@@ -1,12 +1,17 @@
+import { Link } from 'react-router-dom';
 import { useImageUrl } from '../../User/Hooks/useImgUrl';
-import { alertaView } from '../hooks/alerta-añadir';
-import { Link } from "react-router-dom";
+import { alertaView, mostrarAlerta } from '../hooks/alerta-añadir';
+import { isLoggedIn } from '../../auth';
+import { useCarrito } from '../hooks/useCarrito';
+
 function formatPrice(price) {
-    return `$${price.toLocaleString()}`;
+  return `$${price.toLocaleString()}`;
 }
 
 export function ProductCard({ product }) {
+    const { agregarProductoAlCarrito } = useCarrito();
     const {
+        id_producto,
         nombre,
         precio,
         imagen,
@@ -15,7 +20,7 @@ export function ProductCard({ product }) {
         stock,
     } = product;
 
-  // Determina clases y texto para indicador de stock
+    // Indicador de stock
     let stockIndicatorClass = '';
     let stockLabelText = '';
     let stockLabelClass = '';
@@ -33,24 +38,24 @@ export function ProductCard({ product }) {
         stockLabelText = 'Agotado';
         stockLabelClass = 'stock-label out-of-stock';
     }
-    
+
     const imagenProductoUrl = useImageUrl(imagen);
 
     return (
         <article className="cart-producto">
-            {/* Indicador visual (punto de color) */}
             <span className={stockIndicatorClass}></span>
-
-            {/* Texto que muestra estado de stock */}
             <span className={stockLabelClass}>{stockLabelText}</span>
 
-            {/* Enlace a detalle de producto */}
-
-            <Link to={`/producto/${product.id_producto}`} aria-label={`Ver más sobre ${nombre}`}>
+            <Link
+                to={`/producto/${id_producto}`}
+                aria-label={`Ver más sobre ${nombre}`}
+            >
                 <figure className="baner-productos">
-                    <img src={imagenProductoUrl} alt={`Imagen del producto ${nombre}`} />
+                    <img
+                        src={imagenProductoUrl}
+                        alt={`Imagen del producto ${nombre}`}
+                    />
                 </figure>
-
                 <section className="info-producto">
                     <p className="categoria">{categoria}</p>
                     <p className="subcategoria">{subcategoria}</p>
@@ -59,20 +64,33 @@ export function ProductCard({ product }) {
                 </section>
             </Link>
 
-        {/* Botón "Agregar al carrito" */}
-            <button
-                className={`boton-carrito ${stock <= 0 ? 'btn-deshabilitado' : ''}`}
-                aria-label={`Agregar ${nombre} al carrito`}
-                disabled={stock <= 0}
-                onClick={() => {
-                alertaView();
+            {isLoggedIn() ? (
+                <button
+                className="boton-carrito"
+                onClick={async () => {
+                    const resultado = await agregarProductoAlCarrito(product, 1);
+                    if (resultado.exito) {
+                        mostrarAlerta(product.nombre);
+                    } else {
+                        console.error('Fallo:', resultado.mensaje);
+                    }
                 }}
-            >
-                < i className='bx bx-cart-add'></i> 
-            </button>
+                >
+                <i className="bx bx-cart-add"></i>
+                </button>
+            ) : (
+                <button
+                className="boton-carrito"
+                aria-label={`Agregar ${nombre} al carrito`}
+                onClick={alertaView}
+                >
+                <i className="bx bx-cart-add"></i>
+                </button>
+            )}
         </article>
     );
 }
+
 
 export function ProductsList({categoriaNombre, subcategoriaNombre, productos}) {
 

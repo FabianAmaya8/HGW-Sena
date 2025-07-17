@@ -1,16 +1,16 @@
 import FooterView from "../../View/Components/footer";
 import Header from "../../User/Components/Fijos/header";
-import LoginModal from "../../View/Components/login/modalLogin";
-import { ModalProvider } from "../Context/ModalContext";
 import Personal from "../../User/Components/Personal/Personal";
+import PrivateRoute from "../Context/PrivateRoute";
+import ChatBot from "../../User/Components/Fijos/chatBot";
 
 export default function PersonalPage() {
     return (
-        <ModalProvider>
+        <PrivateRoute>
             <Header />
             <Personal />
             <FooterView />
-            <LoginModal />
-        </ModalProvider>
+            <ChatBot />
+        </PrivateRoute>
     );
 }
