@@ -67,7 +67,7 @@ const router = createBrowserRouter([
         element: <Carritopage />,
     },
     {
-        path: "/Administrador/*", element: <Controlador />,
+        path: "/Admin/*", element: <Controlador />,
     }
 
 ]);

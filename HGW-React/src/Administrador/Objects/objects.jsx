@@ -10,31 +10,36 @@ import { Title } from '@mui/icons-material';
 
 export const objeto = [
     {id: 1, value: "Categorias", icon: <CategoryIcon />, colorText: "white", childs: [
-        {id: 2, value: "Crear", icon: <></>, colorText: "white", click: "/Administrador/Categorias/Crear" },
-        {id: 3, value: "Ver Lista", icon: <></>, colorText: "white", click: "/Administrador/Categorias/Lista" },
+        {id: 2, value: "Crear", icon: <></>, colorText: "white", click: "Categorias/Crear" },
+        {id: 3, value: "Ver Lista", icon: <></>, colorText: "white", click: "Categorias/Lista" },
         {id: 30, value: "Subcategorias", icon: <></>, colorText: "white", childs: [
-          {id: 31, value: "Crear", icon: <></>, colorText: "white", click: "/Administrador/Categorias/Subcategorias/Crear" },
-          {id: 32, value: "Ver Lista", icon: <></>, colorText: "white", click: "/Administrador/Categorias/Subcategorias/Lista" },
+          {id: 31, value: "Crear", icon: <></>, colorText: "white", click: "Categorias/Subcategorias/Crear" },
+          {id: 32, value: "Ver Lista", icon: <></>, colorText: "white", click: "Categorias/Subcategorias/Lista" },
         ]},
     ]},
     {id: 4, value: "Productos", icon: <Inventory2Icon />, colorText: "white", childs: [
-        {id: 5, value: "Crear", icon: <></>, colorText: "white", click: "/Administrador/Productos/Crear" },
-        {id: 6, value: "Ver Lista", icon: <></>, colorText: "white", click: "/Administrador/Productos/Lista" },
+        {id: 5, value: "Crear", icon: <></>, colorText: "white", click: "Productos/Crear" },
+        {id: 6, value: "Ver Lista", icon: <></>, colorText: "white", click: "Productos/Lista" },
       ]
     },
     {id: 7, value: "Usuarios", icon: <PeopleIcon />, colorText: "white", childs: [
-        {id: 8, value: "Crear", icon: <></>, colorText: "white", click: "/Administrador/Usuarios/Crear" },
-        {id: 9, value: "Ver Lista", icon: <></>, colorText: "white", click: "/Administrador/Usuarios/Lista" },
+        {id: 8, value: "Crear", icon: <></>, colorText: "white", click: "Usuarios/Crear" },
+        {id: 9, value: "Ver Lista", icon: <></>, colorText: "white", click: "Usuarios/Lista" },
       ]
     },
     {id: 10, value: "Membresias", icon: <CardMembershipIcon />, colorText: "white", childs: [
-        {id: 11, value: "Crear", icon: <></>, colorText: "white", click: "/Administrador/Membresias/Crear" },
-        {id: 12, value: "Ver Lista", icon: <></>, colorText: "white", click: "/Administrador/Membresias/Lista" },
+        {id: 11, value: "Crear", icon: <></>, colorText: "white", click: "Membresias/Crear" },
+        {id: 12, value: "Ver Lista", icon: <></>, colorText: "white", click: "Membresias/Lista" },
       ]
     },
     {id: 13, value: "Bonos", icon: <CardGiftcardIcon />, colorText: "white", childs: [
-        {id: 14, value: "Crear", icon: <></>, colorText: "white", click: "/Administrador/Bonos/Crear" },
-        {id: 15, value: "Ver Lista", icon: <></>, colorText: "white", click: "/Administrador/Bonos/Lista" },
+        {id: 14, value: "Crear", icon: <></>, colorText: "white", click: "Bonos/Crear" },
+        {id: 15, value: "Ver Lista", icon: <></>, colorText: "white", click: "Bonos/Lista" },
+      ]
+    },
+    {id: 16, value: "opciones", icon: <AccountCircleIcon />, colorText: "white", childs: [
+        {id: 17, value: "cerrar sesion", icon: <LogoutIcon />, colorText: "white", click: "/login" },
+        {id: 18, value: "ir a pagina", icon: <HomeIcon />, colorText: "white", click: "/inicio" },
       ]
     }
   ];
