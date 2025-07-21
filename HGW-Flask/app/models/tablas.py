@@ -1,4 +1,5 @@
-import os
+import os, json
+from flask_bcrypt import Bcrypt
 from flask import Blueprint, request, jsonify, send_from_directory, Response, current_app
 from flask_cors import cross_origin
 from sqlalchemy import inspect
@@ -7,6 +8,8 @@ from app import db
 from werkzeug.utils import secure_filename
 
 tablas = automap_base()
+bcrypt = Bcrypt()
+print(tablas.classes.keys())
 
 def get_fk_display(obj):
     cols = [c.name for c in obj.__table__.columns if 'name' in c.name.lower() or 'nombre' in c.name.lower()]
@@ -65,16 +68,25 @@ def registros():
         return Response(status=200)
     tablaActual = tablas.classes[request.form["table"]]
     registro = tablaActual()
+    print(request.form)
     for clave, valor in request.form.items():
-        if clave not in ("table", "req"):
+        try: 
+            lista = json.loads(valor)
+            if "password" in lista:
+                valor = bcrypt.generate_password_hash(lista.get("text")).decode('utf-8')
+            elif "text" in lista:
+                valor = lista.get("text")
             setattr(registro, clave, valor)
+        except(json.JSONDecodeError, TypeError):
+            if clave not in ("table", "req"):
+                setattr(registro, clave, valor)
     for clave, archivo in request.files.items():
         filename = secure_filename(archivo.filename)
         archivo.save(os.path.join(UPLOAD_FOLDER, filename))
         setattr(registro, clave, filename)
     db.session.add(registro)
     db.session.commit()
-    return jsonify({"respuesta": "se registro correctamente"})
+    return jsonify({"respuesta": "Se registro correctamente"})
 
 @bp_tablas.route("/consultas", methods=["POST","OPTIONS"])
 def consultas():
@@ -103,15 +115,13 @@ def consultaTabla():
     if request.method == "OPTIONS":
         return Response(status=200)
     req = request.get_json()
-    tabla = tablas.classes[req["table"]]
+    tabla = tablas.classes[req["table"].lower()]
     objetos = db.session.query(tabla).all()
     filas = serializar_con_fk_lookup(objetos)
-    # Solo usar el nombre real de la columna para 'field'
     columnas = [{
         "name": col.name.replace("_", " ").title(),
         "field": col.name
     } for col in tabla.__table__.columns]
-    print({"filas": filas, "columnas": columnas})
     return jsonify({"filas": filas, "columnas": columnas})
 
 @bp_tablas.route("/eliminar", methods=["POST","OPTIONS"])
@@ -144,11 +154,19 @@ def editar():
     tablaActual = tablas.classes[request.form["table"]]
     elementoG = db.session.get(tablaActual, request.form["id"])
     for clave, valor in request.form.items():
-        if clave not in ("table", "id", "req"):
+        try:
+            lista = json.loads(valor)
+            if "password" in lista:
+                valor = bcrypt.generate_password_hash(lista.get("text")).decode('utf-8')
+            elif "text" in lista:
+                valor = lista.get("text")
             setattr(elementoG, clave, valor)
+        except (json.JSONDecodeError, TypeError):
+            if clave not in ("table", "id", "req"):
+                setattr(elementoG, clave, valor)
     for clave, archivo in request.files.items():
         filename = secure_filename(archivo.filename)
         archivo.save(os.path.join(UPLOAD_FOLDER, filename))
         setattr(elementoG, clave, filename)
     db.session.commit()
-    return jsonify({"respuesta": "se actualizo el registro"})
+    return jsonify({"respuesta": "Se actualizo el registro"})

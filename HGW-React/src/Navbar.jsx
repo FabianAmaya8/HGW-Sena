@@ -1,19 +1,31 @@
 import { useState, useEffect, useMemo, useRef, useCallback, useContext, memo } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import JsxParser from 'react-jsx-parser';
+import "./font.module.scss"
 import {
   Box, Button, Dialog, Alert, AlertTitle, Drawer,
   Typography, Accordion, AccordionSummary, AccordionDetails,
-  SpeedDial, SpeedDialAction
+  SpeedDial, SpeedDialAction,
+  SnackbarContent,
+  ButtonBase
 } from '@mui/material';
+import { objectSpeedDial } from './Administrador/Objects/objects'
+import Snackbar from '@mui/material/Snackbar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import HomeIcon from '@mui/icons-material/Home';
 import AppsIcon from '@mui/icons-material/Apps';
 import CloseIcon from '@mui/icons-material/Close';
-
-import { objeto, objectSpeedDial } from './Administrador/Objects/objects';
 import { AppContext } from './controlador';
 import Style from './App.module.scss';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import LogoutIcon from '@mui/icons-material/Logout';
+import CategoryIcon from '@mui/icons-material/Category'
+import Inventory2Icon from '@mui/icons-material/Inventory2'
+import PeopleIcon from '@mui/icons-material/People'
+import CardMembershipIcon from '@mui/icons-material/CardMembership';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const BACKEND = 'http://127.0.0.1:3000';
 
@@ -98,7 +110,9 @@ const Arboles = memo(({ elementos, hoverDrawer }) => {
                 gap: anchoDrawer.isOpen ? '1rem' : '1.2rem',
                 transition: 'gap 450ms'
               }}>
-                {el.icon}
+                {"icon" in el && <JsxParser components={{AccountCircleIcon, LogoutIcon, HomeIcon, CategoryIcon, Inventory2Icon, PeopleIcon, CardMembershipIcon, CardGiftcardIcon, SettingsIcon}}
+                  jsx={el.icon}
+                 />}
                 <Typography variant="body1" noWrap>{el.value}</Typography>
               </Box>
             </AccordionSummary>
@@ -167,7 +181,7 @@ const MyDrawer = memo(({ switch: { isOpen, setIsOpen }, data }) => {
   );
 });
 
-const App = memo(() => {
+const App = memo(({objeto}) => {
   const { medidas: dispositivo, anchoDrawer } = useContext(AppContext);
   const { isOpen, setIsOpen } = anchoDrawer;
   const navigate = useNavigate();
@@ -239,9 +253,9 @@ const App = memo(() => {
             </Box>
           )}
         </Button>
-        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-          <h2>HGW|</h2>
-          <p style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '40%' }}>Admin</p>
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', padding: 0, margin: 0 }}>
+          <Typography variant="h4" sx={{fontWeight: 600, padding: 0, margin: 0}}>HGW|</Typography>
+          <Typography variant='p' sx={{ fontWeight: 600 , padding: 0, margin: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '65%' }}>Admin</Typography>
         </Box>
       </Box>
       <MyDrawer switch={objetoEstado} data={objeto} />
@@ -254,7 +268,7 @@ const App = memo(() => {
   );
 });
 
-function Navbar({ alerta, setAlerta, imagenes }) {
+function Navbar({ alerta, setAlerta, imagenes, objeto }) {
   const [anchoAlert, setAncho] = useState('-180px');
 
   useEffect(() => {
@@ -263,14 +277,10 @@ function Navbar({ alerta, setAlerta, imagenes }) {
     }
   }, [alerta]);
 
-  useEffect(() => {
-    if (!alerta.estado) return;
-    const timeout = setTimeout(() => {
-      setAlerta(a => ({ ...a, estado: false }));
-    }, 4000);
-    return () => clearTimeout(timeout);
-  }, [alerta.estado]);
-
+  
+  const closeAlert = useCallback(() => {
+    setAlerta({ estado: false, valor: { title: '', content: '' } });
+  }, []);
   const safeSrc = useMemo(() => {
     const src = (imagenes.imagenes.file || '').trim();
     if (src.startsWith('http') || src.startsWith('data:image/')) return src;
@@ -279,19 +289,9 @@ function Navbar({ alerta, setAlerta, imagenes }) {
 
   return (
     <Box className={Style.padre}>
-      <Alert
-        sx={{
-          position: 'fixed',
-          zIndex: 9999,
-          transition: '250ms',
-          ...(alerta.lado === 'izquierdo'
-            ? { left: alerta.estado ? '1vw' : anchoAlert }
-            : { right: alerta.estado ? '1vw' : anchoAlert })
-        }}
-      >
-        <AlertTitle>{alerta.valor.title}</AlertTitle>
-        {alerta.valor.content}
-      </Alert>
+      <Snackbar onClose={closeAlert} autoHideDuration={6000} open={alerta.estado} sx={{zIndex: 9999}}   anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        message={alerta.valor.content}>
+      </Snackbar>
 
       {imagenes.imagenes.estado && safeSrc && (
         <Dialog
@@ -322,7 +322,7 @@ function Navbar({ alerta, setAlerta, imagenes }) {
           </Box>
         </Dialog>
       )}
-      <App />
+      <App objeto={objeto} />
       <Outlet />
     </Box>
   );

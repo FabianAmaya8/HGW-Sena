@@ -1,110 +1,122 @@
 import { memo, useCallback, useEffect, useState, useContext, useMemo } from 'react'
-import React from 'react';
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
+import { Fade, Stack } from '@mui/material';
+import "../../../font.module.scss"
 import { AppContext } from '../../../controlador';
 import Style from './ListaDinamic.module.scss'
-import { TableContainer, DialogTitle, DialogContent, DialogActions, Table, TableHead, TableRow, TableCell, TableBody, Button, Box, Dialog, Slide, IconButton, Typography } from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
+import {
+  TableContainer, DialogTitle, DialogContent, DialogActions,
+  Table, TableHead, TableRow, TableCell, TableBody,
+  Button, Box, Dialog, Slide, IconButton, Typography
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import DinamicForm from '../formularios/Dinamics';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
-import Categorias from '../../Categorias/Categorias';
-import Subcategorias from '../../Categorias/Subcategorias/Subcategorias';
-import CrearProducto from '../../Productos/CrearProducto';
-import Usuarios from '../../Usuarios/Usuarios';
 import Carga from '../../intermedias/carga';
-import Membresias from '../../Membresias/Membresias';
-import Bonos from './../../Bonos/Bonos';
 
 const BACKEND = "http://127.0.0.1:3000"
-
 const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
-  const [confirmacion, setConfirmacion] = useState({ estado: false, table: "", filaDatos: "", columnas: "" });
-  const columnas = useMemo(() => [...datos.columnas.map(c => c.field), 'Editar/Eliminar'], [datos.columnas]);
-  const renderHeader = useCallback(() => (
-    <TableRow sx={{ background: '#9BCC4B' }}>
-      {datos.columnas.map((celda, i) => (
-        <TableCell key={celda.field + '_' + i} sx={{ minWidth: "80px" }}>
-          <Typography sx={{ color: 'white', textAlign: 'center' }}>{celda.name}</Typography>
+  const [confirmacion, setConfirmacion] = useState({ estado:false,table:"",filaDatos:null,columnas:[] })
+  const columnas = useMemo(()=>[...datos.columnas.map(c=>c.field),"Editar/Eliminar"],[datos.columnas])
+  const renderHeader = useCallback(()=>(
+    <TableRow sx={{ background:"#9BCC4B" }}>
+      {datos.columnas.map((c,i)=>
+        <TableCell key={c.field+"_"+i} sx={{ minWidth:"80px" }}>
+          <Typography sx={{ color:"white",textAlign:"center" }}>{c.name}</Typography>
         </TableCell>
-      ))}
+      )}
       <TableCell key="editarEliminar_header">
-        <Typography sx={{ color: 'white', textAlign: 'center' }}>Editar/Eliminar</Typography>
+        <Typography sx={{ color:"white",textAlign:"center" }}>Editar/Eliminar</Typography>
       </TableCell>
     </TableRow>
-  ), [datos.columnas]);
-  const edit = useCallback((id) => {
+  ),[datos.columnas])
+  const edit = useCallback(id=>{
     editar.setId(id);
-    editar.setDialog(true);
-  }, [editar]);
-  const eliminar = useCallback((table, filaDatos, columnas) => {
-    fetch(`${BACKEND}/eliminar`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ table: table, id: filaDatos[columnas[0]] })
-    }).then(() => padre.setRender(!padre.render));
-  }, [padre]);
-  const renderRows = useCallback(() =>
-    datos.filas.map((filaDatos, rowIndex) => (
-      <TableRow key={'fila_' + rowIndex}>
-        {columnas.map(col => (
-          <TableCell key={rowIndex + '_' + col}>
-            {col === 'Editar/Eliminar' ? (
-              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Button onClick={() => edit({ id: filaDatos[columnas[0]], table })}><EditIcon sx={{ color: "black" }} /></Button>
-                <Button onClick={() => setConfirmacion({ estado: true, table, filaDatos, columnas })} sx={{ background: "red", borderRadius: "2rem" }}>
-                  <DeleteIcon sx={{ color: "white" }} />
-                </Button>
-              </Box>
-            ) : (col.toLowerCase().includes("img") || col.toLowerCase().includes("imagen") || col.toLowerCase().includes("foto")) ? (
-              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' }}>
-                {filaDatos[col] && (
-                  <Button onClick={() => {
-                    let file = filaDatos[col];
-                    if (typeof file === 'string' && file.startsWith('http')) {
-                      try {
-                        const url = new URL(file);
-                        file = url.pathname.split('/').pop();
-                      } catch { }
-                    }
-                    if (typeof file === 'string') file = file.trim();
-                    if (!file) return;
-                    imagenes.setImagenes({ estado: true, file });
-                  }}>Ver Imagen</Button>
-                )}
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' }}>
-                {filaDatos[col]?.value ?? filaDatos[col]}
-              </Box>
-            )}
-          </TableCell>
-        ))}
-      </TableRow>
-    )), [datos.filas, columnas, edit, table, imagenes, padre]);
+    editar.setDialog(true)
+  },[editar])
+  const eliminar = useCallback(async(tbl,fila,cols)=>{
+    await fetch(`${BACKEND}/eliminar`,{
+      method:"POST",
+      headers:{"content-type":"application/json"},
+      body:JSON.stringify({ table:tbl,id:fila[cols[0]] })
+    })
+    padre.setRender(r=>!r)
+  },[padre])
+  const renderRows = useMemo(()=>datos.filas.map((fila,i)=>
+    <TableRow key={"fila_"+i}>
+      {columnas.map(col=>
+        <TableCell key={i+"_"+col}>
+          {col==="Editar/Eliminar"?
+            <Box sx={{ display:"flex",gap:1,justifyContent:"center",alignItems:"center" }}>
+              <Button onClick={()=>edit({ id:fila[columnas[0]],table })}>
+                <EditIcon sx={{ color:"black" }}/>
+              </Button>
+              <Button sx={{ background:"red",borderRadius:"2rem" }} onClick={()=>setConfirmacion({ estado:true,table,filaDatos:fila,columnas })}>
+                <DeleteIcon sx={{ color:"white" }}/>
+              </Button>
+            </Box>:
+          col.toLowerCase().includes("img")||col.toLowerCase().includes("imagen")||col.toLowerCase().includes("foto")?
+            <Box sx={{ display:"flex",gap:1,justifyContent:"center",alignItems:"center" }}>
+              {fila[col]&&
+                <Button onClick={()=>{
+                  let file=fila[col]
+                  if(typeof file==="string"&&file.startsWith("http")){
+                    try{file=new URL(file).pathname.split("/").pop()}catch{}
+                  }
+                  file=typeof file==="string"?file.trim():file
+                  if(!file)return
+                  imagenes.setImagenes({ estado:true,file })
+                }}>Ver Imagen</Button>
+              }
+            </Box>:
+            <Box sx={{ display:"flex",gap:1,justifyContent:"center",alignItems:"center" }}>
+              {fila[col]?.value??fila[col]}
+            </Box>
+          }
+        </TableCell>
+      )}
+    </TableRow>
+  ),[datos.filas,columnas,edit,table,imagenes])
   return (
     <>
       <Dialog
         open={confirmacion.estado}
-        PaperProps={{ sx: { width: "60%", maxWidth: "400px", borderRadius: "30px", display: "flex", flexDirection: "column", overflow: "visible", p: 0 } }}
+        disableRestoreFocus
+        onClose={()=>setConfirmacion(s=>({...s,estado:false}))}
+        TransitionComponent={Fade}
+        PaperProps={{ sx:{ width:"100%",maxWidth:420,borderRadius:4,px:4,py:3,boxShadow:12,backdropFilter:"blur(12px)",backgroundColor:"rgba(255,255,255,0.85)",position:"relative",overflow:"visible" } }}
       >
-        <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.25rem' }}>¿Eliminar registro?</DialogTitle>
-        <DialogContent sx={{ textAlign: 'center', pt: 0, pb: 3 }}>
-          <Typography variant="body1" color="textSecondary">¿En verdad desea eliminar este registro? Esta acción no se puede deshacer.</Typography>
+        <Box sx={{ position:"absolute",top:-35,left:"50%",transform:"translateX(-50%) scale(1)",transition:"transform 0.4s ease" }}>
+          <Box sx={{ animation:"scaleIn 0.5s ease-out","@keyframes scaleIn":{ "0%":{ transform:"scale(0)",opacity:0 },"100%":{ transform:"scale(1)",opacity:1 } } }}>
+            <WarningAmberRoundedIcon sx={{ fontSize:64,color:"warning.main",background:"linear-gradient(135deg,#fff7e0,#ffe0b2)",borderRadius:"50%",p:2,boxShadow:4 }}/>
+          </Box>
+        </Box>
+        <DialogTitle sx={{ mt:5,textAlign:"center",fontWeight:700,fontSize:"1.6rem",color:"text.primary" }}>
+          ¿Eliminar registro?
+        </DialogTitle>
+        <DialogContent sx={{ textAlign:"center",mt:1 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ lineHeight:1.6 }}>
+            Esta acción no se puede deshacer. <br/> ¿Estás completamente seguro?
+          </Typography>
         </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', pb: 4, gap: 2 }}>
+        <DialogActions sx={{ justifyContent:"center",mt:3,gap:2 }}>
           <Button
             variant="contained"
-            onClick={() => {
-              setConfirmacion(s => ({ ...s, estado: false }));
-              eliminar(confirmacion.table, confirmacion.filaDatos, confirmacion.columnas);
+            color="error"
+            onClick={()=>{
+              setConfirmacion(s=>({...s,estado:false}))
+              eliminar(confirmacion.table,confirmacion.filaDatos,confirmacion.columnas)
             }}
-            sx={{ backgroundColor: 'error.main', color: 'common.white', px: 3, py: 1, borderRadius: '30px', textTransform: 'none', boxShadow: 2, '&:hover': { backgroundColor: 'error.dark', boxShadow: 4 } }}
+            sx={{ px:4,py:1.3,borderRadius:3,textTransform:"none",fontWeight:600,boxShadow:3,transition:"all 0.3s ease","&:hover":{ backgroundColor:"error.dark",transform:"scale(1.05)",boxShadow:6 } }}
           >
-            Confirmar
+            Eliminar
           </Button>
           <Button
             variant="outlined"
-            onClick={() => setConfirmacion({ estado: false, table: "", filaDatos: "", columnas: "" })}
-            sx={{ px: 3, py: 1, borderRadius: '30px', textTransform: 'none', borderColor: 'grey.400', color: 'text.primary', '&:hover': { borderColor: 'grey.600', backgroundColor: 'action.hover' } }}
+            onClick={()=>setConfirmacion(s=>({...s,estado:false}))}
+            sx={{ px:4,py:1.3,borderRadius:3,textTransform:"none",fontWeight:600,color:"text.primary",borderColor:"grey.400",transition:"all 0.3s ease","&:hover":{ backgroundColor:"action.hover",borderColor:"grey.600",transform:"scale(1.03)" } }}
           >
             Cancelar
           </Button>
@@ -114,78 +126,114 @@ const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
         <TableContainer
           className={Style.formulario}
           sx={{
-            position: "relative",
-            "&::-webkit-scrollbar": { width: "2.5px", height: "9px" },
-            "&::-webkit-scrollbar-thumb": { background: "#7e9e4a", borderRadius: "5px" },
-            "& .MuiTableCell-stickyHeader": { backgroundColor: "#9BCC4B", color: "white" },
-            borderRadius: '10px 0 0 10px', margin: '3.5vh 1%', background: 'white', width: '100%', height: '78.5vh'
+            position:"relative",
+            "&::-webkit-scrollbar":{ width:"2.5px",height:"9px" },
+            "&::-webkit-scrollbar-thumb":{ background:"#7e9e4a",borderRadius:"5px" },
+            "& .MuiTableCell-stickyHeader":{ backgroundColor:"#9BCC4B",color:"white" },
+            borderRadius:"10px 0 0 10px",margin:"3.5vh 1%",background:"white",width:"100%",height:"78.5vh"
           }}
         >
-          {datos.columnas.length <= 0 && <Carga />}
-          <Table stickyHeader sx={{ "& .MuiTableCell-stickyHeader": { backgroundColor: "#9BCC4B", color: "white" } }}>
+          {!datos.columnas.length && <Carga/>}
+          <Table stickyHeader sx={{ "& .MuiTableCell-stickyHeader":{ backgroundColor:"#9BCC4B",color:"white" } }}>
             <TableHead>{renderHeader()}</TableHead>
-            <TableBody>{renderRows()}</TableBody>
+            <TableBody>{renderRows}</TableBody>
           </Table>
         </TableContainer>
       </Slide>
     </>
-  );
-});
+  )
+})
 
-const ListaDinamic = ({ datos, padre }) => {
+const ListaDinamic = ({ datos, padre, form, consultas }) => {
   const { medidas, anchoDrawer, alerta, imagenes } = useContext(AppContext);
   const [dialog, setDialog] = useState(false);
   const [consulta, setConsulta] = useState({ columnas: [], filas: [] });
   const [consultaEditar, setConsultaEditar] = useState({});
-  const [id, setId] = useState({});
+  const [id, setId] = useState(null);
+  const [clickEdit, setClickEdit] = useState(false);
   useEffect(() => {
-    if (Object.keys(id).length > 0) {
-      let ignore = false;
-      fetch(`${BACKEND}/consultaFilas`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(id)
-      }).then(r => r.json()).then(res => { if (!ignore) setConsultaEditar(res) });
-      return () => { ignore = true };
-    }
-  }, [id]);
+    if (!id) return;
+    let ignore = false;
+    (async () => {
+      try {
+        const res = await fetch(`${BACKEND}/consultaFilas`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(id)
+        });
+        const json = await res.json();
+        if (!ignore) setConsultaEditar(json);
+      } catch { }
+    })();
+    return () => { ignore = true };
+  }, [id, padre.render]);
+
   const contenidoWidth = useMemo(() => anchoDrawer.isOpen
     ? `calc(100% - ${anchoDrawer.ancho.open - 15}rem)`
     : `calc(100% - ${anchoDrawer.ancho.close - 4}rem)`, [anchoDrawer.isOpen, anchoDrawer.ancho.open, anchoDrawer.ancho.close]);
+
   useEffect(() => {
     let tabla = datos.table;
     let ignore = false;
-    fetch(`${BACKEND}/consultaTabla`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ table: tabla })
-    }).then(r => r.json()).then(res => { if (!ignore) setConsulta(res) });
+    (async () => {
+      try {
+        const res = await fetch(`${BACKEND}/consultaTabla`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ table: tabla })
+        });
+        const json = await res.json();
+        if (!ignore) setConsulta(json);
+      } catch { }
+    })();
     return () => { ignore = true };
   }, [datos.table, padre.render]);
+
   const handleClose = useCallback(() => {
     alerta.setAlerta({ estado: false, valor: { title: '', content: "" }, lado: 'derecho' });
     setDialog(false);
   }, [alerta]);
-  const datosEnvioEdit = useMemo(() => ({ estado: true, datos: consultaEditar }), [consultaEditar]);
+  const datosEnvioEdit = useMemo(() => ({ estado: true, datos: consultaEditar, setClick: setClickEdit , click: clickEdit ? true: false }), [consultaEditar, clickEdit]);
   const editarMemo = useMemo(() => ({ setDialog, setId }), []);
   return (
     <>
-      <Box sx={{ position: "fixed", height: dialog ? "100%" : "0", transition: "350ms", width: "100%", backgroundColor: "#ebebeb", zIndex: "9997", bottom: 0, right: 0, display: "flex", flexDirection: "row", alignItems: "center", overflow: 'hidden' }}>
-        <Box sx={{ width: "100%", height: "60px", background: "#9BCC4B", position: 'absolute', top: 0, left: 0, display: "flex", alignItems: "center", justifyContent: "flex-end", paddingLeft: "1rem", paddingRight: "1rem", boxSizing: 'border-box', zIndex: 9999 }}>
-          <IconButton onClick={handleClose}>
-            <CloseIcon sx={{ color: "white" }} />
-          </IconButton>
+      <Box sx={{
+        position: "fixed", height: dialog ? "100%" : "0", transition: "350ms", width: "100%", backgroundColor: "#ebebeb",
+        zIndex: 9997, bottom: 0, right: 0, display: "flex", flexDirection: "row", alignItems: "center", overflow: 'hidden'
+      }}>
+        <Box sx={{
+          width: "100%", height: "60px", background: "#9BCC4B", position: 'absolute',
+          top: 0, left: 0, display: "flex", alignItems: "center", justifyContent: "space-between",
+          paddingLeft: "1rem", paddingRight: "1rem", boxSizing: 'border-box', zIndex: 9998
+        }}>
+          <Box></Box>
+          {medidas != "movil" && 
+          <Box sx={{position: "absolute", left: 0 , backgroundColor: "white", display: "flex", width: "max-content", height: "100%", alignItems: "center", justifyContent: "flex-end", paddingLeft: "2.5rem", paddingRight: "2rem", borderRadius: "0px 20rem 20rem 0px"}}>
+            <Typography variant="h5" sx={{color: "#2ebe66ff", fontWeight: 600}}>
+              {form[0].title[0]}
+            </Typography>
+          </Box>}
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1.1rem" }}>
+            <Button 
+              onClick={()=>setClickEdit(true)}
+              sx={{color: "white", display: "flex", alignItems: "center", gap: "0.3rem"}}>
+              {<SaveIcon sx={{color: "white"}} />} Guardar
+            </Button>
+            <IconButton onClick={handleClose}>
+              <CloseIcon sx={{ color: "white" }} />
+            </IconButton>
+          </Box>
         </Box>
         {Object.keys(consultaEditar).length > 0 && (
-          datos.table === "categorias" ? <Categorias edit={datosEnvioEdit} padre={padre} /> :
-            datos.table === "subcategoria" ? <Subcategorias edit={datosEnvioEdit} padre={padre} /> :
-              datos.table === "productos" ? <CrearProducto edit={datosEnvioEdit} padre={padre} /> :
-                datos.table === "usuarios" ? <Usuarios edit={datosEnvioEdit} padre={padre} /> :
-                  datos.table === "membresias" ? <Membresias edit={datosEnvioEdit} padre={padre} /> :
-                    datos.table === "bonos" && <Bonos edit={datosEnvioEdit} padre={padre} />
+          <DinamicForm padre={padre} form={form} edit={datosEnvioEdit} consultas={consultas} />
         )}
       </Box>
-      <Box className="box-contenidos" sx={{ right: medidas === "movil" ? "0vw" : "0.6vw", marginLeft: "auto", width: medidas === "movil" ? "100%" : contenidoWidth, transition: "450ms" }}>
+      <Box className="box-contenidos" sx={{
+        right: medidas === "movil" ? "0vw" : "0.6vw",
+        marginLeft: "auto",
+        width: medidas === "movil" ? "100%" : contenidoWidth,
+        transition: "450ms"
+      }}>
         <MyTable imagenes={imagenes} padre={padre} table={datos.table} datos={consulta} editar={editarMemo} />
       </Box>
     </>

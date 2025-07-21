@@ -1,14 +1,3 @@
-* {
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
-}
 .box-contenidos {
   width: 100%;
   max-width: 100vw;
@@ -21,6 +10,6 @@
   overflow: hidden;
   
   @media (max-width: 600px) {
-    right: 0.9vw;
+    right: 0vw;
   }
 }

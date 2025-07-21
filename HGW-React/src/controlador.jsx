@@ -1,83 +1,118 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { useTheme, useMediaQuery } from '@mui/material'
-import { Navigate } from 'react-router-dom'
-import { createTheme, ThemeProvider } from '@mui/material'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useTheme, useMediaQuery, createTheme, ThemeProvider, Backdrop } from '@mui/material'
+import "./font.module.scss"
 import './index.scss'
 import { createContext, useMemo, useState, useEffect } from 'react'
 import Navbar from './Navbar.jsx'
 import Home from './Administrador/Home/Home.jsx'
-import Categorias from './Administrador/Categorias/Categorias.jsx'
-import Subcategorias from './Administrador/Categorias/Subcategorias/Subcategorias.jsx'
-import ListaCategorias from './Administrador/Categorias/ListaCategorias.jsx'
-import CrearProducto from './Administrador/Productos/CrearProducto.jsx'
-import ListaSubcategorias from './Administrador/Categorias/Subcategorias/ListaSubcategorias.jsx'
-import ListaProductos from './Administrador/Productos/ListaProductos.jsx'
-import Usuarios from './Administrador/Usuarios/Usuarios.jsx'
-import ListaUsuarios from './Administrador/Usuarios/ListaUsuarios.jsx'
+import Dinamics from './Administrador/Dinamics/formularios/Dinamics.jsx'
+import ListaDinamics from './Administrador/Dinamics/Listas/listaDinamic.jsx'
 import Secure from './Administrador/Services/guardia.jsx'
-import Membresias from './Administrador/Membresias/Membresias.jsx'
-import ListaMembresias from './Administrador/Membresias/ListaMembresias.jsx'
-import Bonos from './Administrador/Bonos/Bonos.jsx'
-import ListaBonos from './Administrador/Bonos/ListaBonos.jsx'
 import NoPermiss from './Administrador/Services/noPermiss.jsx'
 import Nofound from './Administrador/Services/no-found.jsx'
+import CircularProgress from '@mui/material/CircularProgress';
+import CreacionVistas from './Administrador/ModulosGestionVista/Creacion.jsx'
+import EditarModulo from './Administrador/ModulosGestionVista/Edicion.jsx'
 
+const BACKEND = 'http://127.0.0.1:3000'
 const tema = createTheme({
   palette: {
-    primary: {
-      main: "#9BCC4B"
-    },
-    secondary: {
-      main: "#59732F"
-    },
-    background: {
-      main: "#f0f0f0"
-    }
+    primary: { main: "#9BCC4B" },
+    secondary: { main: "#59732F" },
+    background: { main: "#f0f0f0" }
   },
-  typography: {
-    fontFamily: "Arial"
-  }
-});
+  typography: { fontFamily: "Arial" }
+})
 
-
-export const AppContext = createContext();
+export const AppContext = createContext()
 
 const Controlador = () => {
+  const [render, setRender] = useState(false)
+  const [form, setForm] = useState([])
+  useEffect(() => {
+    fetch(BACKEND + "/consultaTabla", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ table: "modulosAdmin" })
+    })
+      .then(r => r.json())
+      .then(setForm)
+  }, [])
   const moviles = useMediaQuery(tema.breakpoints.down("sm"))
   const tablets = useMediaQuery(tema.breakpoints.between("sm", "md"))
+  const medidas = moviles ? "movil" : tablets ? "tablet" : "pc"
   const [estadoDrawer, setEstadoDrawer] = useState(false)
   const objetoDrawer = useMemo(() => ({ isOpen: estadoDrawer, setIsOpen: setEstadoDrawer, ancho: { open: "31", close: "9" } }), [estadoDrawer])
   const [imagenes, setImagenes] = useState(false)
   const [alerta, setAlerta] = useState({ estado: false, valor: { title: "", content: "" } })
-  const medidas = moviles ? "movil" : tablets ? "tablet" : "pc"
   const ctx = useMemo(() => ({ imagenes: { estado: imagenes, setImagenes, file: "" }, alerta: { value: alerta, setAlerta }, medidas, anchoDrawer: objetoDrawer }), [imagenes, alerta, medidas, objetoDrawer])
-  const navImgs = useMemo(() => ({ imagenes, setImagenes }), [imagenes, setImagenes])
+  const navImgs = useMemo(() => ({ imagenes, setImagenes }), [imagenes])
+  const padre = useMemo(() => ({ setRender, render }), [render])
+  const menu = useMemo(() => {
+    if (!Array.isArray(form?.filas)) return []
+    try { return JSON.parse(form.filas[0].navbar) } catch { return [] }
+  }, [form.filas])
+  const drawerItems = useMemo(() => {
+    if (!Array.isArray(form?.filas)) return []
+    try {
+      let valoresDrawer = JSON.parse(form.filas[0].vistas)
+      valoresDrawer.push({
+        "id": 16,
+        "value": "Modulos",
+        "icon": "<SettingsIcon />",
+        "colorText": "white",
+        "childs": [
+          {
+            "id": 17,
+            "value": "Crear",
+            "colorText": "white",
+            "click": "/Administrador/GestionVistas/Crear"
+          },
+          {
+            "id": 18,
+            "value": "Editar",
+            "colorText": "white",
+            "click": "/Administrador/GestionVistas/Editar"
+          }
+        ]
+      })
+      return valoresDrawer
+    } catch { return [] }
+  }, [form.filas])
+  const rutas = useMemo(() => menu.flatMap(datos => {
+    const llave = datos[0].path
+    const consulta = "tableC" in datos[0] ? datos[0].tableC : undefined
+    return [
+      <Route key={llave + "/Crear"} path={llave + "/Crear"} element={<Secure><Dinamics form={datos} consultas={consulta} edit={{ estado: false, datos: "" }} /></Secure>} />,
+      <Route key={llave + "/Lista"} path={llave + "/Lista"} element={<Secure><ListaDinamics form={datos} consultas={consulta} datos={datos[0].req} padre={padre} /></Secure>} />
+    ]
+  }), [menu, padre])
+
   return (
     <ThemeProvider theme={tema}>
       <AppContext.Provider value={ctx}>
-          <Routes>
-            <Route path='/' element={<Navbar imagenes={navImgs} alerta={alerta} setAlerta={setAlerta} />}>
+        <Navbar objeto={drawerItems} imagenes={navImgs} alerta={alerta} setAlerta={setAlerta} />
+        {
+          Array.isArray(form?.filas) ?
+            <Routes>
               <Route path="*" element={<Nofound />} />
               <Route index element={<Navigate to="Home" replace />} />
+              {rutas}
+              <Route path="GestionVistas/Crear" element={<Secure><CreacionVistas /></Secure>} />
+              <Route path="GestionVistas/Editar" element={<Secure><EditarModulo vistas={menu} /></Secure>} />
               <Route path="Home" element={<Secure><Home /></Secure>} />
-              <Route path="Categorias/Crear" element={<Secure><Categorias /></Secure>} />
-              <Route path="Categorias/Lista" element={<Secure><ListaCategorias /></Secure>} />
-              <Route path="Categorias/Subcategorias/Crear" element={<Secure><Subcategorias /></Secure>} />
-              <Route path="Categorias/Subcategorias/Lista" element={<Secure><ListaSubcategorias /></Secure>} />
-              <Route path="Productos/Crear" element={<Secure><CrearProducto /></Secure>} />
-              <Route path="Productos/Lista" element={<Secure><ListaProductos /></Secure>} />
-              <Route path="Usuarios/Lista" element={<Secure><ListaUsuarios /></Secure>} />
-              <Route path="Usuarios/Crear" element={<Secure><Usuarios /></Secure>} />
-              <Route path="Membresias/Crear" element={<Secure><Membresias /></Secure>} />
-              <Route path="Membresias/Lista" element={<Secure><ListaMembresias /></Secure>} />
-              <Route path="Bonos/Crear" element={<Secure><Bonos /></Secure>} />
-              <Route path="Bonos/Lista" element={<Secure><ListaBonos /></Secure>} />
               <Route path="no-autorizado" element={<NoPermiss />} />
-            </Route>
-          </Routes>
+            </Routes> :
+            <Backdrop
+              sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+              open={open}
+            >
+              <CircularProgress color="inherit" />
+            </Backdrop>
+        }
       </AppContext.Provider>
     </ThemeProvider>
   )
 }
 
-export default Controlador;
+export default Controlador
