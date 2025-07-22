@@ -161,8 +161,6 @@ CREATE TABLE bonos_usuarios (
       ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-select * from usuarios;
-
 -- Educación y contenido
 
 CREATE TABLE educacion (
@@ -212,6 +210,39 @@ CREATE TABLE transacciones (
 
 CREATE TABLE modulosAdmin(id int primary key auto_increment, 
 	navbar text, vistas text
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+-- Tabla principal de órdenes
+CREATE TABLE ordenes (
+    id_orden INT PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    id_direccion INT NOT NULL,
+    id_medio_pago INT NOT NULL,
+    total DOUBLE NOT NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id_usuario)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_direccion)
+        REFERENCES direcciones(id_direccion)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_medio_pago)
+        REFERENCES medios_pago(id_medio)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tabla intermedia productos por orden
+CREATE TABLE ordenes_productos (
+    id_orden_producto INT PRIMARY KEY AUTO_INCREMENT,
+    id_orden INT NOT NULL,
+    id_producto INT NOT NULL,
+    cantidad INT NOT NULL,
+    precio_unitario DOUBLE NOT NULL,
+    FOREIGN KEY (id_orden)
+        REFERENCES ordenes(id_orden)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_producto)
+        REFERENCES productos(id_producto)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------

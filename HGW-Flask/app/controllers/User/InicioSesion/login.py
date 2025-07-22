@@ -45,8 +45,8 @@ def login():
                 token = jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm="HS256")
                 
                 role_redirects = {
-                    1: '/Admin',
-                    2: '/mod',
+                    1: '/Administrador',
+                    2: '/moderador',
                     3: '/inicio'
                 }
                 destino = role_redirects.get(usuario_encontrado['role_id'], '/inicio')

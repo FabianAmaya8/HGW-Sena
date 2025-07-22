@@ -27,6 +27,7 @@ def create_app():
     from .controllers.User.InicioSesion.login import login_bp
     from .controllers.User.InicioSesion.register import register_bp
     from .controllers.User.Catalogo.catalogo import catalogo_bp
+    from .controllers.User.Catalogo import productoDet 
     from .controllers.User.Catalogo.producto import stock_bp
     from .controllers.User.Personal.membresia import membresia_bp
     from .controllers.User.Personal.personal import personal_bp

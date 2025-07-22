@@ -1,75 +1,66 @@
 import { createBrowserRouter } from "react-router-dom";
 
-// Visitante
-import InicioWrapper from "./pages/View/inicioWrapper";
-import Buquedapage from "./pages/User/buqueda";
-import LoginPege from "./pages/View/loginPage";
-import RegistroPage from "./pages/View/registroPage";
-import CatalogoPage from "./pages/View/catalogoPege";
-import Carritopage from "./pages/User/carritopag";
+// Layouts
+import LayoutUsuario from "./pages/layouts/LayoutUsuario";
+import PrivateLayout from './pages/layouts/PrivateLayout';
+import LayoutRol from "./pages/layouts/LayoutRol";
+
+// --- Páginas de Error ---
+import Error404 from "./View/Components/Error404";
+
+// --- Páginas Públicas (para visitantes) ---
+import InicioView from "./View/Components/inicio";
+import ResultadoBusqueda from "./User/Components/Fijos/ResultadoBusqueda";
+import LoginView from "./View/Components/login/loginView";
+import RegistroForm from "./View/Components/Registro/registroForm";
+import Catalogo from "./View/Components/catalogo/catalogo";
+
+// --- Páginas Privadas (para usuarios registrados) ---
+import ProductoDetalle from "./View/Components/ProductoDetalle";
+import Personal from "./User/Components/Personal/Personal";
+import PersonalInfo from "./User/Components/Personal/PersonalInfo";
+import Educacion from "./User/Components/Educacion/Educacion";
+import CarritoMultistep from "./View/Components/carrito/CarritoMultistep";
 
 
-// Usuario
-import Inicio from "./pages/User/InicioPege";
-import PersonalPage from "./pages/User/personalPage";
-import InfoPersonalPege from "./pages/User/InfoPersonalPege";
-import EducacionPage from "./pages/User/educacionPage";
-import ProductoPag from "./pages/User/productopag";
 
-//Admin
 
+// --- Admin ---
 import Controlador from "./controlador";
 
 
 const router = createBrowserRouter([
     {
-        path: "/",
-        element: <InicioWrapper />,
+        element: <LayoutRol />,
+        children: [
+            { path: "/administrador/*", element: <Controlador /> },
+            { path: "/moderador/*", element: <Controlador /> }
+        ]
     },
     {
-        path: "/search",
-        element: <Buquedapage />,
+        // Rutas Públicas
+        element: <LayoutUsuario />,
+        children: [
+            { path: "/",    element: <InicioView/>,},
+            { path: "/search",  element: <ResultadoBusqueda />,},
+            { path: "/login",   element: <LoginView />,},
+            { path: "/register",    element: <RegistroForm />,},
+            { path: "/catalogo",    element: <Catalogo />,},
+            { path: "/producto/:id",    element: <ProductoDetalle />},
+            { path: "*",     element: <Error404 />},
+        ]
     },
     {
-        path: "/login",
-        element: <LoginPege />,
+        // Rutas Privadas
+        element: <PrivateLayout />,
+        children: [
+            { path: "/inicio", element: <InicioView /> },
+            { path: "/personal", element: <Personal /> },
+            { path: "/informacion-personal", element: <PersonalInfo /> },
+            { path: "/educacion", element: <Educacion /> },
+            { path: "/carrito", element: <CarritoMultistep /> },
+        ]
     },
-    {
-        path: "/register",
-        element: <RegistroPage />,
-    },
-    {
-        path: "/Catalogo",
-        element: <CatalogoPage />,
-    },
-    {
-        path: "/inicio",
-        element: <Inicio />,
-    },
-    {
-        path: "/Personal",
-        element: <PersonalPage />,
-    },
-    {
-        path: "/informacion-personal",
-        element: <InfoPersonalPege />,
-    },
-    {
-        path: "/Educacion",
-        element: <EducacionPage />,
-    },
-    {
-        path: "/producto/:id",
-        element: <ProductoPag />
-    },
-    {
-        path: "/carrito",
-        element: <Carritopage />,
-    },
-    {
-        path: "/Administrador/*", element: <Controlador />,
-    }
-
 ]);
 
 export default router;

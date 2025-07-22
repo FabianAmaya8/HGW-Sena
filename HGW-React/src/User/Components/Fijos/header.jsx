@@ -45,7 +45,7 @@ export default function Header() {
                     const profileUrl = (data.user.url_foto_perfil ?? null);
                     if (profileUrl) {
                         const baseUrl = await findWorkingBaseUrl();
-                        const fullProfileUrl = `${baseUrl.replace(/\/$/, '')}/${profileUrl.replace(/^\//, '')}`;
+                        const fullProfileUrl = `${baseUrl.replace(/\/$/, '')}/images/${profileUrl.replace(/^\//, '')}`;
                         setProfileUrl(fullProfileUrl);
                     }
                 } else {
@@ -60,7 +60,7 @@ export default function Header() {
 
         const intervalo = setInterval(() => {
             fetchCartCountOnly();
-        }, 5000);
+        }, 30000);
 
         return () => clearInterval(intervalo);
     }, [user]);
@@ -76,7 +76,7 @@ export default function Header() {
     const opciones = [
         { to: '/', text: 'Cerrar sesión', action: () => logout() },
         ...(
-            user?.role === 1 ? [{ to: '/Admin', text: 'Administrador' }]
+            user?.role === 1 ? [{ to: '/administrador', text: 'Administrador' }]
         :   user?.role === 2 ? [{ to: '/Moderador', text: 'Moderador' }] 
         :   []),
 
