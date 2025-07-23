@@ -1,0 +1,64 @@
+# app/docs/producto_unico.yml
+summary: Obtener detalle de un producto
+description: |
+  Recupera la información completa de un producto específico por su ID,
+  incluyendo imágenes, descripción, categoría y subcategoría.
+tags:
+  - Catálogo
+parameters:
+  - name: id
+    in: query
+    type: integer
+    required: true
+    description: ID del producto
+responses:
+  200:
+    description: Producto encontrado
+    schema:
+      type: object
+      properties:
+        id_producto:
+          type: integer
+          example: 123
+        nombre:
+          type: string
+          example: "Teléfono Modelo X"
+        precio:
+          type: number
+          example: 499.99
+        imagen:
+          type: string
+          example: "https://.../imagen.jpg"
+        imagenes:
+          type: array
+          items:
+            type: string
+          example: ["https://.../img1.jpg", "https://.../img2.jpg"]
+        descripcion:
+          type: string
+          example: "Descripción detallada del producto."
+        stock:
+          type: integer
+          example: 25
+        categoria:
+          type: string
+          example: "Electrónica"
+        subcategoria:
+          type: string
+          example: "Smartphones"
+  404:
+    description: Producto no encontrado
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Producto no encontrado"
+  500:
+    description: Error interno del servidor
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Descripción del error"

@@ -1,6 +1,7 @@
 from flask import Blueprint, request,current_app,jsonify,render_template
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
+from flasgger import swag_from
 import os
 
 # Crear blueprint
@@ -11,7 +12,8 @@ bcrypt = Bcrypt()
 def status():
     return render_template('index.html'), 200  
 
-@register_bp.route('/api/ubicacion/paises', methods=['GET', 'POST'])
+@register_bp.route('/api/ubicacion/paises', methods=['GET'])
+@swag_from('../../Doc/InicioSesion/Registro/ubicacion_paises.yml')
 def api_ubicacion_paises():
     connection = current_app.config['MYSQL_CONNECTION']
     try:
@@ -23,6 +25,7 @@ def api_ubicacion_paises():
         return str(e)
 
 @register_bp.route('/api/ubicacion/ciudades', methods=['GET'])
+@swag_from('../../Doc/InicioSesion/Registro/ubicacion_ciudades.yml')
 def api_ubicacion_ciudades():
     connection = current_app.config['MYSQL_CONNECTION']
     pais_id = request.args.get('paisId')
@@ -50,6 +53,7 @@ def api_ubicacion_ciudades():
         return jsonify({'error': str(e)}), 500
 
 @register_bp.route('/api/register', methods=['POST'])
+@swag_from('../../Doc/InicioSesion/Registro/register.yml')
 def register():
     connection = current_app.config['MYSQL_CONNECTION']
 

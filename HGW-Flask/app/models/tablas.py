@@ -6,6 +6,7 @@ from sqlalchemy import inspect
 from sqlalchemy.ext.automap import automap_base
 from app import db
 from werkzeug.utils import secure_filename
+from flasgger import swag_from
 
 tablas = automap_base()
 bcrypt = Bcrypt()
@@ -54,6 +55,7 @@ UPLOAD_FOLDER = os.path.join(current_app.root_path, 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @bp_tablas.route("/images/<path:filename>", methods=["GET", "OPTIONS"])
+@swag_from('../controllers/Doc/Tablas/images.yml')
 def images(filename):
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -63,6 +65,7 @@ def images(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 @bp_tablas.route("/registro", methods=["POST","OPTIONS"])
+@swag_from('../controllers/Doc/Tablas/registros.yml')
 def registros():
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -89,6 +92,7 @@ def registros():
     return jsonify({"respuesta": "Se registro correctamente"})
 
 @bp_tablas.route("/consultas", methods=["POST","OPTIONS"])
+@swag_from('../controllers/Doc/Tablas/consultas.yml')
 def consultas():
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -111,6 +115,7 @@ def consultas():
     return jsonify(respuestas)
 
 @bp_tablas.route("/consultaTabla", methods=["POST","OPTIONS"])
+@swag_from('../controllers/Doc/Tablas/consultaTabla.yml')
 def consultaTabla():
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -125,6 +130,7 @@ def consultaTabla():
     return jsonify({"filas": filas, "columnas": columnas})
 
 @bp_tablas.route("/eliminar", methods=["POST","OPTIONS"])
+@swag_from('../controllers/Doc/Tablas/eliminar.yml')
 def eliminar():
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -136,6 +142,7 @@ def eliminar():
     return jsonify({"respuesta": "se ha eliminado el registro"})
 
 @bp_tablas.route("/consultaFilas", methods=["POST","OPTIONS"])
+@swag_from('../controllers/Doc/Tablas/consultaFilas.yml')
 def consultaFilas():
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -148,6 +155,7 @@ def consultaFilas():
     return jsonify(fila)
 
 @bp_tablas.route("/editar", methods=["POST","OPTIONS"])
+@swag_from('../controllers/Doc/Tablas/editar.yml')
 def editar():
     if request.method == "OPTIONS":
         return Response(status=200)

@@ -1,0 +1,51 @@
+summary: Actualizar cantidad en el carrito
+description: |
+  Modifica la cantidad de un producto existente en el carrito.
+tags:
+  - Carrito
+consumes:
+  - application/json
+parameters:
+  - in: body
+    name: datos
+    schema:
+      type: object
+      required:
+        - id_usuario
+        - id_producto
+        - nueva_cantidad
+      properties:
+        id_usuario:
+          type: integer
+          description: ID del usuario
+        id_producto:
+          type: integer
+          description: ID del producto
+        nueva_cantidad:
+          type: integer
+          description: Nueva cantidad (debe ser > 0)
+responses:
+  200:
+    description: Cantidad actualizada con éxito
+    schema:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: "Cantidad actualizada"
+  400:
+    description: Falta dato obligatorio o cantidad inválida
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "La cantidad debe ser mayor a 0"
+  500:
+    description: Error interno al actualizar cantidad
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Error interno al actualizar cantidad"

@@ -4,11 +4,35 @@ from flask_sqlalchemy import SQLAlchemy
 from config import Config
 import pymysql.cursors
 
+from flasgger import Swagger
+
 db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    swagger_template = {
+        "info": {
+            "title": "HGW API",
+            "version": "1.0.0",
+            "description": "Documentación automática de tu API en Flask"
+        }
+    }
+    swagger_config = {
+        "headers": [],
+        "specs_route": "/docs/",
+        "specs": [{
+            "endpoint": "apispec",
+            "route": "/apispec.json",
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True,
+        }],
+        "static_url_path": "/flasgger_static",
+        "favicon": "./static/hgw_logo.jpeg"
+    }
+    Swagger(app, template=swagger_template, config=swagger_config)
+
     db.init_app(app)
     CORS(app)
     connection = pymysql.connect(
@@ -21,8 +45,6 @@ def create_app():
         autocommit=True
     )
     app.config['MYSQL_CONNECTION'] = connection
-    from .controllers.User.admin import admin_bp
-    from .controllers.User.mod import mod_bp
     from .controllers.User.user import header_bp
     from .controllers.User.InicioSesion.login import login_bp
     from .controllers.User.InicioSesion.register import register_bp
@@ -33,8 +55,6 @@ def create_app():
     from .controllers.User.Personal.personal import personal_bp
     from .controllers.User.Carrito.carrito_routes import carrito_bp
     
-    app.register_blueprint(admin_bp)
-    app.register_blueprint(mod_bp)
     app.register_blueprint(header_bp)
     app.register_blueprint(login_bp)
     app.register_blueprint(register_bp)
