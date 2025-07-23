@@ -15,8 +15,9 @@ import DinamicForm from '../formularios/Dinamics';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Carga from '../../intermedias/carga';
+import { findWorkingBaseUrl } from '../../../urlDB';
 
-const BACKEND = "http://127.0.0.1:3000"
+const BACKEND = findWorkingBaseUrl()
 const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
   const [confirmacion, setConfirmacion] = useState({ estado:false,table:"",filaDatos:null,columnas:[] })
   const columnas = useMemo(()=>[...datos.columnas.map(c=>c.field),"Editar/Eliminar"],[datos.columnas])

@@ -13,8 +13,9 @@ import Nofound from './Administrador/Services/no-found.jsx'
 import CircularProgress from '@mui/material/CircularProgress';
 import CreacionVistas from './Administrador/ModulosGestionVista/Creacion.jsx'
 import EditarModulo from './Administrador/ModulosGestionVista/Edicion.jsx'
+import { findWorkingBaseUrl } from './urlDB.js'
 
-const BACKEND = 'http://127.0.0.1:3000'
+const BACKEND = findWorkingBaseUrl()
 const tema = createTheme({
   palette: {
     primary: { main: "#9BCC4B" },

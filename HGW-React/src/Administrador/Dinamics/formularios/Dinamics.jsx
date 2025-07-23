@@ -10,8 +10,9 @@ import "../../../font.module.scss"
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import Carga from '../../intermedias/carga'
 import Style from './Dinamics.module.scss'
+import { findWorkingBaseUrl } from '../../../urlDB'
 
-const BACKEND = 'http://127.0.0.1:3000'
+const BACKEND = findWorkingBaseUrl()
 
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 
