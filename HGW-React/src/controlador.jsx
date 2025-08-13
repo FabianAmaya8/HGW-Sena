@@ -18,9 +18,10 @@ import { findWorkingBaseUrl } from './urlDB.js'
 const BACKEND = findWorkingBaseUrl()
 const tema = createTheme({
   palette: {
-    primary: { main: "#9BCC4B" },
+    primary: { main: "#29293D", contrastText: 'rgba(255, 255, 255, 0.88)' },
     secondary: { main: "#59732F" },
-    background: { main: "#f0f0f0" }
+    background: { main: "#f0f0f0" },
+    barra: { main: "#29293D" },
   },
   typography: { fontFamily: "Arial" }
 })
@@ -84,11 +85,11 @@ const Controlador = () => {
     const llave = datos[0].path
     const consulta = "tableC" in datos[0] ? datos[0].tableC : undefined
     return [
-      <Route key={llave + "/Crear"} path={llave + "/Crear"} element={<Secure><Dinamics form={datos} consultas={consulta} edit={{ estado: false, datos: "" }} /></Secure>} />,
+      <Route key={llave + "/Crear"} path={llave + "/Crear"} element={<Secure><Dinamics key={datos[0].req.table} form={datos} consultas={consulta} edit={{ estado: false, datos: "" }} /></Secure>} />,
       <Route key={llave + "/Lista"} path={llave + "/Lista"} element={<Secure><ListaDinamics form={datos} consultas={consulta} datos={datos[0].req} padre={padre} /></Secure>} />
     ]
   }), [menu, padre])
-
+  console.log(drawerItems)
   return (
     <ThemeProvider theme={tema}>
       <AppContext.Provider value={ctx}>
