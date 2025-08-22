@@ -129,13 +129,12 @@ const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
           sx={{
             position:"relative",
             "&::-webkit-scrollbar":{ width:"2.5px",height:"9px" },
-            "&::-webkit-scrollbar-thumb":{ background:"#7e9e4a",borderRadius:"5px" },
-            "& .MuiTableCell-stickyHeader":{ backgroundColor:"#9BCC4B",color:"white" },
+            "&::-webkit-scrollbar-thumb":{ backgroundColor: 'barra.main' ,borderRadius:"5px" },
             borderRadius:"10px 0 0 10px",margin:"3.5vh 1%",background:"white",width:"100%",height:"78.5vh"
           }}
         >
           {!datos.columnas.length && <Carga/>}
-          <Table stickyHeader sx={{ "& .MuiTableCell-stickyHeader":{ backgroundColor:"#9BCC4B",color:"white" } }}>
+          <Table stickyHeader sx={{ "& .MuiTableCell-stickyHeader":{ backgroundColor:"	#29293D",color:"white" } }}>
             <TableHead>{renderHeader()}</TableHead>
             <TableBody>{renderRows}</TableBody>
           </Table>
@@ -203,17 +202,17 @@ const ListaDinamic = ({ datos, padre, form, consultas }) => {
         zIndex: 9997, bottom: 0, right: 0, display: "flex", flexDirection: "row", alignItems: "center", overflow: 'hidden'
       }}>
         <Box sx={{
-          width: "100%", height: "60px", background: "#9BCC4B", position: 'absolute',
+          width: "100%", height: "60px", background: "#29293D", position: 'absolute',
           top: 0, left: 0, display: "flex", alignItems: "center", justifyContent: "space-between",
           paddingLeft: "1rem", paddingRight: "1rem", boxSizing: 'border-box', zIndex: 9998
         }}>
           <Box></Box>
           {medidas != "movil" && 
-          <Box sx={{position: "absolute", left: 0 , backgroundColor: "white", display: "flex", width: "max-content", height: "100%", alignItems: "center", justifyContent: "flex-end", paddingLeft: "2.5rem", paddingRight: "2rem", borderRadius: "0px 20rem 20rem 0px"}}>
-            <Typography variant="h5" sx={{color: "#2ebe66ff", fontWeight: 600}}>
+
+            <Typography variant="h6" sx={{ color: "#ffff", fontWeight: 600, position: "absolute", left: 0 , backgroundColor: "transparent", display: "flex", width: "max-content", height: "100%", alignItems: "center", justifyContent: "flex-end", paddingLeft: "2.5rem", paddingRight: "2rem", borderRadius: "0px 20rem 20rem 0px"}}>
               {form[0].title[0]}
             </Typography>
-          </Box>}
+          }
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1.1rem" }}>
             <Button 
               onClick={()=>setClickEdit(true)}

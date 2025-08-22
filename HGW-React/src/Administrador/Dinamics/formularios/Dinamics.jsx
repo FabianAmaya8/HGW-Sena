@@ -127,6 +127,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
   const datosEdit = edit?.datos || {}
   const { medidas } = useContext(AppContext)
   const [consultasCargadas, setConsultasCargadas] = useConsultas({}, consultas)
+  console.log(consultasCargadas)
 
   const normalizaUrlImagen = useCallback(v => {
     if (!v) return ''
@@ -169,7 +170,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
   const [valores, dispatch] = useReducer(asignarValores, form, crearObjeto)
   const valoresRef = useRef(valores)
   useEffect(() => { valoresRef.current = valores }, [valores])
-
+  console.log(valores)
   useEffect(() => {
     if (editara) dispatch({ type: 'RESET', objeto: crearObjeto(form) })
   }, [editara, datosEdit])
@@ -533,12 +534,11 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
           key="submit"
           variant={el.variant}
           sx={{
-            color: 'white',
             mt: 2,
             mr: medidas === 'movil' ? 'auto' : 0,
             ml: 'auto',
             borderRadius: 30,
-            height: 40
+            height: 40,
           }}
           onClick={envio}
         >
@@ -561,7 +561,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            overflow: 'hidden'
+            overflow: 'hidden',
           })
         }}
       >
@@ -579,16 +579,17 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
             height: '80vh',
             boxSizing: 'border-box',
             padding: '2rem',
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.08)",
             ...(editara && { boxShadow: '0 2px 8px rgba(0,0,0,0.1)', alignItems: 'center' }),
             '&::-webkit-scrollbar': { width: '2.5px' },
-            '&::-webkit-scrollbar-thumb': { background: '#7e9e4a', borderRadius: 5 }
+            '&::-webkit-scrollbar-thumb': { backgroundColor: 'barra.main', borderRadius: 5 }
           }}
         >
           {(!form || !form.length) && <Carga />}
           {(!editara && medidas !== 'movil') || medidas === 'movil' ? (
             <Box
               sx={{
-                background: '#7e9e4a',
+                background: '#29293D',
                 color: 'beige',
                 borderRadius: 2,
                 minHeight: 64,
@@ -651,7 +652,7 @@ const DinamicForm = memo(({ form, consultas, edit, padre }) => {
       sx={{
         width: medidas === 'movil' || editara ? '100%' : contenidoWidth,
         right: medidas == 'movil' ? editara ? "0.09rem" : "0.25rem" : "1.1rem",
-        transition: '450ms'
+        transition: '450ms',
       }}
     >
       <Form form={form} consultas={consultas} edit={edit || {}} padre={padre} alerta={alerta} />

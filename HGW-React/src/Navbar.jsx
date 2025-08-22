@@ -98,14 +98,14 @@ const Arboles = memo(({ elementos, hoverDrawer }) => {
               expandIcon={
                 <ExpandMoreIcon sx={{
                   opacity: anchoDrawer.isOpen || hoverDrawer ? 1 : 0,
-                  color: el.colorText,
+                  color: 'primary.contrastText',
                   transition: '350ms'
                 }} />
               }
-              sx={{ transition: '360ms', width: '100%', justifyContent: 'center' }}
+              sx={{ transition: '360ms', width: '100%', justifyContent: 'center', color: 'text.primary' }}
             >
               <Box className={Style.boxElementsNavbar} sx={{
-                color: el.colorText,
+                color: 'primary.contrastText',
                 backgroundColor: 'transparent',
                 gap: anchoDrawer.isOpen ? '1rem' : '1.2rem',
                 transition: 'gap 450ms'
@@ -120,7 +120,8 @@ const Arboles = memo(({ elementos, hoverDrawer }) => {
               display: anchoDrawer.isOpen || hoverDrawer ? 'block' : 'none',
               position: 'relative',
               '&::before': {
-                borderLeft: '3px solid white',
+                borderLeft: '3px solid',
+                borderLeftColor: 'primary.contrastText',
                 content: '""',
                 height: '100%',
                 position: 'absolute',
@@ -137,7 +138,7 @@ const Arboles = memo(({ elementos, hoverDrawer }) => {
           key={el.id}
           onClick={() => navigate(el.click)}
           className={Style.butonNavbar}
-          sx={{ color: el.colorText, width: '100%', textTransform: 'none', whiteSpace: 'nowrap' }}
+          sx={{ color: 'primary.contrastText', width: '100%', textTransform: 'none', whiteSpace: 'nowrap' }}
         >
           <Box className={Style.boxElementsNavbar}>
             {el.icon}
@@ -168,10 +169,10 @@ const MyDrawer = memo(({ switch: { isOpen, setIsOpen }, data }) => {
           transition: 'width 450ms',
           height: '100vh',
           padding: '2rem 0rem',
-          background: '#9BCC4B',
+          background: '#1E1E2F',
           boxSizing: 'border-box',
           '&::-webkit-scrollbar': { width: '7px' },
-          '&::-webkit-scrollbar-thumb': { background: '#59732F', borderRadius: '5px' }
+          '&::-webkit-scrollbar-thumb': { backgroundColor: 'white', borderRadius: '5px' }
         }
       }}
       className={Style.drawer}
@@ -269,6 +270,7 @@ const App = memo(({objeto}) => {
 });
 
 function Navbar({ alerta, setAlerta, imagenes, objeto }) {
+  console.log(objeto);
   const [anchoAlert, setAncho] = useState('-180px');
 
   useEffect(() => {
