@@ -1,0 +1,37 @@
+tags:
+  - auth
+consumes:
+  - application/json
+parameters:
+  - in: body
+    name: credentials
+    schema:
+      type: object
+      required:
+        - usuario
+        - contrasena
+      properties:
+        usuario:
+          type: string
+          description: Email o nombre de usuario
+        contrasena:
+          type: string
+          description: Contraseña en texto plano
+responses:
+  200:
+    description: Login exitoso
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+        token:
+          type: string
+        redirect:
+          type: string
+  400:
+    description: JSON inválido o faltan campos
+  401:
+    description: Credenciales incorrectas
+  500:
+    description: Error de servidor

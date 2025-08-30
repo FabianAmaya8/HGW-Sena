@@ -69,8 +69,8 @@ const Catalogo = () => {
             <div className="catalog-k">
                 <div className="pato card">
                 <div className="patologias">
-                    <h2>¿Sufres de alguna de estas afecciones?</h2>
-                    <p>
+                    <h2 className='cardh2'>¿Sufres de alguna de estas afecciones?</h2>
+                    <p className='cardp'>
                     En HGW, tenemos los kits perfectos para cada necesidad de tu salud. ¡Recupera tu
                     bienestar con nuestros productos especializados!
                     </p>
@@ -80,7 +80,7 @@ const Catalogo = () => {
 
                 <div className="card-descuentos card">
                 <div className="desc">
-                    <h2>
+                    <h2 className='cardh2'>
                     SI TIENES EL RANGO MASTER TE ENTRAS EL 52% EN TODOS LOS PRODUCTOS
                     </h2>
                     <button className="btn">Browse Products</button>
