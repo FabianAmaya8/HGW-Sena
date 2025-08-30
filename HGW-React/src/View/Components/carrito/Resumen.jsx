@@ -7,6 +7,7 @@ export default function OrderSummaryCard({
     step,
     onNext,
     onBack,
+    handleContinuar,
     onConfirm
     }) {
     // Cálculos básicos a partir del carrito
@@ -43,18 +44,16 @@ export default function OrderSummaryCard({
 
             {step === 'shipping' && (
                 <>
-                    <button 
-                        className="btn w-100"
-                        onClick={onNext}
-                    >
-                        {loading ? 'Modificar Dirección' : 'Continuar con Pago'}
-                    </button>
-                    <button
-                        className="btn btn-outline-secondary w-100 mt-2"
-                        onClick={onBack}
-                    >
-                        Atrás al Carrito
-                    </button>
+                <button className="btn w-100" onClick={handleContinuar}>
+                    Continuar con Pago
+                </button>
+                <button
+                    className="btn btn-outline-secondary w-100 mt-2"
+                    onClick={onBack}
+                    disabled={loading}
+                >
+                    Atrás al Carrito
+                </button>
                 </>
             )}
 

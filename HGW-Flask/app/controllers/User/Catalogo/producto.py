@@ -1,12 +1,10 @@
 from flask import Blueprint, jsonify, current_app
 from app.controllers.db import get_db
-from flasgger import swag_from
 import traceback
 
 stock_bp = Blueprint("stock", __name__)
 
 @stock_bp.route("/api/productos")
-@swag_from("../../Doc/Catalogo/productos.yml")
 def api_obtener_productos():
     try:
         connection = get_db()

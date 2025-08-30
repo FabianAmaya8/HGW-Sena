@@ -1,12 +1,10 @@
 from flask import Blueprint, request, jsonify, current_app
 from app.controllers.db import get_db
-from flasgger import swag_from
 import traceback
 
 carrito_bp = Blueprint("carrito_bp", __name__)
 
 @carrito_bp.route("/api/carrito", methods=["GET"])
-@swag_from("../../Doc/Carrito/obtener_carrito.yml")
 def obtener_carrito():
     connection = get_db()
     id_usuario = request.args.get("id", type=int)
@@ -65,7 +63,6 @@ def obtener_carrito():
         return jsonify({"error": "Error al obtener el carrito"}), 500
 
 @carrito_bp.route("/api/carrito/agregar", methods=["POST"])
-@swag_from("../../Doc/Carrito/agregar_producto_carrito.yml")
 def agregar_producto_carrito():
     connection = get_db()
     datos = request.get_json()
@@ -117,7 +114,6 @@ def agregar_producto_carrito():
         return jsonify({"error": "Error interno al guardar en el carrito"}), 500
     
 @carrito_bp.route("/api/carrito/eliminar", methods=["DELETE"])
-@swag_from("../../Doc/Carrito/eliminar_producto_carrito.yml")
 def eliminar_producto_carrito():
     connection = get_db()
     datos = request.get_json()
@@ -143,7 +139,6 @@ def eliminar_producto_carrito():
         return jsonify({"error": "Error interno al eliminar producto"}), 500
 
 @carrito_bp.route("/api/carrito/actualizar", methods=["PUT"])
-@swag_from("../../Doc/Carrito/actualizar_cantidad_carrito.yml")
 def actualizar_cantidad_carrito():
     connection = get_db()
     datos = request.get_json()
@@ -174,7 +169,6 @@ def actualizar_cantidad_carrito():
         return jsonify({"error": "Error interno al actualizar cantidad"}), 500
 
 @carrito_bp.route("/api/direcciones", methods=["GET"])
-@swag_from("../../Doc/Carrito/obtener_direcciones.yml")
 def obtener_direcciones():
     id_usuario = request.args.get("id", type=int)
     connection = get_db()
@@ -198,7 +192,6 @@ def obtener_direcciones():
         return jsonify({"success": False, "error": "Error al obtener direcciones"}), 500
 
 @carrito_bp.route("/api/ordenes", methods=["POST"])
-@swag_from("../../Doc/Carrito/crear_orden.yml")
 def crear_orden():
     connection = get_db()
     data = request.get_json()
@@ -257,11 +250,6 @@ def crear_orden():
             
             connection.commit()
 
-            #Disminuir cantidad de productos
-            for item in items:
-                cursor.execute("UPDATE productos SET stock = stock - %s WHERE id_producto = %s", (item["cantidad"], item["id_producto"]))
-                connection.commit()
-
             # Eliminar carrito
             cursor.execute("DELETE FROM carrito_compras WHERE id_usuario = %s", (id_usuario,))
             connection.commit()
@@ -277,7 +265,6 @@ def crear_orden():
         return jsonify({"error": "Error interno al procesar la orden"}), 500
     
 @carrito_bp.route("/api/medios-pago", methods=["GET"])
-@swag_from("../../Doc/Carrito/listar_medios_pago.yml")
 def listar_medios_pago():
 
     conn = current_app.config["MYSQL_CONNECTION"]

@@ -1,10 +1,19 @@
-const PRIMERA_URL = import.meta.env.VITE_URL_BACKEND;
+const PRIMERA_URL = "http://localhost:3000/";
+const SEGUNDA_URL = "https://hgw-sena-production.up.railway.app/";
 
 // Función interna que prueba cuál base URL está viva
-export function findWorkingBaseUrl() {
-  const base = PRIMERA_URL;
-  
-  return base;
+export async function findWorkingBaseUrl() {
+  const bases = [PRIMERA_URL, SEGUNDA_URL];
+  for (const base of bases) {
+    // try {
+    //   const res = await fetch(`${base}`, { method: 'HEAD' });
+    //   if (res.ok) return base;
+    // } catch (_) {
+    //   console.warn(`Base caída: ${base}`);
+    // }
+  }
+  // console.error("Ninguna base URL responde");
+  return PRIMERA_URL;
 }
 
 // Arrancamos la detección apenas se importe este módulo

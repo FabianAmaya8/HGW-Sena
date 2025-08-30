@@ -1,10 +1,8 @@
 import React, { useEffect } from 'react';
 import { useModal } from '../../pages/Context/ModalContext';
-import Buscador from '../../User/Components/Fijos/Buscador';
 
 // Imagenes logo
 import logo from '../../assets/img/logo.png';
-import { Link } from 'react-router';
 
 const HeaderView = () => {
     const { showLoginModal } = useModal();
@@ -37,12 +35,24 @@ const HeaderView = () => {
                 </div>
 
                 {/* Buscador */}
-                <Buscador />
+                <div className="buscardor">
+                    <form>
+                        <input
+                        className="buscador-tex"
+                        id="buscador"
+                        type="text"
+                        placeholder="Buscador"
+                        />
+                        <button className="buscador-btn" type="submit">
+                        <i className="bx bx-search"></i>
+                        </button>
+                    </form>
+                </div>
 
                 {/* Navegación */}
                 <nav className="nav-general">
-                    <Link to="/" className="nav-link">Inicio</Link>
-                    <Link to="/catalogo" className="nav-link">Catalogo</Link>
+                    <a href="/" className="nav-link">Inicio</a>
+                    <a href="/Catalogo" className="nav-link">Catalogo</a>
 
                     {/* Desplegable */}
                     <div className="desplegable">

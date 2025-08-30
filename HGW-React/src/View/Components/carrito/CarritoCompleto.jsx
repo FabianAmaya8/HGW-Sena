@@ -2,24 +2,15 @@ import { Link } from "react-router-dom";
 import "../../../assets/css/CarritoCompleto.css";
 import { useImageUrl } from "../../../User/Hooks/useImgUrl";
 import Resumen from "./Resumen";
-import { useEffect, useState } from "react";
 
 export default function Carrito({ carrito, aumentarCantidad, disminuirCantidad, quitarDelCarrito, onNext }) {
-    const [vacio, setLoading] = useState(true);
-
-    useEffect(() => {
-        if (carrito?.length > 0) {
-            setLoading(false);
-        }
-    });
-
     return (
-        <div className="container">
+        <div className="contenedor-general">
             <h2 className="titulo-principal">Resumen de Compra</h2>
-            
+
             <div className="seccion-carrito">
                 <div className="area-productos">
-                    {vacio ? (
+                    {carrito.length === 0 ? (
                         <p className="mensaje-vacio">Tu carrito está vacío.</p>
                     ) : (
                         <table className="tabla-productos">
@@ -49,7 +40,10 @@ export default function Carrito({ carrito, aumentarCantidad, disminuirCantidad, 
 
                 <Resumen
                     carrito={carrito}
-                    loading={vacio}
+                    taxRate={0} // Ajusta según sea necesario
+                    loading={false} // Cambia según tu lógica de carga
+                    medioPago={null} // Ajusta según tu lógica de pago
+                    dirSel={null} // Ajusta según tu lógica de dirección
                     step="cart"
                     onNext={onNext}
                 />

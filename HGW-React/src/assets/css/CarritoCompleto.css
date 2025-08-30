@@ -39,7 +39,6 @@
 /* Área productos izquierda */
 .area-productos {
     flex: 2;
-    width: 100%;
 }
 
 .tabla-productos {
@@ -183,6 +182,10 @@
         overflow: hidden;
         overflow-x: auto;
     }
+    .seccion-carrito {
+        flex-direction: column;
+    }
+
     .formulario-datos {
         grid-template-columns: 1fr;
     }
@@ -194,6 +197,11 @@
 
     .titulo-principal {
         font-size: 1.5rem;
+    }
+
+    .seccion-carrito {
+        flex-direction: column;
+        gap: 1.5rem;
     }
 
     .tabla-productos th,
@@ -253,13 +261,5 @@
     .area-resumen .titulo-resumen,
     .total-compra {
         font-size: 1rem;
-    }
-}
-
-@media (max-width: 1280px) {
-    .seccion-carrito {
-        flex-direction: column;
-        align-items: center;
-        gap: 1.5rem;
     }
 }

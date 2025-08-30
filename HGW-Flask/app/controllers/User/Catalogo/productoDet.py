@@ -1,9 +1,7 @@
 from flask import jsonify, current_app, request
-from .catalogo import catalogo_bp
-from flasgger import swag_from
+from .catalogo import catalogo_bp  # usa el blueprint ya registrado
 
 @catalogo_bp.route('/api/producto/unico', methods=['GET'])
-@swag_from('../../Doc/Catalogo/producto_unico.yml')
 def obtener_producto():
     id = request.args.get('id', type=int)
     connection = current_app.config['MYSQL_CONNECTION']
