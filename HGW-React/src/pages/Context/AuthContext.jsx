@@ -1,28 +1,62 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+import Swal from "sweetalert2";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(() => {
-        const storedUser = localStorage.getItem("user");
-        return storedUser ? JSON.parse(storedUser) : null;
-    });
+    const [token, setToken] = useState(() => localStorage.getItem("token"));
 
-    const login = (userData) => {
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
+    const isTokenValid = () => {
+        if (!token) return false;
+        try {
+            const { exp } = jwtDecode(token);
+            const now = Date.now();
+            const expMs = exp * 1000;
+
+            return now < expMs;
+        } catch (err) {
+            console.error("Token inválido:", err);
+            localStorage.removeItem("token");
+            return false;
+        }
+    };
+
+
+    const isAuthenticated = isTokenValid();
+    const user = isAuthenticated ? jwtDecode(token) : null;
+
+    const login = (newToken) => {
+        setToken(newToken);
+        localStorage.setItem("token", newToken);
     };
 
     const logout = () => {
-        setUser(null);
-        localStorage.removeItem("user");
-        window.location.href = "/login";
+        setToken(null);
+        localStorage.removeItem("token");
     };
 
-    const isAuthenticated = !!user;
+    useEffect(() => {
+        if (!token) return;
+        const intervalo = setInterval(() => {
+            const valido = isTokenValid();
+            if (!valido) {
+                Swal.fire({
+                    title: "Sesion expirada",
+                    text: "Su sesion ha expirado. Por favor, vuelva a iniciar sesion.",
+                    icon: "warning",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: "#03624c"
+                })
+                logout();
+            }
+        }, 60000);
+
+        return () => clearInterval(intervalo);
+    }, [token]);
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+        <AuthContext.Provider value={{ token, user, login, logout, isAuthenticated }}>
             {children}
         </AuthContext.Provider>
     );

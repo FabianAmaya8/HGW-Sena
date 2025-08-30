@@ -50,7 +50,7 @@ export default function useLoginForm() {
 
             // respuesta
             if (response.ok && result.success) {
-                login(result.user);
+                login(result.token);
 
                 await Swal.fire({
                     icon: 'success',

@@ -70,13 +70,9 @@ export function ProductCard({ product }) {
                 onClick={async () => {
                     const resultado = await agregarProductoAlCarrito(product, 1);
                     if (resultado.exito) {
-                    mostrarAlerta(product.nombre, () => {
-                        setTimeout(() => {
-                        window.location.href = '/carrito';
-                        }, 100);
-                    });
+                        mostrarAlerta(product.nombre);
                     } else {
-                    console.error('Fallo:', resultado.mensaje);
+                        console.error('Fallo:', resultado.mensaje);
                     }
                 }}
                 >

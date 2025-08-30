@@ -37,7 +37,7 @@ cd hgw-sena
 ```bash
 cd HGW-Flask
 python -m venv venv
-source venv/bin/activate
+source venv/Scripts/activate
 pip install -r requirements.txt
 python run.py
 ```
@@ -61,7 +61,7 @@ python run.py
 #### Git Bash
 
 ```bash
-cd ../HGW-React
+cd HGW-React
 npm install
 npm run dev
 ```
@@ -69,7 +69,7 @@ npm run dev
 #### CMD (Windows)
 
 ```bat
-cd ..\HGW-React
+cd HGW-React
 npm install
 npm run dev
 ```

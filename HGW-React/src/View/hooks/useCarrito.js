@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { urlDB } from "../../urlDB";
+import { useAuth } from "../../pages/Context/AuthContext";
 
 export function useCarrito() {
     const [carrito, setCarrito] = useState([]);
@@ -8,9 +9,9 @@ export function useCarrito() {
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState(null);
 
-    const rawUser = localStorage.getItem("user");
-    const usuario = rawUser ? JSON.parse(rawUser) : null;
-    const id_usuario = usuario?.id;
+    const { user,token } = useAuth();
+    
+    const id_usuario = user?.id;
 
     async function agregarProductoAlCarrito(producto, cantidad = 1) {
         if (!id_usuario) return { exito: false, mensaje: "Usuario no autenticado" };
