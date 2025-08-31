@@ -4,7 +4,7 @@ import traceback
 
 carrito_bp = Blueprint("carrito_bp", __name__)
 
-@carrito_bp.route("/api/http://localhost:3000/api/direcciones?id=1", methods=["GET"])
+@carrito_bp.route("/api/carrito", methods=["GET"])
 def obtener_carrito():
     connection = get_db()
     id_usuario = request.args.get("id", type=int)

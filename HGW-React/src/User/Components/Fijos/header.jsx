@@ -15,24 +15,7 @@ export default function Header() {
     useEffect(() => {
         if (!user) return;
 
-        const fetchCartCountOnly = async () => {
-            try {
-                const endpoint = `/api/header?id=${user.id}`;
-                const urlFetch = await urlDB(endpoint);
-                const res = await fetch(urlFetch);
-                const data = await res.json();
-
-                if (data.success) {
-                    setCartCount(data.user.total_carrito ?? 0);
-                } else {
-                    console.warn("No se pudo cargar total del carrito:", data.message);
-                }
-            } catch (error) {
-                console.error("Error al actualizar total del carrito:", error);
-            }
-        };
-
-        const fetchFullUserData = async () => {
+        const fetchDatos = async () => {
             try {
                 const endpoint = `/api/header?id=${user.id}`;
                 const urlFetch = await urlDB(endpoint);
@@ -43,27 +26,23 @@ export default function Header() {
                     setCartCount(data.user.total_carrito ?? 0);
 
                     const profileUrl = (data.user.url_foto_perfil ?? null);
+
                     if (profileUrl) {
                         const baseUrl = await findWorkingBaseUrl();
                         const fullProfileUrl = `${baseUrl.replace(/\/$/, '')}/${profileUrl.replace(/^\//, '')}`;
                         setProfileUrl(fullProfileUrl);
                     }
                 } else {
-                    console.warn("No se pudo cargar datos de usuario:", data.message);
+                    console.warn("No se pudo cargar usuario:", data.message);
                 }
-            } catch (error) {
+            }catch (error) {
                 console.error("Error al cargar datos de usuario:", error);
             }
         };
 
-        fetchFullUserData();
-
-        const intervalo = setInterval(() => {
-            fetchCartCountOnly();
-        }, 5000);
-
-        return () => clearInterval(intervalo);
+        fetchDatos();
     }, [user]);
+
 
     const links = [
         { to: '/Inicio', text: 'Inicio' },
