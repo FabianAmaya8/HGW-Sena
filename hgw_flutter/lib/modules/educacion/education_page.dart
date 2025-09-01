@@ -17,9 +17,9 @@ class _EducationPageState extends State<EducationPage> {
 
   static const Color oliveColor = Color(0xFF6B8E23);
   static const Color cardButtonColor = Color(0xFF2E8B57);
-  static const double cardHeight = 90;    // ahora la mitad de antes
-  static const double hSpacing = 16;      // espacio horizontal entre cards
-  static const double vSpacing = 24;      // espacio vertical general
+  static const double cardHeight = 90;    
+  static const double hSpacing = 16;      
+  static const double vSpacing = 24;      
 
   @override
   void dispose() {
@@ -314,7 +314,7 @@ class _Footer extends StatelessWidget {
           Text('NIT: 901270584', style: TextStyle(fontSize: 12, color: Colors.white)),
           Text('Teléfono: 3142921508', style: TextStyle(fontSize: 12, color: Colors.white)),
           Text('Dirección: Calle 119 #14-42', style: TextStyle(fontSize: 12, color: Colors.white)),
-          Text('Email: documentoscompensaciones@world-food.co',
+          Text('Email: documentoscompensaciones@world-food.com',
               style: TextStyle(fontSize: 12, color: Colors.white)),
           SizedBox(height: 8),
           Text(
