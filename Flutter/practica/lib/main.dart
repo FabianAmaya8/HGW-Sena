@@ -93,17 +93,52 @@ class _ManejadorMenu extends State<Menu> {
         children: List.generate(3, (row) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(3, (_) => Container(
-              width: 5,
-              height: 5,
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
-                shape: BoxShape.circle,
+            children: List.generate(
+              3,
+              (_) => Container(
+                width: 5,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[800],
+                  shape: BoxShape.circle,
+                ),
               ),
-            )),
+            ),
           );
         }),
       ),
+    );
+  }
+
+  Widget elegantLogo(Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          "HGW",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            color: color,
+            letterSpacing: 2,
+            fontFamily: 'Roboto',
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: color, width: 2),
+          ),
+          child: Icon(
+            Icons.storefront,
+            color: color,
+            size: 20,
+          ),
+        ),
+      ],
     );
   }
 
@@ -114,7 +149,8 @@ class _ManejadorMenu extends State<Menu> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          height: 200,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
           color: Colors.white,
           child: SafeArea(
             child: Row(
@@ -126,15 +162,7 @@ class _ManejadorMenu extends State<Menu> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Text(
-                  "HGW",
-                  style: TextStyle(
-                    color: primaryGreen,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
-                    fontSize: 20,
-                  ),
-                ),
+                elegantLogo(primaryGreen),
                 const Spacer(),
                 ..._quickNav(),
               ],
@@ -197,7 +225,12 @@ class _ManejadorMenu extends State<Menu> {
       ),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        child: _pages()[currentPage],
+        child: SizedBox.expand(
+          key: ValueKey<int>(currentPage),
+          child: Center(
+            child: _pages()[currentPage],
+          ),
+        ),
       ),
     );
   }
