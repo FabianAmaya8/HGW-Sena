@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, current_app
 from app.controllers.db import get_db
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
+from flasgger import swag_from
 import os
 
 bcrypt = Bcrypt()
@@ -9,6 +10,7 @@ personal_bp = Blueprint('personal_bp', __name__)
 
 # -------------------- Personal GET --------------------
 @personal_bp.route('/api/personal', methods=['GET'])
+@swag_from('../../Doc/Personal/ControllerPersonal/get_personal.yml')
 def get_personal():
     user_id = request.args.get("id", type=int)
     if not user_id:
@@ -61,6 +63,7 @@ def get_personal():
 
 # -------------------- Personal UPDATE --------------------
 @personal_bp.route('/api/personal/update', methods=['PUT'])
+@swag_from('../../Doc/Personal/ControllerPersonal/update_personal.yml')
 def update_personal():
     user_id = request.args.get("id", type=int)
     if not user_id:
@@ -129,6 +132,7 @@ def update_personal():
 
 # -------------------- Personal CAMBIAR CONTRASEÑA --------------------
 @personal_bp.route('/api/cambiar-contrasena', methods=['POST'])
+@swag_from('../../Doc/Personal/ControllerPersonal/cambiar_contrasena.yml')
 def cambiar_contrasena():
     data = request.json
     user_id = data.get('id_usuario')
@@ -158,6 +162,7 @@ def cambiar_contrasena():
 
 # -------------------- Personal DELETE --------------------
 @personal_bp.route('/api/personal/delete', methods=['DELETE'])
+@swag_from('../../Doc/Personal/ControllerPersonal/delete_foto_perfil.yml')
 def delete_foto_perfil():
     user_id = request.args.get("id", type=int)
     if not user_id:

@@ -1,0 +1,65 @@
+summary: Obtener membresía de un usuario
+description: |
+  Recupera la membresía activa de un usuario a partir de su ID.
+tags:
+  - Membresía
+parameters:
+  - name: id
+    in: query
+    type: integer
+    required: true
+    description: ID del usuario
+responses:
+  200:
+    description: Membresía encontrada
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        membresia:
+          type: object
+          properties:
+            id_membresia:
+              type: integer
+              example: 2
+            nombre_membresia:
+              type: string
+              example: "Premium"
+            precio_membresia:
+              type: number
+              example: 49.99
+  400:
+    description: ID no proporcionado
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "ID de usuario no proporcionado"
+  404:
+    description: Membresía no encontrada
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Membresía no encontrada"
+  500:
+    description: Error interno del servidor
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Descripción del error"
