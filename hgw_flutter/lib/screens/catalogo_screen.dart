@@ -203,11 +203,7 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-<<<<<<< Updated upstream
-                          childAspectRatio: 0.65,
-=======
                           childAspectRatio: 0.75,
->>>>>>> Stashed changes
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 20,
                         ),
@@ -231,40 +227,7 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                     );
                   }
 
-<<<<<<< Updated upstream
-                  return SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
-                    sliver: SliverMasonryGrid.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 20,
-                      childCount: provider.productos.length,
-                      itemBuilder: (context, index) {
-                        final producto = provider.productos[index];
-                        return ProductoCard(
-                          producto: producto,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              PageRouteBuilder(
-                                pageBuilder:
-                                    (context, animation, secondaryAnimation) =>
-                                        ProductoDetalleScreen(
-                                            productoId: producto.idProducto),
-                                transitionsBuilder: (context, animation,
-                                    secondaryAnimation, child) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                        );
-                      },
-=======
-                  // Debug para verificar productos
+                  // Debug para verificar productos (puedes quitarlo si no lo necesitas)
                   print(
                       'CatalogoScreen - Total productos: ${provider.productos.length}');
                   for (var producto in provider.productos) {
@@ -309,7 +272,6 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                         },
                         childCount: provider.productos.length,
                       ),
->>>>>>> Stashed changes
                     ),
                   );
                 },

@@ -1,8 +1,5 @@
-<<<<<<< Updated upstream
-=======
 import '../config/api_config.dart';
 
->>>>>>> Stashed changes
 class ProductoDetalle {
   final int idProducto;
   final String nombre;
@@ -28,20 +25,6 @@ class ProductoDetalle {
 
   factory ProductoDetalle.fromJson(Map<String, dynamic> json) {
     try {
-<<<<<<< Updated upstream
-      List<String> parseImagenes(dynamic value) {
-        if (value == null) return [];
-        if (value is List) {
-          return value
-              .map((e) => e.toString())
-              .where((e) => e.isNotEmpty)
-              .toList();
-        }
-        if (value is String && value.isNotEmpty) {
-          return value.split(',').where((e) => e.trim().isNotEmpty).toList();
-        }
-        return [];
-=======
       // Función para construir URLs completas de imágenes
       String? buildImageUrl(String? imagePath) {
         if (imagePath == null || imagePath.isEmpty) return null;
@@ -73,7 +56,6 @@ class ProductoDetalle {
             .map((img) => buildImageUrl(img.trim()) ?? '')
             .where((url) => url.isNotEmpty)
             .toList();
->>>>>>> Stashed changes
       }
 
       double parsePrecio(dynamic value) {
@@ -95,11 +77,7 @@ class ProductoDetalle {
         idProducto: json['id_producto'] ?? 0,
         nombre: json['nombre']?.toString() ?? 'Producto sin nombre',
         precio: parsePrecio(json['precio']),
-<<<<<<< Updated upstream
-        imagen: json['imagen']?.toString(),
-=======
         imagen: buildImageUrl(json['imagen']?.toString()),
->>>>>>> Stashed changes
         imagenes: parseImagenes(json['imagenes']),
         descripcion: json['descripcion']?.toString(),
         stock: parseStock(json['stock']),
