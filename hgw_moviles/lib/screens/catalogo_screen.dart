@@ -203,7 +203,11 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
+<<<<<<< Updated upstream
                           childAspectRatio: 0.65,
+=======
+                          childAspectRatio: 0.75,
+>>>>>>> Stashed changes
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 20,
                         ),
@@ -227,6 +231,7 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                     );
                   }
 
+<<<<<<< Updated upstream
                   return SliverPadding(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
                     sliver: SliverMasonryGrid.count(
@@ -258,6 +263,53 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                           },
                         );
                       },
+=======
+                  // Debug para verificar productos
+                  print(
+                      'CatalogoScreen - Total productos: ${provider.productos.length}');
+                  for (var producto in provider.productos) {
+                    print(
+                        'Producto: ${producto.nombre}, Precio: ${producto.precio}, Stock: ${producto.stock}');
+                  }
+
+                  return SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+                    sliver: SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.75,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 20,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final producto = provider.productos[index];
+                          return ProductoCard(
+                            producto: producto,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                  pageBuilder: (context, animation,
+                                          secondaryAnimation) =>
+                                      ProductoDetalleScreen(
+                                          productoId: producto.idProducto),
+                                  transitionsBuilder: (context, animation,
+                                      secondaryAnimation, child) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: child,
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        childCount: provider.productos.length,
+                      ),
+>>>>>>> Stashed changes
                     ),
                   );
                 },

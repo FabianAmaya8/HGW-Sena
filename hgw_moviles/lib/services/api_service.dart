@@ -64,21 +64,55 @@ class ApiService {
           .timeout(ApiConfig.timeout);
 
       print('Products response status: ${response.statusCode}');
+<<<<<<< Updated upstream
       print(
           'Products response body: ${response.body.substring(0, response.body.length.clamp(0, 200))}');
+=======
+>>>>>>> Stashed changes
 
       if (response.statusCode == 200) {
         final dynamic decodedData = json.decode(response.body);
 
+<<<<<<< Updated upstream
         if (decodedData == null) {
+=======
+        print('Products raw data type: ${decodedData.runtimeType}');
+        print('Products raw data: $decodedData');
+
+        if (decodedData == null) {
+          print('Warning: Products data is null');
+>>>>>>> Stashed changes
           return [];
         }
 
         if (decodedData is List) {
+<<<<<<< Updated upstream
           return decodedData
               .where((item) => item != null)
               .map((json) => Producto.fromJson(json as Map<String, dynamic>))
               .toList();
+=======
+          print('Products count: ${decodedData.length}');
+
+          final productos = <Producto>[];
+          for (var i = 0; i < decodedData.length; i++) {
+            try {
+              if (decodedData[i] != null) {
+                print('Parsing product $i: ${decodedData[i]}');
+                final producto =
+                    Producto.fromJson(decodedData[i] as Map<String, dynamic>);
+                productos.add(producto);
+                print('Successfully parsed: ${producto.nombre}');
+              }
+            } catch (e) {
+              print('Error parsing product $i: $e');
+              print('Product data: ${decodedData[i]}');
+            }
+          }
+
+          print('Successfully parsed ${productos.length} products');
+          return productos;
+>>>>>>> Stashed changes
         } else {
           print(
               'Unexpected products response type: ${decodedData.runtimeType}');
