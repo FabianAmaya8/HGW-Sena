@@ -1,36 +1,285 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'providers/productos_provider.dart';
-import 'screens/catalogo_screen.dart';
-import 'utils/constants.dart';
+import 'package:provider/provider.dart';              
+import './providers/productos_provider.dart';         
+import 'Login.dart';
+import './modules/educacion/education_page.dart';
+import './screens/catalogo_screen.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Configurar orientación
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ProductosProvider(),
+      child: const App(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class App extends StatelessWidget {
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ProductosProvider()),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Menu(
+        headers: const [
+          {"value": "Inicio"},
+          {"value": "Registro"},
+          {"value": "Login"},
+        ],
+      ),
+    );
+  }
+}
+
+class Menu extends StatefulWidget {
+  final List<Map<String, String>> headers;
+
+  const Menu({super.key, required this.headers});
+
+  @override
+  State<Menu> createState() => _ManejadorMenu();
+}
+
+class _ManejadorMenu extends State<Menu> {
+  int currentPage = 0;
+  final Color primaryGreen = Colors.green.shade600;
+
+  void navigateTo(int index) {
+    setState(() {
+      currentPage = index;
+    });
+  }
+
+  List<Widget> _pages() {
+    return [
+      const HomePage(),
+      const Login(),
+      const Login(),
+      const EducationPage(),
+      const CatalogoScreen(),
+    ];
+  }
+
+  List<Widget> _quickNav() {
+    return [
+      _elegantButton("Registro", 1),
+      _elegantButton("Login", 2),
+    ];
+  }
+
+  Widget _elegantButton(String label, int index) {
+    bool isActive = currentPage == index;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: GestureDetector(
+        onTap: () => navigateTo(index),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isActive ? primaryGreen : Colors.transparent,
+            border: Border.all(color: primaryGreen, width: 1.5),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isActive ? Colors.white : primaryGreen,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _drawerIcon() {
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(3, (row) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(
+              3,
+              (_) => Container(
+                width: 5,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[800],
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget elegantLogo(Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          "HGW",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            color: color,
+            letterSpacing: 2,
+            fontFamily: 'Roboto',
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: color, width: 2),
+          ),
+          child: Icon(
+            Icons.storefront,
+            color: color,
+            size: 20,
+          ),
+        ),
       ],
-      child: MaterialApp(
-        title: 'HGW Catálogo Premium',
-        theme: AppTheme.theme,
-        debugShowCheckedModeBanner: false,
-        home: const CatalogoScreen(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Container(
+          height: 200,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+          color: Colors.white,
+          child: SafeArea(
+            child: Row(
+              children: [
+                Builder(
+                  builder: (context) => IconButton(
+                    icon: _drawerIcon(),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                elegantLogo(primaryGreen),
+                const Spacer(),
+                ..._quickNav(),
+              ],
+            ),
+          ),
+        ),
+      ),
+      drawer: Drawer(
+        child: Column(
+          children: [
+            UserAccountsDrawerHeader(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [primaryGreen, Colors.green.shade400],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              accountName: const Text("HGW Tienda", style: TextStyle(fontSize: 18)),
+              accountEmail: const Text("contact@hgw.com"),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Text(
+                  "HGW",
+                  style: TextStyle(
+                    color: primaryGreen,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.home, color: primaryGreen),
+              title: const Text("Inicio"),
+              onTap: () => navigateTo(0),
+            ),
+            ListTile(
+              leading: Icon(Icons.app_registration, color: primaryGreen),
+              title: const Text("Registro"),
+              onTap: () => navigateTo(1),
+            ),
+            ListTile(
+              leading: Icon(Icons.login, color: primaryGreen),
+              title: const Text("Login"),
+              onTap: () => navigateTo(2),
+            ),
+            const Divider(),
+            ListTile(
+              leading: Icon(Icons.info, color: primaryGreen),
+              title: const Text("Educación"),
+              onTap: () => navigateTo(3),
+            ),
+            ListTile(
+              leading: Icon(Icons.settings, color: primaryGreen),
+              title: const Text("Catalogo"),
+              onTap: () => navigateTo(4),
+            ),
+          ],
+        ),
+      ),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: SizedBox.expand(
+          key: ValueKey<int>(currentPage),
+          child: Center(
+            child: _pages()[currentPage],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.storefront, size: 90, color: Colors.green.shade600),
+            const SizedBox(height: 20),
+            Text(
+              "Bienvenido a Tienda HGW",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "Productos destacados.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
