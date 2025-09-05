@@ -10,7 +10,7 @@ class ProductoCard extends StatefulWidget {
   const ProductoCard({
     Key? key,
     required this.producto,
-    required this.onTap,
+    required this.onTap, required Future<Null> Function() onAddToCart,
   }) : super(key: key);
 
   @override

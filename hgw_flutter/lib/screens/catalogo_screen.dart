@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shimmer/shimmer.dart';
 import '../providers/productos_provider.dart';
+import '../providers/carrito/carrito_provider.dart';
 import '../widgets/producto_card.dart';
 import '../utils/constants.dart';
 import 'producto_detalle_screen.dart';
+import 'carrito/carrito_screen.dart';
 
 class CatalogoScreen extends StatefulWidget {
   const CatalogoScreen({Key? key}) : super(key: key);
@@ -18,7 +19,6 @@ class CatalogoScreen extends StatefulWidget {
 class _CatalogoScreenState extends State<CatalogoScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
   final ScrollController _scrollController = ScrollController();
   bool _showBackToTop = false;
 
@@ -28,12 +28,7 @@ class _CatalogoScreenState extends State<CatalogoScreen>
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeIn,
-    );
-    _fadeController.forward();
+    )..forward();
 
     _scrollController.addListener(() {
       setState(() {
@@ -69,8 +64,6 @@ class _CatalogoScreenState extends State<CatalogoScreen>
           CustomScrollView(
             controller: _scrollController,
             slivers: [
-
-              // Filtros de categorías con diseño moderno
               Consumer<ProductosProvider>(
                 builder: (context, provider, child) {
                   if (provider.categoriasUnicas.isEmpty) {
@@ -105,27 +98,10 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                   );
                 },
               ),
-
-              // Grid de productos
               Consumer<ProductosProvider>(
                 builder: (context, provider, child) {
                   if (provider.isLoading) {
-                    return SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      sliver: SliverGrid(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.75,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 20,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) => _buildShimmerCard(),
-                          childCount: 6,
-                        ),
-                      ),
-                    );
+                    return _buildLoadingGrid();
                   }
 
                   if (provider.error != null) {
@@ -138,14 +114,6 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                     return SliverFillRemaining(
                       child: _buildEmptyState(provider),
                     );
-                  }
-
-                  // Debug para verificar productos (puedes quitarlo si no lo necesitas)
-                  print(
-                      'CatalogoScreen - Total productos: ${provider.productos.length}');
-                  for (var producto in provider.productos) {
-                    print(
-                        'Producto: ${producto.nombre}, Precio: ${producto.precio}, Stock: ${producto.stock}');
                   }
 
                   return SliverPadding(
@@ -181,6 +149,66 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                                 ),
                               );
                             },
+                            onAddToCart: () async {
+                              final carritoProvider =
+                                  context.read<CarritoProvider>();
+                              final success =
+                                  await carritoProvider.agregarProducto(
+                                producto.idProducto,
+                                1,
+                              );
+
+                              if (success && mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.check_circle,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            '${producto.nombre} agregado al carrito',
+                                            style: const TextStyle(
+                                                color: Colors.white),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    backgroundColor: AppColors.successColor,
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    action: SnackBarAction(
+                                      label: 'Ver Carrito',
+                                      textColor: Colors.white,
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          PageRouteBuilder(
+                                            pageBuilder: (context, animation,
+                                                    secondaryAnimation) =>
+                                                const CarritoScreen(),
+                                            transitionsBuilder: (context,
+                                                animation,
+                                                secondaryAnimation,
+                                                child) {
+                                              return FadeTransition(
+                                                opacity: animation,
+                                                child: child,
+                                              );
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
                           );
                         },
                         childCount: provider.productos.length,
@@ -191,43 +219,61 @@ class _CatalogoScreenState extends State<CatalogoScreen>
               ),
             ],
           ),
-
-          // Botón flotante para volver arriba
           if (_showBackToTop)
             Positioned(
               bottom: 24,
               right: 24,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                child: FloatingActionButton(
-                  mini: true,
-                  backgroundColor: AppColors.primaryGreen,
-                  onPressed: () {
-                    _scrollController.animateTo(
-                      0,
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.easeOutCubic,
-                    );
-                  },
-                  child: const Icon(Icons.arrow_upward, color: Colors.white),
-                ),
+              child: FloatingActionButton(
+                mini: true,
+                backgroundColor: AppColors.primaryGreen,
+                onPressed: () {
+                  _scrollController.animateTo(
+                    0,
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeOutCubic,
+                  );
+                },
+                child: const Icon(Icons.arrow_upward, color: Colors.white),
               ),
             ),
-        ],
-      ),
-    );
-  }
+          Positioned(
+            bottom: 24,
+            left: 24,
+            child: Consumer<CarritoProvider>(
+              builder: (context, carrito, _) {
+                if (carrito.cantidadTotal == 0) return const SizedBox();
 
-  Widget _buildIconButton(IconData icon, VoidCallback onPressed) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceWhite,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderColor),
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: AppColors.textMedium),
-        onPressed: onPressed,
+                return FloatingActionButton.extended(
+                  backgroundColor: AppColors.primaryGreen,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            const CarritoScreen(),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                  label: Text(
+                    '${carrito.cantidadTotal} items | \$${carrito.total.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -276,6 +322,24 @@ class _CatalogoScreenState extends State<CatalogoScreen>
     );
   }
 
+  Widget _buildLoadingGrid() {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.75,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 20,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => _buildShimmerCard(),
+          childCount: 6,
+        ),
+      ),
+    );
+  }
+
   Widget _buildShimmerCard() {
     return Shimmer.fromColors(
       baseColor: Colors.grey[200]!,
@@ -309,10 +373,7 @@ class _CatalogoScreenState extends State<CatalogoScreen>
               ),
             ),
             const SizedBox(height: 24),
-            Text(
-              'Error de conexión',
-              style: AppStyles.heading2,
-            ),
+            Text('Error de conexión', style: AppStyles.heading2),
             const SizedBox(height: 8),
             Text(
               provider.error ?? 'No se pudo conectar con el servidor',
@@ -355,10 +416,7 @@ class _CatalogoScreenState extends State<CatalogoScreen>
               ),
             ),
             const SizedBox(height: 24),
-            Text(
-              'Sin productos',
-              style: AppStyles.heading2,
-            ),
+            Text('Sin productos', style: AppStyles.heading2),
             const SizedBox(height: 8),
             Text(
               'No hay productos disponibles en este momento',
