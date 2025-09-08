@@ -226,7 +226,6 @@ class _EstadoRegistro extends State<Registro> {
                                   return campo;
                                 }).toList();
 
-                                // <- Aquí solo agregamos el context
                                 List<Widget> widgets = Forms(
                                   context,
                                   campos,

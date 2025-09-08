@@ -8,7 +8,6 @@ final Color primaryGreen = Colors.green[400]!;
 
 final Map<String, Future<List<Map<String, String>>>> _optionsCache = {};
 
-/// Alerta global
 void showGlobalAlert(BuildContext context, String message) {
   showDialog(
     context: context,
@@ -25,7 +24,6 @@ void showGlobalAlert(BuildContext context, String message) {
   );
 }
 
-/// Fetch POST genérico con alerta
 Future<void> fetch(String urlStr, Map<String, dynamic> datos, BuildContext context) async {
   Uri url = Uri.parse(urlStr);
   final respuesta = await http.post(
@@ -36,7 +34,6 @@ Future<void> fetch(String urlStr, Map<String, dynamic> datos, BuildContext conte
 
   print('Respuesta POST API: ${respuesta.body}');
 
-  // Mostrar alerta si hay mensaje
   try {
     final decoded = jsonDecode(respuesta.body);
     if (decoded is Map && decoded.containsKey("message")) {
@@ -48,7 +45,6 @@ Future<void> fetch(String urlStr, Map<String, dynamic> datos, BuildContext conte
   }
 }
 
-/// Fetch sin cache con alerta
 Future<List<Map<String, String>>> fetchOptionsUncached(String urlStr, BuildContext context) async {
   final Uri url = Uri.parse(urlStr);
   final respuesta = await http.get(url);
@@ -58,7 +54,6 @@ Future<List<Map<String, String>>> fetchOptionsUncached(String urlStr, BuildConte
   if (respuesta.statusCode == 200) {
     final decoded = jsonDecode(respuesta.body);
 
-    // Mostrar mensaje si existe
     if (decoded is Map && decoded.containsKey("message")) {
       final msg = decoded["message"]?.toString() ?? '';
       if (msg.isNotEmpty) showGlobalAlert(context, msg);
@@ -82,7 +77,6 @@ Future<List<Map<String, String>>> fetchOptionsUncached(String urlStr, BuildConte
   return [];
 }
 
-/// Fetch con cache e integración de alertas
 Future<List<Map<String, String>>> _fetchOptionsCached(String url, BuildContext context) {
   if (_optionsCache.containsKey(url)) return _optionsCache[url]!;
   final future = fetchOptionsUncached(url, context);
@@ -90,7 +84,6 @@ Future<List<Map<String, String>>> _fetchOptionsCached(String url, BuildContext c
   return future;
 }
 
-/// Función auxiliar para seleccionar valor válido
 String? _matchingValue(List<Map<String, String>> opciones, dynamic currentValue) {
   if (currentValue == null) return null;
   final cur = currentValue.toString();
@@ -98,7 +91,6 @@ String? _matchingValue(List<Map<String, String>> opciones, dynamic currentValue)
   return exists ? cur : null;
 }
 
-/// Generador de widgets de formulario
 List<Widget> Forms(
   BuildContext context,
   List<Map<String, dynamic>> campos,
@@ -114,7 +106,6 @@ List<Widget> Forms(
   return campos.map((campo) {
     final String name = campo["name"];
 
-    // Input
     if (campo["tipo"] == "input") {
       return TextFormField(
         cursorColor: primaryGreen,
@@ -131,7 +122,6 @@ List<Widget> Forms(
       );
     }
 
-    // Select
     if (campo["tipo"] == "select") {
       final childs = campo["childs"];
 
