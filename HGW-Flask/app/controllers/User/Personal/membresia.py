@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify
 from app.controllers.db import get_db
 from decimal import Decimal
+from flasgger import swag_from
 
 membresia_bp = Blueprint('membresia_bp', __name__)
 @membresia_bp.route("/api/membresia", methods=["GET"])
+@swag_from('../../Doc/Personal/Membresia/obtener_membresia.yml')
 def obtener_membresia():
     user_id = request.args.get("id", type=int)
 
@@ -35,6 +37,7 @@ def obtener_membresia():
         return jsonify({"success": False, "message": str(e)}), 500
 
 @membresia_bp.route("/api/membresias", methods=["GET"])
+@swag_from('../../Doc/Personal/Membresia/listar_membresias.yml')
 def obtener_todas_membresias():
     try:
         connection = get_db()

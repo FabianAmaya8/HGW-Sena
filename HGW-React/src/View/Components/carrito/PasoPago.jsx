@@ -100,7 +100,7 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
     };
 
     return (
-        <div className="container my-4">
+        <div className="container">
             <h2 className="mb-4">Confirmar Pago</h2>
             {error && <div className="alert alert-danger">{error}</div>}
             <div className="row">
@@ -161,7 +161,6 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
                     medioPago={medioPago}
                     dirSel={dirSel}
                     step="payment"
-                    onNext={confirmarPago}
                     onBack={onBack}
                     onConfirm={confirmarPago}
                 />

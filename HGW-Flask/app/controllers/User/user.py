@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 from app.controllers.db import get_db
 from decimal import Decimal
+from flasgger import swag_from
 
 header_bp = Blueprint('header_bp', __name__)
 
 @header_bp.route("/api/header", methods=["GET"])
+@swag_from('../Doc/user.yml')
 def obtener_usuario():
     user_id = request.args.get("id", type=int)
 

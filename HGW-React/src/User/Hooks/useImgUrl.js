@@ -10,7 +10,7 @@ export function useImageUrl(path) {
             try {
                 const base = await findWorkingBaseUrl(); 
                 // elimina slash final de base y slash inicial de path
-                const full = `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+                const full = `${base.replace(/\/$/, '')}/images/${path.replace(/^\//, '')}`;
                 setUrl(full);
             } catch (e) {
                 console.error('Error construyendo URL de imagen:', e);
@@ -31,7 +31,7 @@ export function useImageUrls(paths) {
             try {
                 const base = await findWorkingBaseUrl();
                 const cleanBase = base.replace(/\/$/, '');
-                const result = paths.map(path => `${cleanBase}/${path.replace(/^\//, '')}`);
+                const result = paths.map(path => `${cleanBase}/images/${path.replace(/^\//, '')}`);
                 setUrls(result);
             } catch (e) {
                 console.error('Error construyendo URLs:', e);

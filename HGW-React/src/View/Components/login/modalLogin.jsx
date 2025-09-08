@@ -1,7 +1,14 @@
+import { useNavigate } from 'react-router';
 import { useModal } from '../../../pages/Context/ModalContext';
 
 const LoginModal = () => {
-  const { loginModalRef } = useModal();
+  const { loginModalRef, showLoginModal } = useModal();
+  const navigate = useNavigate();
+
+  const opciones = [
+    { label: 'Iniciar sesión', to: '/login' },
+    { label: 'Crear cuenta', to: '/register' },
+  ]
 
   return (
     <div
@@ -30,8 +37,17 @@ const LoginModal = () => {
           </div>
 
           <div className="modal-footer justify-content-center gap-3">
-            <a href="/login" className="btn btn-outline-primary modal-button">Iniciar sesión</a>
-            <a href="/register" className="btn btn-primary modal-button">Crear cuenta</a>
+            {opciones.map((opcion, index) => (
+              <button
+                key={index}
+                type="button"
+                className="btn btn-secondary modal-button"
+                data-bs-dismiss="modal"
+                onClick={() => {navigate(opcion.to); showLoginModal();}}
+              >
+                {opcion.label}
+              </button>
+            ))}
           </div>
 
         </div>
