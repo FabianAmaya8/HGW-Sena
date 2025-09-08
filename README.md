@@ -75,3 +75,28 @@ npm run dev
 ```
 
 💡 **URL del cliente**: `http://localhost:3001/`
+
+---
+
+### 4. Móvil: HGW-Flutter 📱
+
+#### Git Bash
+
+```bash
+cd hgw_flutter
+flutter clean
+flutter pub get
+flutter run
+```
+
+#### CMD (Windows)
+
+```bat
+cd hgw_flutter
+flutter clean
+flutter pub get
+flutter run
+```
+ 
+
+
