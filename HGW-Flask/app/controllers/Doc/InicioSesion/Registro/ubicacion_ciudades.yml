@@ -1,0 +1,36 @@
+summary: Listar ciudades por país
+description: |
+  Recupera la lista de ciudades. Si se envía `paisId` en query, filtra por ese país.
+tags:
+  - Registro
+parameters:
+  - name: paisId
+    in: query
+    type: integer
+    required: false
+    description: ID del país para filtrar ciudades
+responses:
+  200:
+    description: Lista de ciudades obtenida exitosamente
+    schema:
+      type: array
+      items:
+        type: object
+        properties:
+          id_ubicacion:
+            type: integer
+            example: 10
+          nombre:
+            type: string
+            example: "Bogotá"
+          ubicacion_padre:
+            type: integer
+            example: 1
+  500:
+    description: Error interno del servidor
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Descripción del error"

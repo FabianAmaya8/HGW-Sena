@@ -1,0 +1,28 @@
+summary: Servir imágenes estáticas
+description: |
+  Devuelve un archivo de imagen desde el directorio de uploads.
+tags:
+  - Tablas
+parameters:
+  - name: filename
+    in: path
+    type: string
+    required: true
+    description: Nombre (y subruta) del archivo de imagen
+responses:
+  200:
+    description: Imagen encontrada y enviada correctamente
+    schema:
+      type: file
+  404:
+    description: Imagen no encontrada
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Imagen no encontrada"
+        filename:
+          type: string
+  200:
+    description: Respuesta OPTIONS válida
