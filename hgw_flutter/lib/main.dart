@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';              
 import './providers/productos_provider.dart';         
-import 'Login.dart';
+import 'Registro.dart';
 import './modules/educacion/education_page.dart';
 import './screens/catalogo_screen.dart';
+import './Login.dart';
 
 void main() {
   runApp(
@@ -54,7 +55,7 @@ class _ManejadorMenu extends State<Menu> {
   List<Widget> _pages() {
     return [
       const HomePage(),
-      const Login(),
+      const Registro(),
       const Login(),
       const EducationPage(),
       const CatalogoScreen(),
