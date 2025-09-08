@@ -13,6 +13,7 @@ dist-ssr
 *.local
 venv/
 __pycache__/
+.env
 
 profile_pictures/
 product_images/

@@ -1,5 +1,5 @@
-name: hgw_catalogo
-description: Catálogo de productos HGW
+name: hgw
+description: Flutter HGW
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -9,18 +9,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  provider: ^6.0.5
   
   # Networking
   http: ^1.5.0
-  
-  # State Management
-  provider: ^6.0.5
   
   # UI Components
   cached_network_image: ^3.3.0
   shimmer: ^3.0.0
   flutter_staggered_grid_view: ^0.7.0
-
   youtube_player_flutter: ^8.1.0
   
   # Core
