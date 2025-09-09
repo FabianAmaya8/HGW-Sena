@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './providers/productos_provider.dart';
-import './providers/carrito/carrito_provider.dart'; // Nuevo import
+import './providers/carrito/carrito_provider.dart';
 import 'Login.dart';
 import './modules/educacion/education_page.dart';
 import './screens/catalogo_screen.dart';
-import './screens/carrito/carrito_screen.dart'; // Nuevo import
+import './screens/carrito/carrito_screen.dart';
 
 void main() {
   runApp(
-    // Cambiamos a MultiProvider para manejar múltiples providers
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ProductosProvider()),
-        ChangeNotifierProvider(
-            create: (_) => CarritoProvider()), // Nuevo provider
+        ChangeNotifierProvider(create: (_) => CarritoProvider()),
       ],
       child: const App(),
     ),
@@ -65,7 +63,9 @@ class _ManejadorMenu extends State<Menu> {
       const Login(),
       const EducationPage(),
       const CatalogoScreen(),
-      CarritoScreen(onNavigateToCatalog: () {  },), // Nueva página del carrito
+      CarritoScreen(
+        onNavigateToCatalog: () => navigateTo(4),
+      ),
     ];
   }
 
@@ -103,7 +103,6 @@ class _ManejadorMenu extends State<Menu> {
     );
   }
 
-  // Widget para el ícono del carrito con badge
   Widget _cartIconWithBadge() {
     return Consumer<CarritoProvider>(
       builder: (context, carritoProvider, child) {
@@ -214,7 +213,6 @@ class _ManejadorMenu extends State<Menu> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: Container(
@@ -234,7 +232,7 @@ class _ManejadorMenu extends State<Menu> {
                 elegantLogo(primaryGreen),
                 const Spacer(),
                 ..._quickNav(),
-                _cartIconWithBadge(), // Ícono del carrito con badge
+                _cartIconWithBadge(),
               ],
             ),
           ),
@@ -306,7 +304,6 @@ class _ManejadorMenu extends State<Menu> {
                 Navigator.pop(context);
               },
             ),
-            // Nueva opción del carrito en el drawer
             ListTile(
               leading: Stack(
                 clipBehavior: Clip.none,
@@ -345,112 +342,48 @@ class _ManejadorMenu extends State<Menu> {
                   ),
                 ],
               ),
-              title: Consumer<CarritoProvider>(
+                title: Consumer<CarritoProvider>(
                 builder: (context, carritoProvider, child) {
                   int itemCount = carritoProvider.cantidadTotal;
                   return Text(
-                    itemCount > 0 ? "Carrito ($itemCount)" : "Carrito",
+                  itemCount > 0 ? "Carrito ($itemCount)" : "Carrito",
                   );
                 },
-              ),
-              subtitle: Consumer<CarritoProvider>(
+                ),
+                subtitle: Consumer<CarritoProvider>(
                 builder: (context, carritoProvider, child) {
                   double total = carritoProvider.total;
                   if (total == 0) return const SizedBox();
                   return Text(
-                    "Total: \$${total.toStringAsFixed(2)}",
-                    style: TextStyle(
-                      color: primaryGreen,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  "Total: \${total.toStringAsFixed(2)}",
+                  style: TextStyle(
+                    color: primaryGreen,
+                    fontWeight: FontWeight.bold,
+                  ),
                   );
                 },
-              ),
-              onTap: () {
+                ),
+                onTap: () {
                 navigateTo(5);
                 Navigator.pop(context);
-              },
+                },
+              ),
+              const Spacer(),
+              const Divider(),
+              const SizedBox(height: 16),
+              ],
             ),
-            const Spacer(),
-            const Divider(),
-            // Información del total del carrito en la parte inferior
-            Consumer<CarritoProvider>(
-              builder: (context, carritoProvider, child) {
-                if (carritoProvider.items.isEmpty) {
-                  return const SizedBox();
-                }
-
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  color: Colors.green.shade50,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Resumen del Carrito",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: primaryGreen,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Productos:"),
-                          Text("${carritoProvider.cantidadTotal}"),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Total:"),
-                          Text(
-                            "\$${carritoProvider.total.toStringAsFixed(2)}",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: primaryGreen,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
             ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: SizedBox.expand(
-          key: ValueKey<int>(currentPage),
-          child: Center(
-            child: _pages()[currentPage],
-          ),
-        ),
-      ),
-      // Botón flotante para acceso rápido al carrito (opcional)
-      floatingActionButton: currentPage != 5
-          ? Consumer<CarritoProvider>(
-              builder: (context, carritoProvider, child) {
-                if (carritoProvider.items.isEmpty) return const SizedBox();
-
-                return FloatingActionButton.extended(
-                  onPressed: () => navigateTo(5),
-                  backgroundColor: primaryGreen,
-                  icon: const Icon(Icons.shopping_cart),
-                  label: Text(
-                    "${carritoProvider.cantidadTotal} items",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                );
-              },
-            )
-          : null,
-    );
+            body: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: SizedBox.expand(
+              key: ValueKey<int>(currentPage),
+              child: Center(
+              child: _pages()[currentPage],
+              ),
+            ),
+            ),
+          );
   }
 }
 
@@ -486,7 +419,6 @@ class HomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            // Botones de acceso rápido
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -500,6 +432,7 @@ class HomePage extends StatelessWidget {
                   label: const Text("Ver Catálogo"),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green.shade600,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 24, vertical: 12),
                   ),
@@ -519,6 +452,7 @@ class HomePage extends StatelessWidget {
                       label: Text("Carrito (${carritoProvider.cantidadTotal})"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange.shade600,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 24, vertical: 12),
                       ),

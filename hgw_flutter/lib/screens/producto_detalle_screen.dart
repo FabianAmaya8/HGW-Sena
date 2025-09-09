@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../models/producto_detalle.dart';
 import '../services/api_service.dart';
+import '../providers/carrito/carrito_provider.dart';
 import '../utils/constants.dart';
+import 'carrito/carrito_screen.dart';
 
 class ProductoDetalleScreen extends StatefulWidget {
   final int productoId;
@@ -25,6 +28,7 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
   int _selectedImageIndex = 0;
   int _cantidad = 1;
   bool _isFavorite = false;
+  bool _isAddingToCart = false;
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -68,6 +72,111 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
         _error = e.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _agregarAlCarrito() async {
+    if (_producto == null || _isAddingToCart) return;
+
+    setState(() {
+      _isAddingToCart = true;
+    });
+
+    try {
+      final carritoProvider = context.read<CarritoProvider>();
+      final success = await carritoProvider.agregarProducto(
+        _producto!.idProducto,
+        _cantidad,
+      );
+
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Se agregó $_cantidad ${_producto!.nombre} al carrito',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.successColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            action: SnackBarAction(
+              label: 'Ver Carrito',
+              textColor: Colors.white,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        const CarritoScreen(),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        // Reiniciar la cantidad a 1 después de agregar
+        setState(() {
+          _cantidad = 1;
+        });
+      } else if (mounted) {
+        // Mostrar mensaje de error si no se pudo agregar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Text(
+                  carritoProvider.mensaje ?? 'Error al agregar al carrito',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.errorColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: AppColors.errorColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAddingToCart = false;
+        });
+      }
     }
   }
 
@@ -206,7 +315,6 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
                             ],
                           ),
 
-                          // Botón flotante de compra
                           Positioned(
                             bottom: 24,
                             left: 24,
@@ -487,13 +595,17 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
   }
 
   Widget _buildPurchaseButton() {
+    final bool canAdd = _producto!.stock > 0 && !_isAddingToCart;
+
     return Container(
       decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
+        gradient: canAdd ? AppColors.primaryGradient : null,
+        color: canAdd ? null : Colors.grey,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryGreen.withOpacity(0.3),
+            color: (canAdd ? AppColors.primaryGreen : Colors.grey)
+                .withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -503,34 +615,35 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
-          onTap: _producto!.stock > 0
-              ? () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Se agregó $_cantidad ${_producto!.nombre} al carrito',
-                      ),
-                      backgroundColor: AppColors.successColor,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  );
-                }
-              : null,
+          onTap: canAdd ? _agregarAlCarrito : null,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 18),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.shopping_cart_checkout,
-                  color: Colors.white,
-                ),
+                if (_isAddingToCart)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                else
+                  Icon(
+                    _producto!.stock > 0
+                        ? Icons.shopping_cart_checkout
+                        : Icons.remove_shopping_cart,
+                    color: Colors.white,
+                  ),
                 const SizedBox(width: 12),
                 Text(
-                  'Agregar al Carrito - \$${(_producto!.precio * _cantidad).toStringAsFixed(2)}',
+                  _isAddingToCart
+                      ? 'Agregando...'
+                      : _producto!.stock > 0
+                          ? 'Agregar al Carrito - \$${(_producto!.precio * _cantidad).toStringAsFixed(2)}'
+                          : 'Sin Stock',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,

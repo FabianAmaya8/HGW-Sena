@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/carrito/carrito_provider.dart';
+import '../../utils/constants.dart';
 import 'confirmacion_screen.dart';
 
 class PagoScreen extends StatefulWidget {
@@ -11,7 +12,6 @@ class PagoScreen extends StatefulWidget {
 }
 
 class _PagoScreenState extends State<PagoScreen> {
-  final Color primaryGreen = Colors.green.shade600;
   bool _isProcessing = false;
 
   @override
@@ -27,10 +27,10 @@ class _PagoScreenState extends State<PagoScreen> {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: const Text('Método de Pago'),
-        backgroundColor: primaryGreen,
+        backgroundColor: AppColors.primaryGreen,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -58,7 +58,7 @@ class _PagoScreenState extends State<PagoScreen> {
                                 children: [
                                   Icon(
                                     Icons.receipt_long,
-                                    color: primaryGreen,
+                                    color: AppColors.primaryGreen,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
@@ -80,7 +80,7 @@ class _PagoScreenState extends State<PagoScreen> {
                                     '${provider.cantidadTotal} productos',
                                     style: TextStyle(
                                       fontSize: isSmallScreen ? 13 : 14,
-                                      color: Colors.grey[600],
+                                      color: AppColors.textMedium,
                                     ),
                                   ),
                                   Text(
@@ -97,7 +97,7 @@ class _PagoScreenState extends State<PagoScreen> {
                                   Icon(
                                     Icons.local_shipping,
                                     size: 16,
-                                    color: Colors.grey[600],
+                                    color: AppColors.textMedium,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
@@ -109,7 +109,7 @@ class _PagoScreenState extends State<PagoScreen> {
                                           'Enviar a:',
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: Colors.grey[600],
+                                            color: AppColors.textMedium,
                                           ),
                                         ),
                                         Text(
@@ -126,7 +126,7 @@ class _PagoScreenState extends State<PagoScreen> {
                                               '',
                                           style: TextStyle(
                                             fontSize: isSmallScreen ? 12 : 13,
-                                            color: Colors.grey[600],
+                                            color: AppColors.textMedium,
                                           ),
                                         ),
                                       ],
@@ -160,13 +160,14 @@ class _PagoScreenState extends State<PagoScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             side: BorderSide(
-                              color:
-                                  isSelected ? primaryGreen : Colors.grey[300]!,
+                              color: isSelected
+                                  ? AppColors.primaryGreen
+                                  : AppColors.borderColor,
                               width: isSelected ? 2 : 1,
                             ),
                           ),
                           color: isSelected
-                              ? primaryGreen.withOpacity(0.05)
+                              ? AppColors.primaryGreen.withOpacity(0.05)
                               : null,
                           child: InkWell(
                             onTap: () => provider.seleccionarMedioPago(medio),
@@ -179,7 +180,7 @@ class _PagoScreenState extends State<PagoScreen> {
                                     value: medio.id,
                                     groupValue:
                                         provider.medioPagoSeleccionado?.id,
-                                    activeColor: primaryGreen,
+                                    activeColor: AppColors.primaryGreen,
                                     onChanged: (_) =>
                                         provider.seleccionarMedioPago(medio),
                                   ),
@@ -187,8 +188,8 @@ class _PagoScreenState extends State<PagoScreen> {
                                   Icon(
                                     _getPaymentIcon(medio.nombre),
                                     color: isSelected
-                                        ? primaryGreen
-                                        : Colors.grey[600],
+                                        ? AppColors.primaryGreen
+                                        : AppColors.textMedium,
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
@@ -215,7 +216,7 @@ class _PagoScreenState extends State<PagoScreen> {
               Container(
                 padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surfaceWhite,
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(24),
                   ),
@@ -241,7 +242,7 @@ class _PagoScreenState extends State<PagoScreen> {
                                 'Total a pagar:',
                                 style: TextStyle(
                                   fontSize: isSmallScreen ? 14 : 16,
-                                  color: Colors.grey[600],
+                                  color: AppColors.textMedium,
                                 ),
                               ),
                               if (provider.medioPagoSeleccionado != null)
@@ -249,7 +250,7 @@ class _PagoScreenState extends State<PagoScreen> {
                                   provider.medioPagoSeleccionado!.nombre,
                                   style: TextStyle(
                                     fontSize: isSmallScreen ? 12 : 13,
-                                    color: primaryGreen,
+                                    color: AppColors.primaryGreen,
                                   ),
                                 ),
                             ],
@@ -259,7 +260,7 @@ class _PagoScreenState extends State<PagoScreen> {
                             style: TextStyle(
                               fontSize: isSmallScreen ? 24 : 28,
                               fontWeight: FontWeight.bold,
-                              color: primaryGreen,
+                              color: AppColors.primaryGreen,
                             ),
                           ),
                         ],
@@ -286,10 +287,10 @@ class _PagoScreenState extends State<PagoScreen> {
                                     );
                                   } else if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content:
                                             Text('Error al procesar el pedido'),
-                                        backgroundColor: Colors.red,
+                                        backgroundColor: AppColors.warningColor,
                                       ),
                                     );
                                     setState(() => _isProcessing = false);
@@ -297,7 +298,7 @@ class _PagoScreenState extends State<PagoScreen> {
                                 }
                               : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryGreen,
+                            backgroundColor: AppColors.primaryGreen,
                             padding: EdgeInsets.symmetric(
                               vertical: isSmallScreen ? 14 : 16,
                             ),

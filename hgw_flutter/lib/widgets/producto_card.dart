@@ -6,11 +6,13 @@ import '../utils/constants.dart';
 class ProductoCard extends StatefulWidget {
   final Producto producto;
   final VoidCallback onTap;
+  final VoidCallback onAddToCart; // Callback para agregar al carrito
 
   const ProductoCard({
     Key? key,
     required this.producto,
-    required this.onTap, required Future<Null> Function() onAddToCart,
+    required this.onTap,
+    required this.onAddToCart,
   }) : super(key: key);
 
   @override
@@ -21,6 +23,7 @@ class _ProductoCardState extends State<ProductoCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  bool _isAddingToCart = false;
 
   @override
   void initState() {
@@ -72,7 +75,6 @@ class _ProductoCardState extends State<ProductoCard>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Imagen con badge de stock
                     Expanded(
                       flex: 3,
                       child: Stack(
@@ -91,7 +93,6 @@ class _ProductoCardState extends State<ProductoCard>
                             ),
                             child: _buildProductImage(),
                           ),
-                          // Badge de estado
                           Positioned(
                             top: 12,
                             right: 12,
@@ -190,16 +191,50 @@ class _ProductoCardState extends State<ProductoCard>
                                     ],
                                   ),
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryGreen.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Icon(
-                                    Icons.add_shopping_cart,
-                                    color: AppColors.primaryGreen,
-                                    size: 20,
+                                // Botón de agregar al carrito
+                                GestureDetector(
+                                  onTap: widget.producto.stock > 0 &&
+                                          !_isAddingToCart
+                                      ? () async {
+                                          setState(() {
+                                            _isAddingToCart = true;
+                                          });
+
+                                          widget.onAddToCart();
+
+                                          await Future.delayed(const Duration(
+                                              milliseconds: 500));
+
+                                          if (mounted) {
+                                            setState(() {
+                                              _isAddingToCart = false;
+                                            });
+                                          }
+                                        }
+                                      : null,
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: _isAddingToCart
+                                          ? AppColors.successColor
+                                          : widget.producto.stock > 0
+                                              ? AppColors.primaryGreen
+                                                  .withOpacity(0.1)
+                                              : Colors.grey.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Icon(
+                                      _isAddingToCart
+                                          ? Icons.check
+                                          : Icons.add_shopping_cart,
+                                      color: _isAddingToCart
+                                          ? Colors.white
+                                          : widget.producto.stock > 0
+                                              ? AppColors.primaryGreen
+                                              : Colors.grey,
+                                      size: 20,
+                                    ),
                                   ),
                                 ),
                               ],
