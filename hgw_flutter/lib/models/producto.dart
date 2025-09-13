@@ -1,5 +1,4 @@
 import '../config/api_config.dart';
-
 class Producto {
   final int idProducto;
   final String categoria;
@@ -21,7 +20,6 @@ class Producto {
 
   factory Producto.fromJson(Map<String, dynamic> json) {
     try {
-      // Manejo robusto de conversión de tipos
       double parsePrecio(dynamic value) {
         if (value == null) return 0.0;
         if (value is double) return value;
@@ -36,23 +34,16 @@ class Producto {
         if (value is String) return int.tryParse(value) ?? 0;
         return 0;
       }
-
-      // Construir URL completa para la imagen
       String? parseImagen(dynamic value) {
         if (value == null || value.toString().isEmpty) {
-          // Usar placeholder si no hay imagen
           return 'https://via.placeholder.com/300x300/00C896/ffffff?text=Producto';
         }
 
         String imagenPath = value.toString();
-
-        // Si ya es una URL completa
         if (imagenPath.startsWith('http://') ||
             imagenPath.startsWith('https://')) {
           return imagenPath;
         }
-
-        // Usar baseUrl si es ruta relativa
         return '${ApiConfig.baseUrl}/$imagenPath';
       }
 

@@ -6,7 +6,7 @@ import '../utils/constants.dart';
 class ProductoCard extends StatefulWidget {
   final Producto producto;
   final VoidCallback onTap;
-  final VoidCallback onAddToCart; // Callback para agregar al carrito
+  final VoidCallback onAddToCart;
 
   const ProductoCard({
     Key? key,

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './providers/productos_provider.dart';
 import './providers/carrito/carrito_provider.dart';
+import './providers/personal/personal_provider.dart';
 import 'Login.dart';
 import './modules/educacion/education_page.dart';
 import './screens/catalogo_screen.dart';
 import './screens/carrito/carrito_screen.dart';
+import './screens/personal/personal_screen.dart';
 
 void main() {
   runApp(
@@ -13,6 +15,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => ProductosProvider()),
         ChangeNotifierProvider(create: (_) => CarritoProvider()),
+        ChangeNotifierProvider(create: (_) => PersonalProvider()),
       ],
       child: const App(),
     ),
@@ -66,6 +69,7 @@ class _ManejadorMenu extends State<Menu> {
       CarritoScreen(
         onNavigateToCatalog: () => navigateTo(4),
       ),
+      const PersonalScreen(), // Nueva página de Personal
     ];
   }
 
@@ -152,6 +156,16 @@ class _ManejadorMenu extends State<Menu> {
     );
   }
 
+  Widget _personalIcon() {
+    return IconButton(
+      icon: Icon(
+        Icons.person,
+        color: currentPage == 6 ? primaryGreen : Colors.grey[700],
+      ),
+      onPressed: () => navigateTo(6),
+    );
+  }
+
   Widget _drawerIcon() {
     return SizedBox(
       width: 28,
@@ -232,6 +246,7 @@ class _ManejadorMenu extends State<Menu> {
                 elegantLogo(primaryGreen),
                 const Spacer(),
                 ..._quickNav(),
+                _personalIcon(), // Icono de Personal
                 _cartIconWithBadge(),
               ],
             ),
@@ -249,18 +264,56 @@ class _ManejadorMenu extends State<Menu> {
                   end: Alignment.bottomRight,
                 ),
               ),
-              accountName:
-                  const Text("HGW Tienda", style: TextStyle(fontSize: 18)),
-              accountEmail: const Text("contact@hgw.com"),
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Text(
-                  "HGW",
-                  style: TextStyle(
-                    color: primaryGreen,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+              accountName: Consumer<PersonalProvider>(
+                builder: (context, personalProvider, child) {
+                  final usuario = personalProvider.usuario;
+                  return Text(
+                    usuario != null
+                        ? "${usuario.nombre} ${usuario.apellido}"
+                        : "HGW Tienda",
+                    style: const TextStyle(fontSize: 18),
+                  );
+                },
+              ),
+              accountEmail: Consumer<PersonalProvider>(
+                builder: (context, personalProvider, child) {
+                  final usuario = personalProvider.usuario;
+                  return Text(
+                    usuario?.correoElectronico ?? "contact@hgw.com",
+                  );
+                },
+              ),
+              currentAccountPicture: Consumer<PersonalProvider>(
+                builder: (context, personalProvider, child) {
+                  final usuario = personalProvider.usuario;
+
+                  if (usuario?.urlFotoPerfil != null) {
+                    return CircleAvatar(
+                      backgroundImage: NetworkImage(usuario!.urlFotoPerfil!),
+                      backgroundColor: Colors.white,
+                      onBackgroundImageError: (exception, stackTrace) {
+                        // Si hay error cargando la imagen, mostrar inicial
+                      },
+                      child: null,
+                    );
+                  }
+
+                  String inicial = usuario != null
+                      ? (usuario.nombre.isNotEmpty ? usuario.nombre[0] : 'H')
+                      : 'H';
+
+                  return CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: Text(
+                      inicial.toUpperCase(),
+                      style: TextStyle(
+                        color: primaryGreen,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             ListTile(
@@ -342,48 +395,152 @@ class _ManejadorMenu extends State<Menu> {
                   ),
                 ],
               ),
-                title: Consumer<CarritoProvider>(
+              title: Consumer<CarritoProvider>(
                 builder: (context, carritoProvider, child) {
                   int itemCount = carritoProvider.cantidadTotal;
                   return Text(
-                  itemCount > 0 ? "Carrito ($itemCount)" : "Carrito",
+                    itemCount > 0 ? "Carrito ($itemCount)" : "Carrito",
                   );
                 },
-                ),
-                subtitle: Consumer<CarritoProvider>(
+              ),
+              subtitle: Consumer<CarritoProvider>(
                 builder: (context, carritoProvider, child) {
                   double total = carritoProvider.total;
                   if (total == 0) return const SizedBox();
                   return Text(
-                  "Total: \${total.toStringAsFixed(2)}",
-                  style: TextStyle(
-                    color: primaryGreen,
-                    fontWeight: FontWeight.bold,
-                  ),
+                    "Total: \$${total.toStringAsFixed(2)}",
+                    style: TextStyle(
+                      color: primaryGreen,
+                      fontWeight: FontWeight.bold,
+                    ),
                   );
                 },
-                ),
-                onTap: () {
+              ),
+              onTap: () {
                 navigateTo(5);
                 Navigator.pop(context);
+              },
+            ),
+            const Divider(),
+            // Nueva sección de Personal
+            ListTile(
+              leading: Icon(Icons.person, color: primaryGreen),
+              title: const Text("Mi Perfil"),
+              subtitle: Consumer<PersonalProvider>(
+                builder: (context, personalProvider, child) {
+                  return Text(
+                    personalProvider.nivelMembresia,
+                    style: TextStyle(
+                      color: primaryGreen,
+                      fontSize: 12,
+                    ),
+                  );
                 },
               ),
-              const Spacer(),
-              const Divider(),
-              const SizedBox(height: 16),
-              ],
+              onTap: () {
+                navigateTo(6);
+                Navigator.pop(context);
+              },
             ),
-            ),
-            body: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: SizedBox.expand(
-              key: ValueKey<int>(currentPage),
-              child: Center(
-              child: _pages()[currentPage],
+            ListTile(
+              leading: Icon(Icons.group, color: primaryGreen),
+              title: const Text("Mi Red"),
+              trailing: Consumer<PersonalProvider>(
+                builder: (context, personalProvider, child) {
+                  return Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: primaryGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${personalProvider.personasEnRed}',
+                      style: TextStyle(
+                        color: primaryGreen,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  );
+                },
               ),
+              onTap: () {
+                navigateTo(6);
+                Navigator.pop(context);
+              },
             ),
+            const Spacer(),
+            // Información de membresía en el drawer
+            Consumer<PersonalProvider>(
+              builder: (context, personalProvider, child) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        primaryGreen.withOpacity(0.1),
+                        Colors.green.shade400.withOpacity(0.1),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Membresía',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: primaryGreen,
+                            ),
+                          ),
+                          Text(
+                            personalProvider.nivelMembresia,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: primaryGreen,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: personalProvider.progresoMembresia,
+                        backgroundColor: Colors.grey[300],
+                        valueColor: AlwaysStoppedAnimation<Color>(primaryGreen),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${personalProvider.puntosActuales} BV',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          );
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: SizedBox.expand(
+          key: ValueKey<int>(currentPage),
+          child: Center(
+            child: _pages()[currentPage],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -460,6 +617,21 @@ class HomePage extends StatelessWidget {
                   },
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                final menu = context.findAncestorStateOfType<_ManejadorMenu>();
+                menu?.navigateTo(6);
+              },
+              icon: const Icon(Icons.person),
+              label: const Text("Mi Perfil"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade600,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
             ),
           ],
         ),
