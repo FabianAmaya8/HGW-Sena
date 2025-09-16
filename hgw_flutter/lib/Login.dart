@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import './Dynamics.dart';
+import './Registro.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import './main.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -43,6 +48,36 @@ class _ManejadorLogin extends State<Login> {
       );
     }).toList();
   }
+
+  Future<void> _tryLogin(BuildContext context) async {
+  String usuario = (valores["usuario"] ?? '').toString().trim();
+  String contrasena = (valores["contrasena"] ?? '').toString().trim();
+  if (usuario.isEmpty || contrasena.isEmpty) {
+    showGlobalAlert(context, "Ingresa usuario y contraseña");
+    return;
+  }
+
+  try {
+    final response = await http.post(
+      Uri.parse(baseUrl + "api/login"),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'usuario': usuario, 'contrasena': contrasena}),
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      auth.login();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("✅ Login exitoso")),
+      );
+    } else {
+      final resp = jsonDecode(response.body);
+      showGlobalAlert(context, resp['message'] ?? "Usuario o contraseña incorrectos");
+    }
+  } catch (e) {
+    showGlobalAlert(context, "⚠️ No se pudo conectar con el servidor");
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -96,9 +131,7 @@ class _ManejadorLogin extends State<Login> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {
-                      fetch(baseUrl + "api/login", valores, context);
-                    },
+                    onPressed: () => _tryLogin(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green.shade700,
                       shape: RoundedRectangleBorder(
@@ -115,7 +148,30 @@ class _ManejadorLogin extends State<Login> {
                     ),
                   ),
                 ),
-                SizedBox(height: 15),
+                SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (_) => Registro()));
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: BorderSide(color: Colors.green.shade700, width: 1.5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      "Registrarme",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green.shade700,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 12),
                 TextButton(
                   onPressed: () {},
                   child: Text(

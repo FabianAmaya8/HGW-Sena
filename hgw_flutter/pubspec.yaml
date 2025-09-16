@@ -13,6 +13,8 @@ dependencies:
   
   # Networking
   http: ^1.5.0
+
+  file_picker: ^8.0.0
   
   # UI Components
   cached_network_image: ^3.3.0
