@@ -54,6 +54,7 @@ def create_app():
     from .controllers.User.Personal.membresia import membresia_bp
     from .controllers.User.Personal.personal import personal_bp
     from .controllers.User.Carrito.carrito_routes import carrito_bp
+    from .controllers.User.Educacion.educacion import educacion_bp
     
     app.register_blueprint(header_bp)
     app.register_blueprint(login_bp)
@@ -63,6 +64,7 @@ def create_app():
     app.register_blueprint(membresia_bp)
     app.register_blueprint(personal_bp)
     app.register_blueprint(carrito_bp)
+    app.register_blueprint(educacion_bp)
     with app.app_context():
         from app.models.tablas import tablas, bp_tablas
         tablas.prepare(
