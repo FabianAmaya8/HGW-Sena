@@ -10,11 +10,13 @@ CREATE TABLE roles (
     id_rol INT PRIMARY KEY AUTO_INCREMENT,
     nombre_rol VARCHAR(50)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabla de medios de pago
 CREATE TABLE medios_pago (
     id_medio INT PRIMARY KEY AUTO_INCREMENT,
     nombre_medio VARCHAR(50)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabla unificada de ubicaciones (países y ciudades)
@@ -34,6 +36,7 @@ CREATE TABLE membresias (
     nombre_membresia VARCHAR(50),
     bv INT,
     precio_membresia FLOAT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabla de usuarios
@@ -81,6 +84,7 @@ CREATE TABLE categorias (
     img_categoria TEXT,
     activo BOOLEAN DEFAULT TRUE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabla de subcategorías
 CREATE TABLE subcategoria (
@@ -115,6 +119,7 @@ CREATE TABLE productos (
 
 -- Carrito de compras y productos en el carrito
 
+
 CREATE TABLE carrito_compras (
     id_carrito INT PRIMARY KEY AUTO_INCREMENT,
     id_usuario INT NOT NULL UNIQUE,
@@ -139,12 +144,15 @@ CREATE TABLE productos_carrito (
 
 -- Bonos y su historial
 
+-- Bonos y su historial
+
 CREATE TABLE bonos (
     id_bono INT PRIMARY KEY AUTO_INCREMENT,
     nombre_bono VARCHAR(50) NOT NULL,
     porcentaje FLOAT(5,2),
     tipo VARCHAR(50),
     costo_activacion INT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE bonos_usuarios (
@@ -163,9 +171,12 @@ CREATE TABLE bonos_usuarios (
 
 -- Educación y contenido
 
+-- Educación y contenido
+
 CREATE TABLE educacion (
     id_tema INT PRIMARY KEY AUTO_INCREMENT,
     tema VARCHAR(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE contenido_tema (
@@ -183,6 +194,7 @@ CREATE TABLE contenido_tema (
 CREATE TABLE retiros (
     id_retiro INT PRIMARY KEY AUTO_INCREMENT,
     id_usuario INT NOT NULL,
+    id_usuario INT NOT NULL,
     saldo_disponible DOUBLE NOT NULL,
     banco VARCHAR(100),
     numero_cuenta_celular VARCHAR(100),
@@ -195,6 +207,8 @@ CREATE TABLE retiros (
 
 CREATE TABLE transacciones (
     id_transaccion INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_usuario_emisor VARCHAR(50) NOT NULL,
+    nombre_usuario_receptor VARCHAR(50) NOT NULL,
     nombre_usuario_emisor VARCHAR(50) NOT NULL,
     nombre_usuario_receptor VARCHAR(50) NOT NULL,
     monto DOUBLE NOT NULL,
@@ -229,6 +243,15 @@ CREATE TABLE ordenes (
     FOREIGN KEY (id_medio_pago)
         REFERENCES medios_pago(id_medio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id_usuario)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_direccion)
+        REFERENCES direcciones(id_direccion)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_medio_pago)
+        REFERENCES medios_pago(id_medio)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabla intermedia productos por orden
 CREATE TABLE ordenes_productos (
@@ -237,6 +260,13 @@ CREATE TABLE ordenes_productos (
     id_producto INT NOT NULL,
     cantidad INT NOT NULL,
     precio_unitario DOUBLE NOT NULL,
+    FOREIGN KEY (id_orden)
+        REFERENCES ordenes(id_orden)
+        ON DELETE CASCADE,
+    FOREIGN KEY (id_producto)
+        REFERENCES productos(id_producto)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     FOREIGN KEY (id_orden)
         REFERENCES ordenes(id_orden)
         ON DELETE CASCADE,
@@ -798,3 +828,19 @@ INSERT INTO ubicaciones (nombre, tipo, ubicacion_padre) VALUES
     ('Zapopan',         'ciudad', @id_mexico),
     ('Mérida',          'ciudad', @id_mexico),
     ('Toluca',          'ciudad', @id_mexico);
+
+ALTER TABLE usuarios ADD COLUMN ultimo_acceso TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE usuarios ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+INSERT IGNORE INTO usuarios (nombre, apellido, nombre_usuario, pss, correo_electronico, patrocinador, membresia, rol, activo)
+VALUES 
+('Admin', 'Test', 'admin1', '$2b$12$eImiTXuWVxfM37uY4JANjQ.3YOBqzNcK4hBLvPqmrCWP8KdpGn6Ky', 'admin1@test.com', NULL, 1, 3, 1),
+('Juan', 'Perez', 'juan1', '$2b$12$eImiTXuWVxfM37uY4JANjQ.3YOBqzNcK4hBLvPqmrCWP8KdpGn6Ky', 'juan1@test.com', 'admin1', 1, 3, 1),
+('Maria', 'Lopez', 'maria1', '$2b$12$eImiTXuWVxfM37uY4JANjQ.3YOBqzNcK4hBLvPqmrCWP8KdpGn6Ky', 'maria1@test.com', 'juan1', 1, 3, 1);
+
+INSERT IGNORE INTO carrito_compras (id_usuario)
+SELECT id_usuario FROM usuarios WHERE id_usuario NOT IN (SELECT id_usuario FROM carrito_compras);
+
+SELECT nombre_usuario, patrocinador FROM usuarios WHERE patrocinador IS NOT NULL;
+
+select * FROM usuarios

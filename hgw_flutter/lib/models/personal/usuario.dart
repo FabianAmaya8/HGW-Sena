@@ -1,5 +1,4 @@
 import 'membresia.dart';
-
 class Usuario {
   final int idUsuario;
   final String nombre;
@@ -57,7 +56,6 @@ class Usuario {
     };
   }
 }
-
 class DireccionPersonal {
   final int? idDireccion;
   final String direccion;

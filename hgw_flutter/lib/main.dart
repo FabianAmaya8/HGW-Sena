@@ -286,6 +286,9 @@ class _ManejadorMenu extends State<Menu> {
                     return CircleAvatar(
                       backgroundImage: NetworkImage(usuario!.urlFotoPerfil!),
                       backgroundColor: Colors.white,
+                      onBackgroundImageError: (exception, stackTrace) {
+                        // Si hay error cargando la imagen, mostrar inicial
+                      },
                       child: null,
                     );
                   }

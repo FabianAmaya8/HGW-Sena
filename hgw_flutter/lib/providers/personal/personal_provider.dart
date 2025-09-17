@@ -10,14 +10,12 @@ class PersonalProvider extends ChangeNotifier {
   Usuario? _usuario;
   bool _isLoading = false;
   String? _error;
-
   int _puntosActuales = 45;
   int _comprasRealizadas = 0;
-
-  // Datos de red
   int _personasEnRed = 0;
   int _lineasDirectas = 0;
-
+  List<Map<String, dynamic>> _miRed = [];
+  List<Map<String, dynamic>> _lineasDirectasList = [];
   Usuario? get usuario => _usuario;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -25,6 +23,9 @@ class PersonalProvider extends ChangeNotifier {
   int get comprasRealizadas => _comprasRealizadas;
   int get personasEnRed => _personasEnRed;
   int get lineasDirectas => _lineasDirectas;
+  List<Map<String, dynamic>> get miRed => _miRed;
+  List<Map<String, dynamic>> get lineasDirectasList => _lineasDirectasList;
+
   String get nivelMembresia {
     if (_usuario?.membresia != null) {
       return _usuario!.membresia!.nombreMembresia;
@@ -101,21 +102,49 @@ class PersonalProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      int userId = 1; // Por ahora hardcodeado
+      int userId =
+          1; 
 
       _usuario = await _service.obtenerDatosPersonales(userId);
 
       if (_usuario == null) {
         _error = 'No se pudieron cargar los datos personales';
+      } else {
+        if (_usuario!.membresia != null) {
+          _puntosActuales = _usuario!.membresia!.puntosActuales;
+        }
+        await cargarMiRed();
+        await cargarLineasDirectas();
+        _comprasRealizadas = 15;
       }
-      _personasEnRed = 127;
-      _lineasDirectas = 8;
-      _comprasRealizadas = 15;
     } catch (e) {
       _error = 'Error al cargar datos personales: $e';
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> cargarMiRed() async {
+    try {
+      int userId = _usuario?.idUsuario ?? 1;
+      _miRed = await _service.obtenerMiRed(userId);
+      _personasEnRed = _miRed.length;
+      notifyListeners();
+    } catch (e) {
+      print('Error al cargar mi red: $e');
+    }
+  }
+
+  Future<void> cargarLineasDirectas() async {
+    try {
+      int userId = _usuario?.idUsuario ?? 1;
+      _lineasDirectasList =
+          _miRed.where((persona) => persona['nivel'] == 1).toList();
+      _lineasDirectas = _lineasDirectasList.length;
+      notifyListeners();
+    } catch (e) {
+      print('Error al cargar líneas directas: $e');
     }
   }
 
@@ -127,7 +156,7 @@ class PersonalProvider extends ChangeNotifier {
           fotoPerfil: fotoPerfil);
 
       if (success) {
-        await cargarDatosPersonales(); // Recargar datos
+        await cargarDatosPersonales(); 
       }
 
       return success;
@@ -186,6 +215,7 @@ class PersonalProvider extends ChangeNotifier {
       return false;
     }
   }
+
   void actualizarPuntosPorCompra(double montoCompra) {
     int puntosGanados = (montoCompra / 10000).floor();
     _puntosActuales += puntosGanados;
