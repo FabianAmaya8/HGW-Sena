@@ -89,7 +89,13 @@ const Controlador = () => {
       <Route key={llave + "/Lista"} path={llave + "/Lista"} element={<Secure><ListaDinamics form={datos} consultas={consulta} datos={datos[0].req} padre={padre} /></Secure>} />
     ]
   }), [menu, padre])
-  console.log(drawerItems)
+
+  // después de const rutas = useMemo(...)
+  console.log('<------------------------->');
+console.log('RUTAS REGISTRADAS POR CONTROLADOR:', rutas.map(r => r.props.path));
+console.log('MENU (navbar paths):', menu.map(m => m[0]?.path));
+console.log('DRAWER ITEMS (vistas tal cual):', drawerItems);
+console.log('<------------------------->');
   return (
     <ThemeProvider theme={tema}>
       <AppContext.Provider value={ctx}>
