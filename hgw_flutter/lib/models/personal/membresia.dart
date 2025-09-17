@@ -14,7 +14,6 @@ class Membresia {
   });
 
   factory Membresia.fromJson(Map<String, dynamic> json) {
-    // Mapeo de puntos requeridos según el tipo de membresía
     Map<String, int> puntosPorNivel = {
       'Cliente': 0,
       'Pre-Junior': 50,
