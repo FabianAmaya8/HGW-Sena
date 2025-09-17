@@ -15,6 +15,7 @@ def status():
     return render_template('index.html'), 200  
 
 @register_bp.route('/api/ubicacion/paises', methods=['GET'])
+@swag_from('../../Doc/InicioSesion/Registro/ubicacion_paises.yml')
 def api_ubicacion_paises():
     try:
         result = db.session.execute(
