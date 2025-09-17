@@ -10,20 +10,26 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.0.5
-  
+
   # Networking
   http: ^1.5.0
 
+  # File pickers (usando ambos)
   file_picker: ^8.0.0
-  
+  file_selector: ^1.0.3
+  file_selector_macos: ^0.9.4+4
+
   # UI Components
   cached_network_image: ^3.3.0
   shimmer: ^3.0.0
   flutter_staggered_grid_view: ^0.7.0
   youtube_player_flutter: ^8.1.0
-  
+
   # Core
   cupertino_icons: ^1.0.6
+
+  # Media / Picker
+  image_picker: ^1.0.0
 
 dev_dependencies:
   flutter_test:

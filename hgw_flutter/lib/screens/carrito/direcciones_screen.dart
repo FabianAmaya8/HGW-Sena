@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/carrito/carrito_provider.dart';
+import '../../utils/constants.dart';
 import 'pago_screen.dart';
 
 class DireccionesScreen extends StatefulWidget {
@@ -11,8 +12,6 @@ class DireccionesScreen extends StatefulWidget {
 }
 
 class _DireccionesScreenState extends State<DireccionesScreen> {
-  final Color primaryGreen = Colors.green.shade600;
-
   @override
   void initState() {
     super.initState();
@@ -26,10 +25,10 @@ class _DireccionesScreenState extends State<DireccionesScreen> {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: const Text('Dirección de Envío'),
-        backgroundColor: primaryGreen,
+        backgroundColor: AppColors.primaryGreen,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -37,25 +36,38 @@ class _DireccionesScreenState extends State<DireccionesScreen> {
         builder: (context, provider, _) {
           if (provider.direcciones.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.location_off,
-                    size: 80,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No hay direcciones registradas',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Agrega una dirección para continuar',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(32),
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient.scale(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.location_off,
+                        size: 80,
+                        color: AppColors.primaryGreen,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'No hay direcciones registradas',
+                      style: AppStyles.heading2,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Agrega una dirección para continuar',
+                      style: AppStyles.body.copyWith(
+                        color: AppColors.textMedium,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -71,82 +83,99 @@ class _DireccionesScreenState extends State<DireccionesScreen> {
                     final isSelected =
                         provider.direccionSeleccionada?.id == direccion.id;
 
-                    return Card(
+                    return Container(
                       margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceWhite,
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(
-                          color: isSelected ? primaryGreen : Colors.grey[300]!,
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primaryGreen
+                              : AppColors.borderColor,
                           width: isSelected ? 2 : 1,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      color: isSelected ? primaryGreen.withOpacity(0.05) : null,
-                      child: InkWell(
-                        onTap: () => provider.seleccionarDireccion(direccion),
+                      child: Material(
+                        color: isSelected
+                            ? AppColors.primaryGreen.withOpacity(0.05)
+                            : Colors.transparent,
                         borderRadius: BorderRadius.circular(12),
-                        child: Padding(
-                          padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
-                          child: Row(
-                            children: [
-                              Radio<int>(
-                                value: direccion.id,
-                                groupValue: provider.direccionSeleccionada?.id,
-                                activeColor: primaryGreen,
-                                onChanged: (_) =>
-                                    provider.seleccionarDireccion(direccion),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.home,
-                                          size: 18,
-                                          color: primaryGreen,
+                        child: InkWell(
+                          onTap: () => provider.seleccionarDireccion(direccion),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+                            child: Row(
+                              children: [
+                                Radio<int>(
+                                  value: direccion.id,
+                                  groupValue:
+                                      provider.direccionSeleccionada?.id,
+                                  activeColor: AppColors.primaryGreen,
+                                  onChanged: (_) =>
+                                      provider.seleccionarDireccion(direccion),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.home,
+                                            size: 18,
+                                            color: AppColors.primaryGreen,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            direccion.lugarEntrega,
+                                            style: AppStyles.body.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        direccion.direccion,
+                                        style: AppStyles.body.copyWith(
+                                          fontSize: isSmallScreen ? 13 : 14,
                                         ),
-                                        const SizedBox(width: 8),
+                                      ),
+                                      if (direccion.ciudad != null ||
+                                          direccion.pais != null) ...[
+                                        const SizedBox(height: 4),
                                         Text(
-                                          direccion.lugarEntrega,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                                          direccion.direccionCompleta,
+                                          style: AppStyles.caption.copyWith(
+                                            color: AppColors.textMedium,
+                                            fontSize: isSmallScreen ? 12 : 13,
                                           ),
                                         ),
                                       ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      direccion.direccion,
-                                      style: TextStyle(
-                                        fontSize: isSmallScreen ? 13 : 14,
-                                      ),
-                                    ),
-                                    if (direccion.ciudad != null ||
-                                        direccion.pais != null) ...[
                                       const SizedBox(height: 4),
                                       Text(
-                                        direccion.direccionCompleta,
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
+                                        'CP: ${direccion.codigoPostal}',
+                                        style: AppStyles.caption.copyWith(
+                                          color: AppColors.textMedium,
                                           fontSize: isSmallScreen ? 12 : 13,
                                         ),
                                       ),
                                     ],
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'CP: ${direccion.codigoPostal}',
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: isSmallScreen ? 12 : 13,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -159,15 +188,15 @@ class _DireccionesScreenState extends State<DireccionesScreen> {
               Container(
                 padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surfaceWhite,
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(24),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, -5),
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, -10),
                     ),
                   ],
                 ),
@@ -175,53 +204,106 @@ class _DireccionesScreenState extends State<DireccionesScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: AppColors.borderColor,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Total del pedido:',
-                            style: TextStyle(
+                            style: AppStyles.body.copyWith(
                               fontSize: isSmallScreen ? 14 : 16,
+                              color: AppColors.textMedium,
                             ),
                           ),
                           Text(
                             '\$${provider.total.toStringAsFixed(2)}',
-                            style: TextStyle(
+                            style: AppStyles.price.copyWith(
                               fontSize: isSmallScreen ? 20 : 24,
-                              fontWeight: FontWeight.bold,
-                              color: primaryGreen,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      SizedBox(
+                      const SizedBox(height: 20),
+                      Container(
                         width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: provider.direccionSeleccionada != null
-                              ? () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const PagoScreen(),
-                                    ),
-                                  );
-                                }
+                        decoration: BoxDecoration(
+                          gradient: provider.direccionSeleccionada != null
+                              ? AppColors.primaryGradient
+                              : LinearGradient(
+                                  colors: [
+                                    AppColors.borderColor,
+                                    AppColors.borderColor,
+                                  ],
+                                ),
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: provider.direccionSeleccionada != null
+                              ? [
+                                  BoxShadow(
+                                    color:
+                                        AppColors.primaryGreen.withOpacity(0.3),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ]
                               : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryGreen,
-                            padding: EdgeInsets.symmetric(
-                              vertical: isSmallScreen ? 14 : 16,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            'Continuar al pago',
-                            style: TextStyle(
-                              fontSize: isSmallScreen ? 14 : 16,
-                              fontWeight: FontWeight.bold,
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(15),
+                            onTap: provider.direccionSeleccionada != null
+                                ? () {
+                                    Navigator.push(
+                                      context,
+                                      PageRouteBuilder(
+                                        pageBuilder: (context, animation,
+                                                secondaryAnimation) =>
+                                            const PagoScreen(),
+                                        transitionsBuilder: (context, animation,
+                                            secondaryAnimation, child) {
+                                          return FadeTransition(
+                                              opacity: animation, child: child);
+                                        },
+                                      ),
+                                    );
+                                  }
+                                : null,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: isSmallScreen ? 14 : 16,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.payment,
+                                    color:
+                                        provider.direccionSeleccionada != null
+                                            ? Colors.white
+                                            : AppColors.textMedium,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Continuar al pago',
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 14 : 16,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          provider.direccionSeleccionada != null
+                                              ? Colors.white
+                                              : AppColors.textMedium,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),

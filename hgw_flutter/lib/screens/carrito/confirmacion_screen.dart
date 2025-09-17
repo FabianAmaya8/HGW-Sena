@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/constants.dart';
 
 class ConfirmacionScreen extends StatelessWidget {
   final int idOrden;
@@ -8,10 +9,9 @@ class ConfirmacionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
-    final primaryGreen = Colors.green.shade600;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -22,13 +22,15 @@ class ConfirmacionScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.green.shade400,
-                        primaryGreen,
-                      ],
-                    ),
+                    gradient: AppColors.primaryGradient,
                     shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryGreen.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
                   child: Icon(
                     Icons.check,
@@ -39,9 +41,8 @@ class ConfirmacionScreen extends StatelessWidget {
                 const SizedBox(height: 32),
                 Text(
                   '¡Compra Finalizada!',
-                  style: TextStyle(
+                  style: AppStyles.heading2.copyWith(
                     fontSize: isSmallScreen ? 28 : 32,
-                    fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -52,14 +53,14 @@ class ConfirmacionScreen extends StatelessWidget {
                     vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: primaryGreen.withOpacity(0.1),
+                    color: AppColors.primaryGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     'Orden #$idOrden',
                     style: TextStyle(
                       fontSize: isSmallScreen ? 18 : 20,
-                      color: primaryGreen,
+                      color: AppColors.primaryGreen,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -68,8 +69,8 @@ class ConfirmacionScreen extends StatelessWidget {
                 Text(
                   'Tu pedido ha sido procesado exitosamente',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.grey[600],
+                  style: AppStyles.body.copyWith(
+                    color: AppColors.textMedium,
                     fontSize: isSmallScreen ? 14 : 16,
                   ),
                 ),
@@ -77,45 +78,68 @@ class ConfirmacionScreen extends StatelessWidget {
                 Text(
                   'Recibirás un correo con los detalles de tu compra',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.grey[600],
+                  style: AppStyles.caption.copyWith(
+                    color: AppColors.textMedium,
                     fontSize: isSmallScreen ? 13 : 14,
                   ),
                 ),
                 const SizedBox(height: 40),
-                SizedBox(
+                Container(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.popUntil(context, (route) => route.isFirst);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryGreen,
-                      padding: EdgeInsets.symmetric(
-                        vertical: isSmallScreen ? 14 : 16,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryGreen.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      'Volver al Catálogo',
-                      style: TextStyle(
-                        fontSize: isSmallScreen ? 14 : 16,
-                        fontWeight: FontWeight.bold,
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(15),
+                      onTap: () {
+                        Navigator.popUntil(context, (route) => route.isFirst);
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: isSmallScreen ? 16 : 18,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.store, color: Colors.white),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Volver al Catálogo',
+                              style: TextStyle(
+                                fontSize: isSmallScreen ? 15 : 17,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                TextButton(
+                const SizedBox(height: 8),
+                TextButton.icon(
                   onPressed: () {
-                    // TODO: Implementar ver detalles del pedido
+                    // Funcionalidad para ver detalles del pedido
                   },
-                  child: Text(
+                  icon: Icon(Icons.receipt_long,
+                      size: 18, color: AppColors.primaryGreen),
+                  label: Text(
                     'Ver detalles del pedido',
                     style: TextStyle(
-                      color: primaryGreen,
+                      color: AppColors.primaryGreen,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
                     ),
                   ),
                 ),
