@@ -22,11 +22,9 @@ import PersonalInfo from "./User/Components/Personal/PersonalInfo";
 import Educacion from "./User/Components/Educacion/Educacion";
 import CarritoMultistep from "./View/Components/carrito/CarritoMultistep";
 
-
-
-
 // --- Admin ---
 import Controlador from "./controlador";
+import LogoutWrapper from "./View/Components/Logout";
 
 
 const router = createBrowserRouter([
@@ -48,6 +46,7 @@ const router = createBrowserRouter([
             { path: "/catalogo",    element: <Catalogo />,},
             { path: "/producto/:id",    element: <ProductoDetalle />},
             { path: "*",     element: <Error404 />},
+            { path: "/logout", element: <LogoutWrapper /> },
         ]
     },
     {

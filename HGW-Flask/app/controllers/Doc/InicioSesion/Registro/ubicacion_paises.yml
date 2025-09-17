@@ -24,4 +24,4 @@ responses:
       properties:
         error:
           type: string
-          example: "Descripción del error"
+          example: "Error en /api/ubicacion/paises: <detalle del error>"

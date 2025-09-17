@@ -14,6 +14,7 @@ import Snackbar from '@mui/material/Snackbar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import HomeIcon from '@mui/icons-material/Home';
+import SchoolIcon from '@mui/icons-material/School';
 import AppsIcon from '@mui/icons-material/Apps';
 import CloseIcon from '@mui/icons-material/Close';
 import { AppContext } from './controlador';
@@ -26,8 +27,26 @@ import PeopleIcon from '@mui/icons-material/People'
 import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { findWorkingBaseUrl } from './urlDB';
 
-const BACKEND = 'http://127.0.0.1:3000';
+const BACKEND = findWorkingBaseUrl();
+
+// ---------- AÑADIR justo después de los imports ----------
+const iconComponents = {
+  AccountCircleIcon,
+  LogoutIcon,
+  HomeIcon,
+  SchoolIcon,
+  AppsIcon,
+  CategoryIcon,
+  Inventory2Icon,
+  PeopleIcon,
+  CardMembershipIcon,
+  CardGiftcardIcon,
+  SettingsIcon
+};
+// -------------------------------------------------------
+
 
 const Arboles = memo(({ elementos, hoverDrawer }) => {
   const { medidas: dispositivo, anchoDrawer } = useContext(AppContext);
@@ -110,9 +129,7 @@ const Arboles = memo(({ elementos, hoverDrawer }) => {
                 gap: anchoDrawer.isOpen ? '1rem' : '1.2rem',
                 transition: 'gap 450ms'
               }}>
-                {"icon" in el && <JsxParser components={{AccountCircleIcon, LogoutIcon, HomeIcon, CategoryIcon, Inventory2Icon, PeopleIcon, CardMembershipIcon, CardGiftcardIcon, SettingsIcon}}
-                  jsx={el.icon}
-                 />}
+                {"icon" in el && <JsxParser components={iconComponents} jsx={el.icon} />}
                 <Typography variant="body1" noWrap>{el.value}</Typography>
               </Box>
             </AccordionSummary>
@@ -141,7 +158,7 @@ const Arboles = memo(({ elementos, hoverDrawer }) => {
           sx={{ color: 'primary.contrastText', width: '100%', textTransform: 'none', whiteSpace: 'nowrap' }}
         >
           <Box className={Style.boxElementsNavbar}>
-            {el.icon}
+            {"icon" in el ? <JsxParser components={iconComponents} jsx={el.icon} /> : null}
             <Typography variant="body1" noWrap>{el.value}</Typography>
           </Box>
         </Button>
@@ -270,7 +287,6 @@ const App = memo(({objeto}) => {
 });
 
 function Navbar({ alerta, setAlerta, imagenes, objeto }) {
-  console.log(objeto);
   const [anchoAlert, setAncho] = useState('-180px');
 
   useEffect(() => {
