@@ -93,7 +93,6 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
       );
     }
   }
-
   void _mostrarOpcionesImagen() {
     showModalBottomSheet(
       context: context,
@@ -188,7 +187,6 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
     try {
       final provider = context.read<PersonalProvider>();
 
-      // Datos personales
       Map<String, dynamic> datos = {
         'nombre': _nombreController.text.trim(),
         'apellido': _apellidoController.text.trim(),
@@ -196,7 +194,6 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
         'numero_telefono': _telefonoController.text.trim(),
       };
 
-      // Si hay dirección, incluirla
       if (_direccionController.text.isNotEmpty) {
         datos['direcciones'] = [
           {
@@ -306,7 +303,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                           ],
                         ),
                         child: ClipOval(
-                          child: _imagenSeleccionada != null
+                        child: _imagenSeleccionada != null
                               ? Image.file(
                                   _imagenSeleccionada!,
                                   fit: BoxFit.cover,

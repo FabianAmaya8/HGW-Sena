@@ -10,15 +10,12 @@ class PersonalProvider extends ChangeNotifier {
   Usuario? _usuario;
   bool _isLoading = false;
   String? _error;
-
   int _puntosActuales = 45;
   int _comprasRealizadas = 0;
-
   int _personasEnRed = 0;
   int _lineasDirectas = 0;
   List<Map<String, dynamic>> _miRed = [];
   List<Map<String, dynamic>> _lineasDirectasList = [];
-
   Usuario? get usuario => _usuario;
   bool get isLoading => _isLoading;
   String? get error => _error;
