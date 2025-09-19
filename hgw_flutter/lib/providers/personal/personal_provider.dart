@@ -150,23 +150,20 @@ class PersonalProvider extends ChangeNotifier {
 
   Future<bool> actualizarDatosPersonales(Map<String, dynamic> datos,
       {File? fotoPerfil}) async {
-    try {
-      int userId = _usuario?.idUsuario ?? 1;
-      bool success = await _service.actualizarDatosPersonales(userId, datos,
-          fotoPerfil: fotoPerfil);
+    _error = null;
+    int userId = _usuario?.idUsuario ?? 1;
 
-      if (success) {
-        await cargarDatosPersonales(); 
-      }
-
-      return success;
-    } catch (e) {
-      _error = 'Error al actualizar datos: $e';
-      notifyListeners();
-      return false;
+    bool success = await _service.actualizarDatosPersonales(
+      userId,
+      datos,
+      fotoPerfil: fotoPerfil,
+    );
+    if (success) {
+      await cargarDatosPersonales();
+      _error = null;
     }
+    return success;
   }
-
   Future<bool> actualizarDireccion(
       int direccionId, Map<String, dynamic> direccion) async {
     try {

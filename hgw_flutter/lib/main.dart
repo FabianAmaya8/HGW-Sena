@@ -546,58 +546,8 @@ class HomePage extends StatelessWidget {
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    final menu = context.findAncestorStateOfType<_ManejadorMenu>();
-                    menu?.navigateTo(4);
-                  },
-                  icon: const Icon(Icons.store),
-                  label: const Text("Ver Catálogo"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green.shade600,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Consumer<CarritoProvider>(
-                  builder: (context, carritoProvider, child) {
-                    if (carritoProvider.items.isEmpty) return const SizedBox();
-                    return ElevatedButton.icon(
-                      onPressed: () {
-                        final menu = context.findAncestorStateOfType<_ManejadorMenu>();
-                        menu?.navigateTo(5);
-                      },
-                      icon: const Icon(Icons.shopping_cart),
-                      label: Text("Carrito (${carritoProvider.cantidadTotal})"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange.shade600,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                final menu = context.findAncestorStateOfType<_ManejadorMenu>();
-                menu?.navigateTo(6);
-              },
-              icon: const Icon(Icons.person),
-              label: const Text("Mi Perfil"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade600,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-            ),
+            
+            
           ],
         ),
       ),

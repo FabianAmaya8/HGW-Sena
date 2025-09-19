@@ -119,12 +119,11 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                   return SliverPadding(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
                     sliver: SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 0.75,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 20,
+                        childAspectRatio: MediaQuery.of(context).size.width < 375? 0.58: 0.65,
+                        crossAxisSpacing: MediaQuery.of(context).size.width < 375 ? 8 : 12,
+                        mainAxisSpacing: MediaQuery.of(context).size.width < 375 ? 12 : 16,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {

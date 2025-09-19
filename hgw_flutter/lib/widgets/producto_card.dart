@@ -47,8 +47,12 @@ class _ProductoCardState extends State<ProductoCard>
     super.dispose();
   }
 
-  @override
+  
+@override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 375; // iPhone SE, Galaxy S8, etc.
+
     return GestureDetector(
       onTapDown: (_) => _controller.forward(),
       onTapUp: (_) => _controller.reverse(),
@@ -94,12 +98,12 @@ class _ProductoCardState extends State<ProductoCard>
                             child: _buildProductImage(),
                           ),
                           Positioned(
-                            top: 12,
-                            right: 12,
+                            top: isSmallScreen ? 8 : 12,
+                            right: isSmallScreen ? 8 : 12,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isSmallScreen ? 8 : 12,
+                                vertical: isSmallScreen ? 4 : 6,
                               ),
                               decoration: BoxDecoration(
                                 color: widget.producto.stock > 5
@@ -122,9 +126,9 @@ class _ProductoCardState extends State<ProductoCard>
                                     : widget.producto.stock > 0
                                         ? 'Últimas ${widget.producto.stock}'
                                         : 'Agotado',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 11,
+                                  fontSize: isSmallScreen ? 9 : 11,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -137,7 +141,7 @@ class _ProductoCardState extends State<ProductoCard>
                     Expanded(
                       flex: 2,
                       child: Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(isSmallScreen ? 8 : 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -151,15 +155,17 @@ class _ProductoCardState extends State<ProductoCard>
                                     style: AppStyles.caption.copyWith(
                                       color: AppColors.primaryGreen,
                                       fontWeight: FontWeight.w500,
+                                      fontSize: isSmallScreen ? 10 : 12,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: isSmallScreen ? 2 : 4),
                                   Text(
                                     widget.producto.nombre,
-                                    style: AppStyles.heading3
-                                        .copyWith(fontSize: 16),
+                                    style: AppStyles.heading3.copyWith(
+                                      fontSize: isSmallScreen ? 12 : 14,
+                                    ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -167,8 +173,6 @@ class _ProductoCardState extends State<ProductoCard>
                               ),
                             ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Expanded(
                                   child: Column(
@@ -178,20 +182,26 @@ class _ProductoCardState extends State<ProductoCard>
                                     children: [
                                       Text(
                                         'Precio',
-                                        style: AppStyles.caption,
+                                        style: AppStyles.caption.copyWith(
+                                          fontSize: isSmallScreen ? 8 : 10,
+                                        ),
                                       ),
+                                      const SizedBox(height: 2),
                                       FittedBox(
                                         fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerLeft,
                                         child: Text(
                                           '\$${widget.producto.precio.toStringAsFixed(2)}',
-                                          style: AppStyles.price
-                                              .copyWith(fontSize: 20),
+                                          style: AppStyles.price.copyWith(
+                                            fontSize: isSmallScreen ? 12 : 16,
+                                          ),
+                                          maxLines: 1,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                // Botón de agregar al carrito
+                                const SizedBox(width: 8),
                                 GestureDetector(
                                   onTap: widget.producto.stock > 0 &&
                                           !_isAddingToCart
@@ -214,7 +224,8 @@ class _ProductoCardState extends State<ProductoCard>
                                       : null,
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 300),
-                                    padding: const EdgeInsets.all(8),
+                                    padding:
+                                        EdgeInsets.all(isSmallScreen ? 6 : 8),
                                     decoration: BoxDecoration(
                                       color: _isAddingToCart
                                           ? AppColors.successColor
@@ -233,7 +244,7 @@ class _ProductoCardState extends State<ProductoCard>
                                           : widget.producto.stock > 0
                                               ? AppColors.primaryGreen
                                               : Colors.grey,
-                                      size: 20,
+                                      size: isSmallScreen ? 16 : 18,
                                     ),
                                   ),
                                 ),
