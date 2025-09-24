@@ -3,7 +3,9 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'education_page.dart';
 
 class InfoListPage extends StatelessWidget {
-  const InfoListPage({Key? key}) : super(key: key);
+  final List<String> items;
+
+  const InfoListPage({Key? key, required this.items}) : super(key: key);
 
   static const Color oliveColor = Color(0xFF6B8E23);
 
@@ -26,7 +28,7 @@ class InfoListPage extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                'lista de informacion',
+                'Lista de Información',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -36,11 +38,18 @@ class InfoListPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Varias tarjetas de ejemplo
-              for (var i = 0; i < 5; i++) ...[
-                const _SampleCard(text: 'archivo de muestra'),
-                if (i < 4) const SizedBox(height: 16),
-              ],
+              // Tarjetas basadas en items
+              if (items.isEmpty)
+                const Text("No hay temas disponibles.")
+              else
+                Column(
+                  children: [
+                    for (var i = 0; i < items.length; i++) ...[
+                      _SampleCard(text: items[i]),
+                      if (i < items.length - 1) const SizedBox(height: 16),
+                    ],
+                  ],
+                ),
 
               const SizedBox(height: 32),
 
