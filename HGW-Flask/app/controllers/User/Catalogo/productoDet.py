@@ -14,6 +14,7 @@ def obtener_producto():
                     p.id_producto,
                     p.nombre_producto AS nombre,
                     p.precio_producto AS precio,
+                    p.bv_puntos AS puntos_bv,
                     p.imagen_producto AS imagen,
                     p.imgs_publicidad AS imagenes,
                     p.descripcion,

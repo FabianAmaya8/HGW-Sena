@@ -7,16 +7,12 @@ red_bp = Blueprint('red_bp', __name__)
 def get_connection():
     return current_app.config.get('MYSQL_CONNECTION')
 
-def get_usuario(user_id, cursor):
-    cursor.execute("SELECT nombre_usuario FROM usuarios WHERE id_usuario = %s", (user_id,))
-    return cursor.fetchone()
-
 def validar_usuario(user_id):
     if not user_id:
-        return {"error": "ID de usuario no proporcionado"}, 400
+        return None, ({"success": False, "message": "ID de usuario no proporcionado"}, 400)
     connection = get_connection()
     if not connection:
-        return {"error": "Error de conexión a la base de datos"}, 500
+        return None, ({"success": False, "message": "Error de conexión a la base de datos"}, 500)
     return connection, None
 
 # -------------------- Endpoints --------------------
@@ -28,42 +24,41 @@ def validar_usuario(user_id):
     'responses': {200: {'description': 'OK'}, 400: {}, 404: {}, 500: {}}
 })
 def obtener_mi_red():
-    """Obtiene toda la red multinivel de un usuario hasta 10 niveles"""
+    """Obtiene la red multinivel de un usuario hasta 10 niveles"""
     user_id = request.args.get("id", type=int)
-    validacion = validar_usuario(user_id)
-    if isinstance(validacion, tuple):
-        connection, _ = validacion
-    else:
-        return jsonify({"success": False, "message": validacion["error"]}), validacion[1]
+    connection, error = validar_usuario(user_id)
+    if error:
+        return jsonify(error[0]), error[1]
 
     try:
         with connection.cursor() as cursor:
-            usuario = get_usuario(user_id, cursor)
+            cursor.execute("SELECT nombre_usuario FROM usuarios WHERE id_usuario = %s", (user_id,))
+            usuario = cursor.fetchone()
             if not usuario:
                 return jsonify({"success": False, "message": "Usuario no encontrado"}), 404
 
             cursor.execute(""" 
                 WITH RECURSIVE red_usuarios AS (
                     SELECT u.id_usuario, u.nombre, u.apellido, u.nombre_usuario, 
-                           u.correo_electronico, u.url_foto_perfil, u.patrocinador, 
-                           m.nombre_membresia, IFNULL(u.created_at, NOW()) as fecha_registro, 
-                           1 as nivel, u.activo, u.numero_telefono
+                        u.correo_electronico, u.url_foto_perfil, u.patrocinador, 
+                        m.nombre_membresia, IFNULL(u.created_at, NOW()) AS fecha_registro, 
+                        1 AS nivel, u.activo, u.numero_telefono
                     FROM usuarios u
                     LEFT JOIN membresias m ON u.membresia = m.id_membresia
                     WHERE u.patrocinador = %s AND u.activo = 1
                     UNION ALL
                     SELECT u.id_usuario, u.nombre, u.apellido, u.nombre_usuario, 
-                           u.correo_electronico, u.url_foto_perfil, u.patrocinador, 
-                           m.nombre_membresia, IFNULL(u.created_at, NOW()), 
-                           ru.nivel + 1, u.activo, u.numero_telefono
+                        u.correo_electronico, u.url_foto_perfil, u.patrocinador, 
+                        m.nombre_membresia, IFNULL(u.created_at, NOW()), 
+                        ru.nivel + 1, u.activo, u.numero_telefono
                     FROM usuarios u
                     INNER JOIN red_usuarios ru ON u.patrocinador = ru.nombre_usuario
                     LEFT JOIN membresias m ON u.membresia = m.id_membresia
                     WHERE ru.nivel < 10 AND u.activo = 1
                 )
                 SELECT ru.*, 
-                       (SELECT COUNT(*) FROM usuarios WHERE patrocinador = ru.nombre_usuario AND activo = 1) AS total_red,
-                       IFNULL(m2.bv, 0) as puntos_bv
+                    (SELECT COUNT(*) FROM usuarios WHERE patrocinador = ru.nombre_usuario AND activo = 1) AS total_red,
+                    IFNULL(m2.bv, 0) AS puntos_bv
                 FROM red_usuarios ru
                 LEFT JOIN usuarios u2 ON ru.id_usuario = u2.id_usuario
                 LEFT JOIN membresias m2 ON u2.membresia = m2.id_membresia
@@ -74,7 +69,7 @@ def obtener_mi_red():
             for p in red:
                 if p.get('fecha_registro'):
                     p['fecha_registro'] = str(p['fecha_registro'])
-                p['activo'] = int(p['activo']) if p.get('activo') else 0
+                p['activo'] = int(p.get('activo', 0))
 
             return jsonify({
                 "success": True,
