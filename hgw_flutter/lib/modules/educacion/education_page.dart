@@ -226,18 +226,17 @@ class _ManejadorInterface extends State<InterfaceEducation> {
                           runSpacing: vSpacing / 2,
                           children: _temas.map((tema) {
                             final titulo = tema["tema"] ?? "Sin título";
+                            final id=tema['id_tema'];
                             return SizedBox(
                               width: (MediaQuery.of(context).size.width - 2 * 16 - hSpacing) / 3,
                               height: cardHeight,
                               child: _InfoCard(
                                 title: titulo,
                                 onPressed: () {
-                                  // Aquí puedes usar Navigator para ir a una pantalla de detalle o filtrar contenido
-                                  // También puedes pasar el `tema` completo
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => InfoListPage(items: [titulo]),
+                                      builder: (_) => InfoListPage(idTema:id, titulo: titulo),
                                     ),
                                   );
                                 },

@@ -27,13 +27,26 @@ def get_temas():
 @swag_from("../../Doc/Educacion/get_contenidos.yml")
 def get_contenidos():
     try:
+        id_tema = request.args.get("id_tema") 
         connection = get_db()
         with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-            cursor.execute("""SELECT * , 
-                                (SELECT tema 
-                                FROM educacion 
-                                WHERE educacion.id_tema = contenido_tema.tema) AS temaName
-                            FROM contenido_tema""")
+            if id_tema:
+                cursor.execute("""
+                    SELECT *, 
+                        (SELECT tema 
+                         FROM educacion 
+                         WHERE educacion.id_tema = contenido_tema.tema) AS temaName
+                    FROM contenido_tema
+                    WHERE tema = %s
+                """, (id_tema,))
+            else:
+                cursor.execute("""
+                    SELECT *, 
+                        (SELECT tema 
+                         FROM educacion 
+                         WHERE educacion.id_tema = contenido_tema.tema) AS temaName
+                    FROM contenido_tema
+                """)
             contenidos = cursor.fetchall()
             return jsonify(contenidos), 200
     except Exception:
