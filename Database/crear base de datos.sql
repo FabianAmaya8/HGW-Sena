@@ -1,15 +1,13 @@
 DROP DATABASE IF EXISTS HGW_database;
 CREATE DATABASE HGW_database
-    DEFAULT CHARACTER SET = utf8mb4
-    DEFAULT COLLATE = utf8mb4_unicode_ci;
+  DEFAULT CHARACTER SET = utf8mb4
+  DEFAULT COLLATE = utf8mb4_unicode_ci;
 USE HGW_database;
-
 
 -- Tabla de roles
 CREATE TABLE roles (
     id_rol INT PRIMARY KEY AUTO_INCREMENT,
     nombre_rol VARCHAR(50)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabla de medios de pago
@@ -17,17 +15,14 @@ CREATE TABLE medios_pago (
     id_medio INT PRIMARY KEY AUTO_INCREMENT,
     nombre_medio VARCHAR(50)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabla unificada de ubicaciones (países y ciudades)
+-- Tabla unificada de ubicaciones
 CREATE TABLE ubicaciones (
     id_ubicacion INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(100) NOT NULL,
     tipo ENUM('pais', 'ciudad') NOT NULL,
     ubicacion_padre INT,
-    FOREIGN KEY (ubicacion_padre)
-        REFERENCES ubicaciones(id_ubicacion)
-        ON DELETE CASCADE
+    FOREIGN KEY (ubicacion_padre) REFERENCES ubicaciones(id_ubicacion) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabla de membresías
@@ -37,9 +32,8 @@ CREATE TABLE membresias (
     bv INT,
     precio_membresia FLOAT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabla de usuarios
+-- Tabla de usuarios ( BV acumulados)
 CREATE TABLE usuarios (
     id_usuario INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(50) NOT NULL,
@@ -51,15 +45,15 @@ CREATE TABLE usuarios (
     url_foto_perfil VARCHAR(255),
     patrocinador VARCHAR(50),
     membresia INT NOT NULL,
+    bv_acumulados INT NOT NULL DEFAULT 0, 
     medio_pago INT,
     rol INT NOT NULL,
     activo BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (rol)
-        REFERENCES roles(id_rol),
-    FOREIGN KEY (membresia)
-        REFERENCES membresias(id_membresia),
-    FOREIGN KEY (medio_pago)
-        REFERENCES medios_pago(id_medio)
+    ultimo_acceso TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (rol) REFERENCES roles(id_rol),
+    FOREIGN KEY (membresia) REFERENCES membresias(id_membresia),
+    FOREIGN KEY (medio_pago) REFERENCES medios_pago(id_medio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabla de direcciones
@@ -70,89 +64,68 @@ CREATE TABLE direcciones (
     codigo_postal VARCHAR(50),
     id_ubicacion INT NOT NULL,
     lugar_entrega ENUM('Casa', 'Apartamento', 'Hotel', 'Oficina', 'Otro'),
-    FOREIGN KEY (id_usuario)
-        REFERENCES usuarios(id_usuario)
-        ON DELETE CASCADE,
-    FOREIGN KEY (id_ubicacion)
-        REFERENCES ubicaciones(id_ubicacion)
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_ubicacion) REFERENCES ubicaciones(id_ubicacion)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabla de categorías
+-- Categorías
 CREATE TABLE categorias (
     id_categoria INT PRIMARY KEY AUTO_INCREMENT,
     nombre_categoria VARCHAR(40),
     img_categoria TEXT,
     activo BOOLEAN DEFAULT TRUE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabla de subcategorías
+-- Subcategorías
 CREATE TABLE subcategoria (
     id_subcategoria INT PRIMARY KEY AUTO_INCREMENT,
     nombre_subcategoria VARCHAR(50),
     categoria INT NOT NULL,
     activo BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (categoria)
-        REFERENCES categorias(id_categoria)
-        ON DELETE CASCADE
+    FOREIGN KEY (categoria) REFERENCES categorias(id_categoria) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabla de productos
+-- Productos
 CREATE TABLE productos (
     id_producto INT PRIMARY KEY AUTO_INCREMENT,
     categoria INT NOT NULL,
     subcategoria INT NOT NULL,
     nombre_producto VARCHAR(50) NOT NULL UNIQUE,
     precio_producto FLOAT NOT NULL,
+    bv_puntos INT NOT NULL DEFAULT 0,
     imagen_producto TEXT NOT NULL,
     imgs_publicidad TEXT,
     descripcion TEXT NOT NULL,
     stock INT NOT NULL,
     activo BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (categoria)
-        REFERENCES categorias(id_categoria)
-        ON DELETE CASCADE,
-    FOREIGN KEY (subcategoria)
-        REFERENCES subcategoria(id_subcategoria)
-        ON DELETE CASCADE
+    FOREIGN KEY (categoria) REFERENCES categorias(id_categoria) ON DELETE CASCADE,
+    FOREIGN KEY (subcategoria) REFERENCES subcategoria(id_subcategoria) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Carrito de compras y productos en el carrito
-
-
+-- Carrito
 CREATE TABLE carrito_compras (
     id_carrito INT PRIMARY KEY AUTO_INCREMENT,
     id_usuario INT NOT NULL UNIQUE,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_usuario)
-        REFERENCES usuarios(id_usuario)
-        ON DELETE CASCADE
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE productos_carrito (
     producto INT,
     cantidad_producto INT,
     carrito INT NOT NULL,
-    FOREIGN KEY (producto)
-        REFERENCES productos(id_producto)
-        ON DELETE CASCADE,
-    FOREIGN KEY (carrito)
-        REFERENCES carrito_compras(id_carrito)
-        ON DELETE CASCADE,
+    FOREIGN KEY (producto) REFERENCES productos(id_producto) ON DELETE CASCADE,
+    FOREIGN KEY (carrito) REFERENCES carrito_compras(id_carrito) ON DELETE CASCADE,
     CONSTRAINT unique_producto_carrito UNIQUE (producto, carrito)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Bonos y su historial
-
--- Bonos y su historial
-
+-- Bonos
 CREATE TABLE bonos (
     id_bono INT PRIMARY KEY AUTO_INCREMENT,
     nombre_bono VARCHAR(50) NOT NULL,
     porcentaje FLOAT(5,2),
     tipo VARCHAR(50),
     costo_activacion INT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE bonos_usuarios (
@@ -161,22 +134,14 @@ CREATE TABLE bonos_usuarios (
     id_bono INT NOT NULL,
     fecha DATE NOT NULL,
     detalle TEXT,
-    FOREIGN KEY (id_usuario)
-        REFERENCES usuarios(id_usuario)
-        ON DELETE CASCADE,
-    FOREIGN KEY (id_bono)
-        REFERENCES bonos(id_bono)
-        ON DELETE CASCADE
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_bono) REFERENCES bonos(id_bono) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Educación y contenido
-
--- Educación y contenido
-
+-- Educación
 CREATE TABLE educacion (
     id_tema INT PRIMARY KEY AUTO_INCREMENT,
     tema VARCHAR(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE contenido_tema (
@@ -184,49 +149,40 @@ CREATE TABLE contenido_tema (
     url_documentos TEXT,
     url_videos TEXT,
     tema INT NOT NULL,
-    FOREIGN KEY (tema)
-        REFERENCES educacion(id_tema)
-        ON DELETE CASCADE
+    FOREIGN KEY (tema) REFERENCES educacion(id_tema) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Retiros y transacciones
-
 CREATE TABLE retiros (
     id_retiro INT PRIMARY KEY AUTO_INCREMENT,
-    id_usuario INT NOT NULL,
     id_usuario INT NOT NULL,
     saldo_disponible DOUBLE NOT NULL,
     banco VARCHAR(100),
     numero_cuenta_celular VARCHAR(100),
     monto_retiro DOUBLE NOT NULL,
     fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_usuario)
-        REFERENCES usuarios(id_usuario)
-        ON DELETE CASCADE
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE transacciones (
     id_transaccion INT PRIMARY KEY AUTO_INCREMENT,
     nombre_usuario_emisor VARCHAR(50) NOT NULL,
     nombre_usuario_receptor VARCHAR(50) NOT NULL,
-    nombre_usuario_emisor VARCHAR(50) NOT NULL,
-    nombre_usuario_receptor VARCHAR(50) NOT NULL,
     monto DOUBLE NOT NULL,
     fecha_transaccion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     descripcion TEXT,
-    FOREIGN KEY (nombre_usuario_emisor)
-        REFERENCES usuarios(nombre_usuario)
-        ON DELETE CASCADE,
-    FOREIGN KEY (nombre_usuario_receptor)
-        REFERENCES usuarios(nombre_usuario)
-        ON DELETE CASCADE
+    FOREIGN KEY (nombre_usuario_emisor) REFERENCES usuarios(nombre_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (nombre_usuario_receptor) REFERENCES usuarios(nombre_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE modulosAdmin(id int primary key auto_increment, 
-    navbar text, vistas text
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+-- Admin
+CREATE TABLE modulosAdmin(
+    id INT PRIMARY KEY AUTO_INCREMENT, 
+    navbar TEXT, 
+    vistas TEXT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabla principal de órdenes
+-- Órdenes
 CREATE TABLE ordenes (
     id_orden INT PRIMARY KEY AUTO_INCREMENT,
     id_usuario INT NOT NULL,
@@ -234,54 +190,65 @@ CREATE TABLE ordenes (
     id_medio_pago INT NOT NULL,
     total DOUBLE NOT NULL,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_usuario)
-        REFERENCES usuarios(id_usuario)
-        ON DELETE CASCADE,
-    FOREIGN KEY (id_direccion)
-        REFERENCES direcciones(id_direccion)
-        ON DELETE CASCADE,
-    FOREIGN KEY (id_medio_pago)
-        REFERENCES medios_pago(id_medio)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    FOREIGN KEY (id_usuario)
-        REFERENCES usuarios(id_usuario)
-        ON DELETE CASCADE,
-    FOREIGN KEY (id_direccion)
-        REFERENCES direcciones(id_direccion)
-        ON DELETE CASCADE,
-    FOREIGN KEY (id_medio_pago)
-        REFERENCES medios_pago(id_medio)
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_direccion) REFERENCES direcciones(id_direccion) ON DELETE CASCADE,
+    FOREIGN KEY (id_medio_pago) REFERENCES medios_pago(id_medio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabla intermedia productos por orden
 CREATE TABLE ordenes_productos (
     id_orden_producto INT PRIMARY KEY AUTO_INCREMENT,
     id_orden INT NOT NULL,
     id_producto INT NOT NULL,
     cantidad INT NOT NULL,
     precio_unitario DOUBLE NOT NULL,
-    FOREIGN KEY (id_orden)
-        REFERENCES ordenes(id_orden)
-        ON DELETE CASCADE,
-    FOREIGN KEY (id_producto)
-        REFERENCES productos(id_producto)
-        ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    FOREIGN KEY (id_orden)
-        REFERENCES ordenes(id_orden)
-        ON DELETE CASCADE,
-    FOREIGN KEY (id_producto)
-        REFERENCES productos(id_producto)
-        ON DELETE CASCADE
+    FOREIGN KEY (id_orden) REFERENCES ordenes(id_orden) ON DELETE CASCADE,
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ------------------------------------------------
--- Inserción inicial de datos  ---
--- ------------------------------------------------
+-- ===============================
+-- NUEVO: Historial de BV
+-- ===============================
+CREATE TABLE historial_bv (
+    id_historial INT PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    id_orden INT,
+    bv_ganados INT NOT NULL,
+    fecha_transaccion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    descripcion TEXT,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_orden) REFERENCES ordenes(id_orden) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ===============================
+-- PROCEDIMIENTO para actualizar membresía
+-- ===============================
+DELIMITER $$
+CREATE PROCEDURE ActualizarMembresia(IN usuario_id INT)
+BEGIN
+    DECLARE bv_usuario INT;
+    DECLARE nueva_membresia INT;
+    
+    -- Obtener BV acumulados
+    SELECT bv_acumulados INTO bv_usuario FROM usuarios WHERE id_usuario = usuario_id;
+    
+    -- Determinar nueva membresía
+    SELECT id_membresia INTO nueva_membresia
+    FROM membresias 
+    WHERE bv <= bv_usuario 
+    ORDER BY bv DESC 
+    LIMIT 1;
+    
+    -- Actualizar membresía
+    IF nueva_membresia IS NOT NULL THEN
+        UPDATE usuarios 
+        SET membresia = nueva_membresia 
+        WHERE id_usuario = usuario_id;
+    END IF;
+END$$
+DELIMITER ;
 -- Modulos
-INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES 
-(1, '[
+insert into modulosAdmin(navbar, vistas) values(
+	'[
   [
     {
       "title": ["Editar Categoria", "Crear Categoria"],
@@ -293,7 +260,11 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "Nombre Categoria",
       "dependency": "",
-      "requirements": { "maxLength": 9, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 9,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "img_categoria",
@@ -323,7 +294,11 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "Nombre Subcategoria",
       "dependency": "",
-      "requirements": { "maxLength": 9, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 9,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "categoria",
@@ -353,7 +328,11 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "Nombre Producto",
       "dependency": "",
-      "requirements": { "maxLength": 9, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 9,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "precio_producto",
@@ -361,14 +340,22 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "Precio Producto",
       "dependency": "",
-      "requirements": { "maxLength": 19, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 19,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "stock",
       "type": "input",
       "label": "Stock",
       "dependency": "",
-      "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 100,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "descripcion",
@@ -376,7 +363,11 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "Descripción",
       "dependency": "",
-      "requirements": { "maxLength": 19, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 19,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "imagen_producto",
@@ -422,21 +413,33 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "ingrese el nombre",
       "dependency": "",
-      "requirements": { "maxLength": 25, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 25,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "apellido",
       "type": "input",
       "label": "ingrese el apellido",
       "dependency": "",
-      "requirements": { "maxLength": 25, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 25,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "nombre_usuario",
       "type": "input",
       "label": "ingrese el nombre de usuario",
       "dependency": "",
-      "requirements": { "maxLength": 20, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 20,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "pss",
@@ -444,7 +447,10 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "ingrese su contraseña",
       "dependency": "",
-      "requirements": { "minLength": 1, "value": [] }
+      "requirements": {
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "rol",
@@ -452,14 +458,20 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "label": "Eliga el rol",
       "dependency": "",
       "childs": { "table": "roles" },
-      "requirements": { "minLength": 1 }
+      "requirements": {
+		"minLength": 1
+      }
     },
     {
       "id": "correo_electronico",
       "type": "input",
       "label": "ingrese el correo electronico",
       "dependency": "",
-      "requirements": { "maxLength": 30, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 30,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "numero_telefono",
@@ -467,7 +479,11 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "ingrese el numero de telefono",
       "dependency": "",
-      "requirements": { "maxLength": 12, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 12,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "url_foto_perfil",
@@ -483,7 +499,11 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "ingrese el patrocinador",
       "dependency": "",
-      "requirements": { "maxLength": 9, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 9,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "membresia",
@@ -491,7 +511,9 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "label": "Eliga la membresia",
       "dependency": "",
       "childs": { "table": "membresias" },
-      "requirements": { "minLength": 1 }
+      "requirements": {
+		"minLength": 1
+      }
     },
     {
       "variant": "contained",
@@ -512,7 +534,11 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "Nombre Membresia",
       "dependency": "",
-      "requirements": { "maxLength": 50, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 50,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "precio_membresia",
@@ -542,7 +568,11 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "Nombre Bono",
       "dependency": "",
-      "requirements": { "maxLength": 9, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 9,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "porcentaje",
@@ -550,14 +580,22 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "Porcentaje Bono",
       "dependency": "",
-      "requirements": { "maxLength": 9, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 9,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "tipo",
       "type": "input",
       "label": "Tipo",
       "dependency": "",
-      "requirements": { "maxLength": 9, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 9,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "id": "costo_activacion",
@@ -565,7 +603,11 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "type": "input",
       "label": "Costo Activación",
       "dependency": "",
-      "requirements": { "maxLength": 9, "minLength": 1, "value": [] }
+      "requirements": {
+        "maxLength": 9,
+        "minLength": 1,
+        "value": []
+      }
     },
     {
       "variant": "contained",
@@ -574,209 +616,131 @@ INSERT INTO `modulosadmin` (`id`, `navbar`, `vistas`) VALUES
       "click": "",
       "submit": "bonos"
     }
-  ],
-  [
-    {
-      "title": ["Editar Tema", "Crear Tema"],
-      "req": { "table": "educacion" },
-      "path": "Educacion"
-    },
-    {
-      "id": "tema",
-      "type": "input",
-      "label": "Nombre del Tema",
-      "requirements": { "maxLength": 50, "minLength": 1, "value": [] }
-    },
-    {
-      "variant": "contained",
-      "type": "submit",
-      "label": "Crear Tema",
-      "submit": "educacion"
-    }
-  ],
-  [
-    {
-      "title": ["Editar Contenido", "Crear Contenido"],
-      "req": { "table": "contenido_tema" },
-      "tableC": [{ "table": "educacion" }],
-      "path": "Educacion/Contenido"
-    },
-    {
-      "id": "url_documentos",
-      "type": "input",
-      "label": "URL Documento",
-      "requirements": { "minLength": 1 }
-    },
-    {
-      "id": "url_videos",
-      "type": "input",
-      "label": "URL Video",
-      "requirements": { "minLength": 1 }
-    },
-    {
-      "id": "tema",
-      "type": "select",
-      "label": "Seleccione el tema",
-      "dependency": "",
-      "childs": { "table": "educacion" },
-      "requirements": {}
-    },
-    {
-      "variant": "contained",
-      "type": "submit",
-      "label": "Crear Contenido",
-      "submit": "contenido_tema"
-    }
   ]
-]', '[
-    {
-        "id": 102,
-        "value": "Educacion",
-        "icon": "<SchoolIcon />",
+]
+', '
+[
+  {
+    "id": 1,
+    "value": "Categorias",
+    "icon": "<CategoryIcon />",
+    "colorText": "white",
+    "childs": [
+      {
+        "id": 2,
+        "value": "Crear",
+        "colorText": "white",
+        "click": "/Administrador/Categorias/Crear"
+      },
+      {
+        "id": 3,
+        "value": "Ver Lista",
+        "colorText": "white",
+        "click": "/Administrador/Categorias/Lista"
+      },
+      {
+        "id": 30,
+        "value": "Subcategorias",
         "colorText": "white",
         "childs": [
-            { "id": 103, "value": "Crear Tema", "click": "/Administrador/Educacion/Crear" },
-            { "id": 104, "value": "Ver Temas", "click": "/Administrador/Educacion/Lista" },
-            { "id": 105, "value": "Crear Contenido", "click": "/Administrador/Educacion/Contenido/Crear" },
-            { "id": 106, "value": "Ver Contenido", "click": "/Administrador/Educacion/Contenido/Lista" }
+          {
+            "id": 31,
+            "value": "Crear",
+            "colorText": "white",
+            "click": "/Administrador/Categorias/Subcategorias/Crear"
+          },
+          {
+            "id": 32,
+            "value": "Ver Lista",
+            "colorText": "white",
+            "click": "/Administrador/Categorias/Subcategorias/Lista"
+          }
         ]
-    },
-    {
-        "id": 1,
-        "value": "Categorias",
-        "icon": "<CategoryIcon />",
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "value": "Productos",
+    "icon": "<Inventory2Icon />",
+    "colorText": "white",
+    "childs": [
+      {
+        "id": 5,
+        "value": "Crear",
         "colorText": "white",
-        "childs": [
-            {
-                "id": 2,
-                "value": "Crear",
-                "colorText": "white",
-                "click": "/Administrador/Categorias/Crear"
-            },
-            {
-                "id": 3,
-                "value": "Ver Lista",
-                "colorText": "white",
-                "click": "/Administrador/Categorias/Lista"
-            },
-            {
-                "id": 30,
-                "value": "Subcategorias",
-                "colorText": "white",
-                "childs": [
-                    {
-                        "id": 31,
-                        "value": "Crear",
-                        "colorText": "white",
-                        "click": "/Administrador/Categorias/Subcategorias/Crear"
-                    },
-                    {
-                        "id": 32,
-                        "value": "Ver Lista",
-                        "colorText": "white",
-                        "click": "/Administrador/Categorias/Subcategorias/Lista"
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": 4,
-        "value": "Productos",
-        "icon": "<Inventory2Icon />",
+        "click": "/Administrador/Productos/Crear"
+      },
+      {
+        "id": 6,
+        "value": "Ver Lista",
         "colorText": "white",
-        "childs": [
-            {
-                "id": 5,
-                "value": "Crear",
-                "colorText": "white",
-                "click": "/Administrador/Productos/Crear"
-            },
-            {
-                "id": 6,
-                "value": "Ver Lista",
-                "colorText": "white",
-                "click": "/Administrador/Productos/Lista"
-            }
-        ]
-    },
-    {
-        "id": 7,
-        "value": "Usuarios",
-        "icon": "<PeopleIcon />",
+        "click": "/Administrador/Productos/Lista"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "value": "Usuarios",
+    "icon": "<PeopleIcon />",
+    "colorText": "white",
+    "childs": [
+      {
+        "id": 8,
+        "value": "Crear",
         "colorText": "white",
-        "childs": [
-            {
-                "id": 8,
-                "value": "Crear",
-                "colorText": "white",
-                "click": "/Administrador/Usuarios/Crear"
-            },
-            {
-                "id": 9,
-                "value": "Ver Lista",
-                "colorText": "white",
-                "click": "/Administrador/Usuarios/Lista"
-            }
-        ]
-    },
-    {
-        "id": 10,
-        "value": "Membresias",
-        "icon": "<CardMembershipIcon />",
+        "click": "/Administrador/Usuarios/Crear"
+      },
+      {
+        "id": 9,
+        "value": "Ver Lista",
         "colorText": "white",
-        "childs": [
-            {
-                "id": 11,
-                "value": "Crear",
-                "colorText": "white",
-                "click": "/Administrador/Membresias/Crear"
-            },
-            {
-                "id": 12,
-                "value": "Ver Lista",
-                "colorText": "white",
-                "click": "/Administrador/Membresias/Lista"
-            }
-        ]
-    },
-    {
-        "id": 13,
-        "value": "Bonos",
-        "icon": "<CardGiftcardIcon />",
+        "click": "/Administrador/Usuarios/Lista"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "value": "Membresias",
+    "icon": "<CardMembershipIcon />",
+    "colorText": "white",
+    "childs": [
+      {
+        "id": 11,
+        "value": "Crear",
         "colorText": "white",
-        "childs": [
-            {
-                "id": 14,
-                "value": "Crear",
-                "colorText": "white",
-                "click": "/Administrador/Bonos/Crear"
-            },
-            {
-                "id": 15,
-                "value": "Ver Lista",
-                "colorText": "white",
-                "click": "/Administrador/Bonos/Lista"
-            }
-        ]
-    },
-    {
-        "id": 100,
-        "value": "Vista Normal",
-        "icon": "<HomeIcon />",
+        "click": "/Administrador/Membresias/Crear"
+      },
+      {
+        "id": 12,
+        "value": "Ver Lista",
         "colorText": "white",
-        "click": "/"
-    },
-    {
-        "id": 101,
-        "value": "Cerrar Sesión",
-        "icon": "<LogoutIcon />",
+        "click": "/Administrador/Membresias/Lista"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "value": "Bonos",
+    "icon": "<CardGiftcardIcon />",
+    "colorText": "white",
+    "childs": [
+      {
+        "id": 14,
+        "value": "Crear",
         "colorText": "white",
-        "click": "/logout"
-    }
-]');
-
--- Membresías
+        "click": "/Administrador/Bonos/Crear"
+      },
+      {
+        "id": 15,
+        "value": "Ver Lista",
+        "colorText": "white",
+        "click": "/Administrador/Bonos/Lista"
+      }
+    ]
+  }
+]'
+);
 INSERT INTO membresias (nombre_membresia, bv, precio_membresia) VALUES
     ('Cliente',0, 10000.0),
     ('Pre Junior',50, 20000.0),
@@ -784,22 +748,14 @@ INSERT INTO membresias (nombre_membresia, bv, precio_membresia) VALUES
     ('Senior',300, 40000.0),
     ('Master',600, 50000.0);
 
--- Medios de pago
-INSERT INTO medios_pago (nombre_medio) VALUES
-    ('tarjeta');
+INSERT INTO medios_pago (nombre_medio) VALUES ('tarjeta');
 
--- Roles
-INSERT INTO roles (nombre_rol) VALUES
-    ('Admin'),
-    ('Moderador'),
-    ('Usuario');
+INSERT INTO roles (nombre_rol) VALUES ('Admin'),('Moderador'),('Usuario');
 
--- Ubicaciones: países
 INSERT INTO ubicaciones (nombre, tipo, ubicacion_padre) VALUES
     ('Colombia', 'pais', NULL),
     ('México',   'pais', NULL);
 
--- Capturar IDs de países para luego insertar ciudades
 SET @id_colombia = (SELECT id_ubicacion FROM ubicaciones WHERE nombre = 'Colombia');
 SET @id_mexico   = (SELECT id_ubicacion FROM ubicaciones WHERE nombre = 'México');
 
@@ -828,19 +784,3 @@ INSERT INTO ubicaciones (nombre, tipo, ubicacion_padre) VALUES
     ('Zapopan',         'ciudad', @id_mexico),
     ('Mérida',          'ciudad', @id_mexico),
     ('Toluca',          'ciudad', @id_mexico);
-
-ALTER TABLE usuarios ADD COLUMN ultimo_acceso TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-ALTER TABLE usuarios ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-
-INSERT IGNORE INTO usuarios (nombre, apellido, nombre_usuario, pss, correo_electronico, patrocinador, membresia, rol, activo)
-VALUES 
-('Admin', 'Test', 'admin1', '$2b$12$eImiTXuWVxfM37uY4JANjQ.3YOBqzNcK4hBLvPqmrCWP8KdpGn6Ky', 'admin1@test.com', NULL, 1, 3, 1),
-('Juan', 'Perez', 'juan1', '$2b$12$eImiTXuWVxfM37uY4JANjQ.3YOBqzNcK4hBLvPqmrCWP8KdpGn6Ky', 'juan1@test.com', 'admin1', 1, 3, 1),
-('Maria', 'Lopez', 'maria1', '$2b$12$eImiTXuWVxfM37uY4JANjQ.3YOBqzNcK4hBLvPqmrCWP8KdpGn6Ky', 'maria1@test.com', 'juan1', 1, 3, 1);
-
-INSERT IGNORE INTO carrito_compras (id_usuario)
-SELECT id_usuario FROM usuarios WHERE id_usuario NOT IN (SELECT id_usuario FROM carrito_compras);
-
-SELECT nombre_usuario, patrocinador FROM usuarios WHERE patrocinador IS NOT NULL;
-
-select * FROM usuarios

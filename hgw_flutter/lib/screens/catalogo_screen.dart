@@ -121,9 +121,14 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                     sliver: SliverGrid(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: MediaQuery.of(context).size.width < 375? 0.58: 0.65,
-                        crossAxisSpacing: MediaQuery.of(context).size.width < 375 ? 8 : 12,
-                        mainAxisSpacing: MediaQuery.of(context).size.width < 375 ? 12 : 16,
+                        childAspectRatio:
+                            MediaQuery.of(context).size.width < 375
+                                ? 0.70
+                                : 0.75,
+                        crossAxisSpacing:
+                            MediaQuery.of(context).size.width < 375 ? 8 : 12,
+                        mainAxisSpacing:
+                            MediaQuery.of(context).size.width < 375 ? 12 : 16,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {

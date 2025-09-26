@@ -269,6 +269,8 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
                                             .copyWith(fontSize: 28),
                                       ),
                                       const SizedBox(height: 12),
+
+                                      // Precio y Puntos BV
                                       Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -286,9 +288,14 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
                                               ),
                                             ],
                                           ),
-                                          _buildStockIndicator(),
+                                          // Indicador de Puntos BV
+                                          _buildPointsIndicator(),
                                         ],
                                       ),
+                                      const SizedBox(height: 16),
+
+                                      // Stock indicator
+                                      _buildStockIndicator(),
                                       const SizedBox(height: 24),
 
                                       // Descripción
@@ -305,7 +312,7 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
                                         const SizedBox(height: 32),
                                       ],
 
-                                      // Selector de cantidad
+                                      // Selector de cantidad con puntos totales
                                       _buildQuantitySelector(),
                                       const SizedBox(height: 100),
                                     ],
@@ -314,7 +321,6 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
                               ),
                             ],
                           ),
-
                           Positioned(
                             bottom: 24,
                             left: 24,
@@ -472,6 +478,47 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
     );
   }
 
+  // Nuevo widget para mostrar los puntos BV
+  Widget _buildPointsIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.amber.shade600,
+            Colors.amber.shade700,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.amber.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.star,
+            color: Colors.white,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '${_producto!.puntosBv} Puntos BV',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStockIndicator() {
     final bool inStock = _producto!.stock > 0;
     final bool lowStock = _producto!.stock <= 5;
@@ -503,6 +550,7 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
         ],
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             inStock ? Icons.check_circle : Icons.cancel,
@@ -528,6 +576,8 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
   }
 
   Widget _buildQuantitySelector() {
+    final int totalPoints = _producto!.puntosBv * _cantidad;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -535,60 +585,95 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.borderColor),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          Text(
-            'Cantidad',
-            style: AppStyles.heading3,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Cantidad',
+                style: AppStyles.heading3,
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundLight,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: _cantidad > 1
+                          ? () {
+                              setState(() {
+                                _cantidad--;
+                              });
+                            }
+                          : null,
+                      icon: Icon(
+                        Icons.remove,
+                        color: _cantidad > 1
+                            ? AppColors.primaryGreen
+                            : AppColors.borderColor,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        _cantidad.toString(),
+                        style: AppStyles.heading2,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: _cantidad < _producto!.stock
+                          ? () {
+                              setState(() {
+                                _cantidad++;
+                              });
+                            }
+                          : null,
+                      icon: Icon(
+                        Icons.add,
+                        color: _cantidad < _producto!.stock
+                            ? AppColors.primaryGreen
+                            : AppColors.borderColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: AppColors.backgroundLight,
-              borderRadius: BorderRadius.circular(15),
+          // Mostrar puntos totales según la cantidad
+          if (_cantidad > 1) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.amber.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.star,
+                    color: Colors.amber.shade700,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Total: $totalPoints Puntos BV',
+                    style: TextStyle(
+                      color: Colors.amber.shade700,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: _cantidad > 1
-                      ? () {
-                          setState(() {
-                            _cantidad--;
-                          });
-                        }
-                      : null,
-                  icon: Icon(
-                    Icons.remove,
-                    color: _cantidad > 1
-                        ? AppColors.primaryGreen
-                        : AppColors.borderColor,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    _cantidad.toString(),
-                    style: AppStyles.heading2,
-                  ),
-                ),
-                IconButton(
-                  onPressed: _cantidad < _producto!.stock
-                      ? () {
-                          setState(() {
-                            _cantidad++;
-                          });
-                        }
-                      : null,
-                  icon: Icon(
-                    Icons.add,
-                    color: _cantidad < _producto!.stock
-                        ? AppColors.primaryGreen
-                        : AppColors.borderColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          ],
         ],
       ),
     );
@@ -596,6 +681,8 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
 
   Widget _buildPurchaseButton() {
     final bool canAdd = _producto!.stock > 0 && !_isAddingToCart;
+    final double totalPrice = _producto!.precio * _cantidad;
+    final int totalPoints = _producto!.puntosBv * _cantidad;
 
     return Container(
       decoration: BoxDecoration(
@@ -618,38 +705,55 @@ class _ProductoDetalleScreenState extends State<ProductoDetalleScreen>
           onTap: canAdd ? _agregarAlCarrito : null,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 18),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                if (_isAddingToCart)
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (_isAddingToCart)
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    else
+                      Icon(
+                        _producto!.stock > 0
+                            ? Icons.shopping_cart_checkout
+                            : Icons.remove_shopping_cart,
+                        color: Colors.white,
+                      ),
+                    const SizedBox(width: 12),
+                    Text(
+                      _isAddingToCart
+                          ? 'Agregando...'
+                          : _producto!.stock > 0
+                              ? 'Agregar al Carrito - \$${totalPrice.toStringAsFixed(2)}'
+                              : 'Sin Stock',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  )
-                else
-                  Icon(
-                    _producto!.stock > 0
-                        ? Icons.shopping_cart_checkout
-                        : Icons.remove_shopping_cart,
-                    color: Colors.white,
-                  ),
-                const SizedBox(width: 12),
-                Text(
-                  _isAddingToCart
-                      ? 'Agregando...'
-                      : _producto!.stock > 0
-                          ? 'Agregar al Carrito - \$${(_producto!.precio * _cantidad).toStringAsFixed(2)}'
-                          : 'Sin Stock',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  ],
                 ),
+                // Mostrar puntos en el botón si hay stock
+                if (_producto!.stock > 0 && !_isAddingToCart) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    '+ $totalPoints Puntos BV',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
