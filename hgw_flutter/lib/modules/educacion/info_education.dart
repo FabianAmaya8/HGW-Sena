@@ -54,8 +54,8 @@ class _InfoListPageState extends State<InfoListPage> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: Text(widget.titulo),
-        backgroundColor: Colors.green.shade700,
+        title: Text(widget.titulo, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.green.shade600,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
