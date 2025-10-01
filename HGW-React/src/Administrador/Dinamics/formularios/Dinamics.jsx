@@ -12,7 +12,7 @@ import Carga from '../../intermedias/carga'
 import Style from './Dinamics.module.scss'
 import { findWorkingBaseUrl } from '../../../urlDB'
 
-const BACKEND = findWorkingBaseUrl()
+const BACKEND = findWorkingBaseUrl().replace(/\/$/, "");
 
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 
@@ -127,15 +127,10 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
   const datosEdit = edit?.datos || {}
   const { medidas } = useContext(AppContext)
   const [consultasCargadas, setConsultasCargadas] = useConsultas({}, consultas)
-  console.log(consultasCargadas)
 
   const normalizaUrlImagen = useCallback(v => {
     if (!v) return ''
-    if (v.startsWith('http')) {
-      try { return `${BACKEND}/images/${new URL(v).pathname.split('/').pop()}` }
-      catch { return `${BACKEND}/images/${v}` }
-    }
-    return `${BACKEND}/images/${v}`
+    return v
   }, [])
 
   const crearObjeto = useCallback(datos => {
@@ -170,7 +165,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
   const [valores, dispatch] = useReducer(asignarValores, form, crearObjeto)
   const valoresRef = useRef(valores)
   useEffect(() => { valoresRef.current = valores }, [valores])
-  console.log(valores)
+
   useEffect(() => {
     if (editara) dispatch({ type: 'RESET', objeto: crearObjeto(form) })
   }, [editara, datosEdit])

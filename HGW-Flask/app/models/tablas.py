@@ -1,16 +1,15 @@
 import os, json
 from flask_bcrypt import Bcrypt
-from flask import Blueprint, request, jsonify, send_from_directory, Response, current_app
+from flask import Blueprint, request, jsonify, Response
 from flask_cors import cross_origin
-from sqlalchemy import inspect
 from sqlalchemy.ext.automap import automap_base
 from app import db
 from werkzeug.utils import secure_filename
 from flasgger import swag_from
+from app.controllers.User.utils.upload_image import upload_image_to_supabase
 
 tablas = automap_base()
 bcrypt = Bcrypt()
-print(tablas.classes.keys())
 
 def get_fk_display(obj):
     cols = [c.name for c in obj.__table__.columns if 'name' in c.name.lower() or 'nombre' in c.name.lower()]
@@ -51,27 +50,23 @@ def serializar_con_fk_lookup(objetos):
     return lista
 
 bp_tablas = Blueprint("tablas", __name__)
-UPLOAD_FOLDER = os.path.join(current_app.root_path, 'uploads')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-@bp_tablas.route("/images/<path:filename>", methods=["GET", "OPTIONS"])
-@swag_from('../controllers/Doc/Tablas/images.yml')
-def images(filename):
-    if request.method == "OPTIONS":
-        return Response(status=200)
-    ruta = os.path.join(UPLOAD_FOLDER, filename)
-    if not os.path.isfile(ruta):
-        return jsonify({"error": "Imagen no encontrada", "filename": filename}), 404
-    return send_from_directory(UPLOAD_FOLDER, filename)
+def get_tabla(nombre):
+    claves = {k.lower(): k for k in tablas.classes.keys()}
+    return tablas.classes.get(claves.get(nombre.lower()))
+# ---------------- RUTAS ---------------- #
 
 @bp_tablas.route("/registro", methods=["POST","OPTIONS"])
+@cross_origin()
 @swag_from('../controllers/Doc/Tablas/registros.yml')
 def registros():
     if request.method == "OPTIONS":
         return Response(status=200)
-    tablaActual = tablas.classes[request.form["table"]]
+    tablaActual = get_tabla(request.form["table"])
+    if not tablaActual:
+        return jsonify({"error": f"Tabla '{request.form['table']}' no encontrada"}), 400
+
     registro = tablaActual()
-    print(request.form)
     for clave, valor in request.form.items():
         try: 
             lista = json.loads(valor)
@@ -83,15 +78,17 @@ def registros():
         except(json.JSONDecodeError, TypeError):
             if clave not in ("table", "req"):
                 setattr(registro, clave, valor)
+
     for clave, archivo in request.files.items():
-        filename = secure_filename(archivo.filename)
-        archivo.save(os.path.join(UPLOAD_FOLDER, filename))
-        setattr(registro, clave, filename)
+        url, filename = upload_image_to_supabase(archivo, folder=request.form["table"])
+        setattr(registro, clave, url)
+
     db.session.add(registro)
     db.session.commit()
-    return jsonify({"respuesta": "Se registro correctamente"})
+    return jsonify({"respuesta": "Se registró correctamente"})
 
 @bp_tablas.route("/consultas", methods=["POST","OPTIONS"])
+@cross_origin()
 @swag_from('../controllers/Doc/Tablas/consultas.yml')
 def consultas():
     if request.method == "OPTIONS":
@@ -99,7 +96,9 @@ def consultas():
     objeto = request.get_json()
     respuestas = {}
     if "foreign" in objeto:
-        tablaActual = tablas.classes[objeto["table"]]
+        tablaActual = get_tabla(objeto["table"])
+        if not tablaActual:
+            return jsonify({"error": f"Tabla '{objeto['table']}' no encontrada"}), 400
         get = serializar_con_fk_lookup(
             db.session.query(tablaActual)
                       .filter(getattr(tablaActual, objeto["columnDependency"]) == objeto["foreign"])
@@ -108,19 +107,26 @@ def consultas():
         respuestas[objeto["table"]] = get
     else:
         for tabla in objeto:
-            tablaActual = tablas.classes[tabla["table"]]
+            tablaActual = get_tabla(tabla["table"])
+            if not tablaActual:
+                respuestas[tabla["table"]] = []
+                continue
             respuestas[tabla["table"]] = serializar_con_fk_lookup(
                 db.session.query(tablaActual).all()
             )
     return jsonify(respuestas)
 
 @bp_tablas.route("/consultaTabla", methods=["POST","OPTIONS"])
+@cross_origin()
 @swag_from('../controllers/Doc/Tablas/consultaTabla.yml')
 def consultaTabla():
     if request.method == "OPTIONS":
         return Response(status=200)
     req = request.get_json()
-    tabla = tablas.classes[req["table"].lower()]
+    tabla = get_tabla(req["table"])
+    if not tabla:
+        return jsonify({"error": f"Tabla '{req['table']}' no encontrada"}), 400
+
     objetos = db.session.query(tabla).all()
     filas = serializar_con_fk_lookup(objetos)
     columnas = [{
@@ -130,24 +136,34 @@ def consultaTabla():
     return jsonify({"filas": filas, "columnas": columnas})
 
 @bp_tablas.route("/eliminar", methods=["POST","OPTIONS"])
+@cross_origin()
 @swag_from('../controllers/Doc/Tablas/eliminar.yml')
 def eliminar():
     if request.method == "OPTIONS":
         return Response(status=200)
     datos = request.get_json()
-    table = tablas.classes[datos["table"]]
-    elemento = db.session.get(table, datos["id"])
+    tabla = get_tabla(datos["table"])
+    if not tabla:
+        return jsonify({"error": f"Tabla '{datos['table']}' no encontrada"}), 400
+
+    elemento = db.session.get(tabla, datos["id"])
+    if not elemento:
+        return jsonify({"error": "Registro no encontrado"}), 404
     db.session.delete(elemento)
     db.session.commit()
-    return jsonify({"respuesta": "se ha eliminado el registro"})
+    return jsonify({"respuesta": "Se ha eliminado el registro"})
 
 @bp_tablas.route("/consultaFilas", methods=["POST","OPTIONS"])
+@cross_origin()
 @swag_from('../controllers/Doc/Tablas/consultaFilas.yml')
 def consultaFilas():
     if request.method == "OPTIONS":
         return Response(status=200)
     datos = request.get_json()
-    tabla = tablas.classes[datos["table"]]
+    tabla = get_tabla(datos["table"])
+    if not tabla:
+        return jsonify({"error": f"Tabla '{datos['table']}' no encontrada"}), 400
+
     elemento = db.session.get(tabla, datos["id"])
     if not elemento:
         return jsonify({}), 404
@@ -155,12 +171,19 @@ def consultaFilas():
     return jsonify(fila)
 
 @bp_tablas.route("/editar", methods=["POST","OPTIONS"])
+@cross_origin()
 @swag_from('../controllers/Doc/Tablas/editar.yml')
 def editar():
     if request.method == "OPTIONS":
         return Response(status=200)
-    tablaActual = tablas.classes[request.form["table"]]
+    tablaActual = get_tabla(request.form["table"])
+    if not tablaActual:
+        return jsonify({"error": f"Tabla '{request.form['table']}' no encontrada"}), 400
+
     elementoG = db.session.get(tablaActual, request.form["id"])
+    if not elementoG:
+        return jsonify({"error": "Registro no encontrado"}), 404
+
     for clave, valor in request.form.items():
         try:
             lista = json.loads(valor)
@@ -172,9 +195,10 @@ def editar():
         except (json.JSONDecodeError, TypeError):
             if clave not in ("table", "id", "req"):
                 setattr(elementoG, clave, valor)
+
     for clave, archivo in request.files.items():
-        filename = secure_filename(archivo.filename)
-        archivo.save(os.path.join(UPLOAD_FOLDER, filename))
-        setattr(elementoG, clave, filename)
+        url, filename = upload_image_to_supabase(archivo, folder=request.form["table"])
+        setattr(elementoG, clave, url)
+
     db.session.commit()
-    return jsonify({"respuesta": "Se actualizo el registro"})
+    return jsonify({"respuesta": "Se actualizó el registro"})

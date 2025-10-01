@@ -17,7 +17,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Carga from '../../intermedias/carga';
 import { findWorkingBaseUrl } from '../../../urlDB';
 
-const BACKEND = findWorkingBaseUrl()
+const BACKEND = findWorkingBaseUrl().replace(/\/$/, "");
+
 const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
   const [confirmacion, setConfirmacion] = useState({ estado:false,table:"",filaDatos:null,columnas:[] })
   const columnas = useMemo(()=>[...datos.columnas.map(c=>c.field),"Editar/Eliminar"],[datos.columnas])

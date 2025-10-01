@@ -15,7 +15,8 @@ import CreacionVistas from './Administrador/ModulosGestionVista/Creacion.jsx'
 import EditarModulo from './Administrador/ModulosGestionVista/Edicion.jsx'
 import { findWorkingBaseUrl } from './urlDB.js'
 
-const BACKEND = findWorkingBaseUrl()
+const BACKEND = findWorkingBaseUrl().replace(/\/$/, "");
+
 const tema = createTheme({
   palette: {
     primary: { main: "#29293D", contrastText: 'rgba(255, 255, 255, 0.88)' },
@@ -39,6 +40,7 @@ const Controlador = () => {
     })
       .then(r => r.json())
       .then(setForm)
+      
   }, [])
   const moviles = useMediaQuery(tema.breakpoints.down("sm"))
   const tablets = useMediaQuery(tema.breakpoints.between("sm", "md"))
@@ -90,13 +92,7 @@ const Controlador = () => {
     ]
   }), [menu, padre])
 
-  // después de const rutas = useMemo(...)
-  console.log('<------------------------->');
-console.log('RUTAS REGISTRADAS POR CONTROLADOR:', rutas.map(r => r.props.path));
-console.log('MENU (navbar paths):', menu.map(m => m[0]?.path));
-console.log('DRAWER ITEMS (vistas tal cual):', drawerItems);
-console.log('<------------------------->');
-  return (
+    return (
     <ThemeProvider theme={tema}>
       <AppContext.Provider value={ctx}>
         <Navbar objeto={drawerItems} imagenes={navImgs} alerta={alerta} setAlerta={setAlerta} />

@@ -29,7 +29,7 @@ import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { findWorkingBaseUrl } from './urlDB';
 
-const BACKEND = findWorkingBaseUrl();
+const BACKEND = findWorkingBaseUrl().replace(/\/$/, "");
 
 // ---------- AÑADIR justo después de los imports ----------
 const iconComponents = {

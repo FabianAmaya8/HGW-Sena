@@ -246,9 +246,10 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
+
 -- Modulos
-insert into modulosAdmin(navbar, vistas) values(
-	'[
+INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES 
+(1, '[
   [
     {
       "title": ["Editar Categoria", "Crear Categoria"],
@@ -260,11 +261,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "Nombre Categoria",
       "dependency": "",
-      "requirements": {
-        "maxLength": 9,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 50, "minLength": 1, "value": [] }
     },
     {
       "id": "img_categoria",
@@ -294,11 +291,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "Nombre Subcategoria",
       "dependency": "",
-      "requirements": {
-        "maxLength": 9,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 50, "minLength": 1, "value": [] }
     },
     {
       "id": "categoria",
@@ -328,11 +321,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "Nombre Producto",
       "dependency": "",
-      "requirements": {
-        "maxLength": 9,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "precio_producto",
@@ -340,22 +329,14 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "Precio Producto",
       "dependency": "",
-      "requirements": {
-        "maxLength": 19,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 19, "minLength": 1, "value": [] }
     },
     {
       "id": "stock",
       "type": "input",
       "label": "Stock",
       "dependency": "",
-      "requirements": {
-        "maxLength": 100,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "descripcion",
@@ -363,11 +344,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "Descripción",
       "dependency": "",
-      "requirements": {
-        "maxLength": 19,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 255, "minLength": 1, "value": [] }
     },
     {
       "id": "imagen_producto",
@@ -413,33 +390,21 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "ingrese el nombre",
       "dependency": "",
-      "requirements": {
-        "maxLength": 25,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "apellido",
       "type": "input",
       "label": "ingrese el apellido",
       "dependency": "",
-      "requirements": {
-        "maxLength": 25,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "nombre_usuario",
       "type": "input",
       "label": "ingrese el nombre de usuario",
       "dependency": "",
-      "requirements": {
-        "maxLength": 20,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 50, "minLength": 1, "value": [] }
     },
     {
       "id": "pss",
@@ -447,10 +412,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "ingrese su contraseña",
       "dependency": "",
-      "requirements": {
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "minLength": 1, "maxLength": 255, "value": [] }
     },
     {
       "id": "rol",
@@ -458,20 +420,14 @@ insert into modulosAdmin(navbar, vistas) values(
       "label": "Eliga el rol",
       "dependency": "",
       "childs": { "table": "roles" },
-      "requirements": {
-		"minLength": 1
-      }
+      "requirements": { "minLength": 1 }
     },
     {
       "id": "correo_electronico",
       "type": "input",
       "label": "ingrese el correo electronico",
       "dependency": "",
-      "requirements": {
-        "maxLength": 30,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "numero_telefono",
@@ -479,11 +435,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "ingrese el numero de telefono",
       "dependency": "",
-      "requirements": {
-        "maxLength": 12,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 20, "minLength": 1, "value": [] }
     },
     {
       "id": "url_foto_perfil",
@@ -499,11 +451,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "ingrese el patrocinador",
       "dependency": "",
-      "requirements": {
-        "maxLength": 9,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "membresia",
@@ -511,9 +459,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "label": "Eliga la membresia",
       "dependency": "",
       "childs": { "table": "membresias" },
-      "requirements": {
-		"minLength": 1
-      }
+      "requirements": { "minLength": 1 }
     },
     {
       "variant": "contained",
@@ -534,11 +480,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "Nombre Membresia",
       "dependency": "",
-      "requirements": {
-        "maxLength": 50,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "precio_membresia",
@@ -547,7 +489,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "label": "precio membresia",
       "dependency": "",
       "childs": ["anoche", "ayer", "hoy"],
-      "requirements": { "minLength": 5 }
+      "requirements": { "minLength": 1 }
     },
     {
       "variant": "contained",
@@ -568,11 +510,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "Nombre Bono",
       "dependency": "",
-      "requirements": {
-        "maxLength": 9,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "porcentaje",
@@ -580,22 +518,14 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "Porcentaje Bono",
       "dependency": "",
-      "requirements": {
-        "maxLength": 9,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 10, "minLength": 1, "value": [] }
     },
     {
       "id": "tipo",
       "type": "input",
       "label": "Tipo",
       "dependency": "",
-      "requirements": {
-        "maxLength": 9,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 50, "minLength": 1, "value": [] }
     },
     {
       "id": "costo_activacion",
@@ -603,11 +533,7 @@ insert into modulosAdmin(navbar, vistas) values(
       "type": "input",
       "label": "Costo Activación",
       "dependency": "",
-      "requirements": {
-        "maxLength": 9,
-        "minLength": 1,
-        "value": []
-      }
+      "requirements": { "maxLength": 19, "minLength": 1, "value": [] }
     },
     {
       "variant": "contained",
@@ -616,131 +542,208 @@ insert into modulosAdmin(navbar, vistas) values(
       "click": "",
       "submit": "bonos"
     }
+  ],
+  [
+    {
+      "title": ["Editar Tema", "Crear Tema"],
+      "req": { "table": "educacion" },
+      "path": "Educacion"
+    },
+    {
+      "id": "tema",
+      "type": "input",
+      "label": "Nombre del Tema",
+      "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
+    },
+    {
+      "variant": "contained",
+      "type": "submit",
+      "label": "Crear Tema",
+      "submit": "educacion"
+    }
+  ],
+  [
+    {
+      "title": ["Editar Contenido", "Crear Contenido"],
+      "req": { "table": "contenido_tema" },
+      "tableC": [{ "table": "educacion" }],
+      "path": "Educacion/Contenido"
+    },
+    {
+      "id": "url_documentos",
+      "type": "input",
+      "label": "URL Documento",
+      "requirements": { "minLength": 1, "maxLength": 255 }
+    },
+    {
+      "id": "url_videos",
+      "type": "input",
+      "label": "URL Video",
+      "requirements": { "minLength": 1, "maxLength": 255 }
+    },
+    {
+      "id": "tema",
+      "type": "select",
+      "label": "Seleccione el tema",
+      "dependency": "",
+      "childs": { "table": "educacion" },
+      "requirements": {}
+    },
+    {
+      "variant": "contained",
+      "type": "submit",
+      "label": "Crear Contenido",
+      "submit": "contenido_tema"
+    }
   ]
-]
-', '
-[
-  {
-    "id": 1,
-    "value": "Categorias",
-    "icon": "<CategoryIcon />",
-    "colorText": "white",
-    "childs": [
-      {
-        "id": 2,
-        "value": "Crear",
-        "colorText": "white",
-        "click": "/Administrador/Categorias/Crear"
-      },
-      {
-        "id": 3,
-        "value": "Ver Lista",
-        "colorText": "white",
-        "click": "/Administrador/Categorias/Lista"
-      },
-      {
-        "id": 30,
-        "value": "Subcategorias",
+]', '[
+    {
+        "id": 102,
+        "value": "Educacion",
+        "icon": "<SchoolIcon />",
         "colorText": "white",
         "childs": [
-          {
-            "id": 31,
-            "value": "Crear",
-            "colorText": "white",
-            "click": "/Administrador/Categorias/Subcategorias/Crear"
-          },
-          {
-            "id": 32,
-            "value": "Ver Lista",
-            "colorText": "white",
-            "click": "/Administrador/Categorias/Subcategorias/Lista"
-          }
+            { "id": 103, "value": "Crear Tema", "click": "/Administrador/Educacion/Crear" },
+            { "id": 104, "value": "Ver Temas", "click": "/Administrador/Educacion/Lista" },
+            { "id": 105, "value": "Crear Contenido", "click": "/Administrador/Educacion/Contenido/Crear" },
+            { "id": 106, "value": "Ver Contenido", "click": "/Administrador/Educacion/Contenido/Lista" }
         ]
-      }
-    ]
-  },
-  {
-    "id": 4,
-    "value": "Productos",
-    "icon": "<Inventory2Icon />",
-    "colorText": "white",
-    "childs": [
-      {
-        "id": 5,
-        "value": "Crear",
+    },
+    {
+        "id": 1,
+        "value": "Categorias",
+        "icon": "<CategoryIcon />",
         "colorText": "white",
-        "click": "/Administrador/Productos/Crear"
-      },
-      {
-        "id": 6,
-        "value": "Ver Lista",
+        "childs": [
+            {
+                "id": 2,
+                "value": "Crear",
+                "colorText": "white",
+                "click": "/Administrador/Categorias/Crear"
+            },
+            {
+                "id": 3,
+                "value": "Ver Lista",
+                "colorText": "white",
+                "click": "/Administrador/Categorias/Lista"
+            },
+            {
+                "id": 30,
+                "value": "Subcategorias",
+                "colorText": "white",
+                "childs": [
+                    {
+                        "id": 31,
+                        "value": "Crear",
+                        "colorText": "white",
+                        "click": "/Administrador/Categorias/Subcategorias/Crear"
+                    },
+                    {
+                        "id": 32,
+                        "value": "Ver Lista",
+                        "colorText": "white",
+                        "click": "/Administrador/Categorias/Subcategorias/Lista"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "value": "Productos",
+        "icon": "<Inventory2Icon />",
         "colorText": "white",
-        "click": "/Administrador/Productos/Lista"
-      }
-    ]
-  },
-  {
-    "id": 7,
-    "value": "Usuarios",
-    "icon": "<PeopleIcon />",
-    "colorText": "white",
-    "childs": [
-      {
-        "id": 8,
-        "value": "Crear",
+        "childs": [
+            {
+                "id": 5,
+                "value": "Crear",
+                "colorText": "white",
+                "click": "/Administrador/Productos/Crear"
+            },
+            {
+                "id": 6,
+                "value": "Ver Lista",
+                "colorText": "white",
+                "click": "/Administrador/Productos/Lista"
+            }
+        ]
+    },
+    {
+        "id": 7,
+        "value": "Usuarios",
+        "icon": "<PeopleIcon />",
         "colorText": "white",
-        "click": "/Administrador/Usuarios/Crear"
-      },
-      {
-        "id": 9,
-        "value": "Ver Lista",
+        "childs": [
+            {
+                "id": 8,
+                "value": "Crear",
+                "colorText": "white",
+                "click": "/Administrador/Usuarios/Crear"
+            },
+            {
+                "id": 9,
+                "value": "Ver Lista",
+                "colorText": "white",
+                "click": "/Administrador/Usuarios/Lista"
+            }
+        ]
+    },
+    {
+        "id": 10,
+        "value": "Membresias",
+        "icon": "<CardMembershipIcon />",
         "colorText": "white",
-        "click": "/Administrador/Usuarios/Lista"
-      }
-    ]
-  },
-  {
-    "id": 10,
-    "value": "Membresias",
-    "icon": "<CardMembershipIcon />",
-    "colorText": "white",
-    "childs": [
-      {
-        "id": 11,
-        "value": "Crear",
+        "childs": [
+            {
+                "id": 11,
+                "value": "Crear",
+                "colorText": "white",
+                "click": "/Administrador/Membresias/Crear"
+            },
+            {
+                "id": 12,
+                "value": "Ver Lista",
+                "colorText": "white",
+                "click": "/Administrador/Membresias/Lista"
+            }
+        ]
+    },
+    {
+        "id": 13,
+        "value": "Bonos",
+        "icon": "<CardGiftcardIcon />",
         "colorText": "white",
-        "click": "/Administrador/Membresias/Crear"
-      },
-      {
-        "id": 12,
-        "value": "Ver Lista",
+        "childs": [
+            {
+                "id": 14,
+                "value": "Crear",
+                "colorText": "white",
+                "click": "/Administrador/Bonos/Crear"
+            },
+            {
+                "id": 15,
+                "value": "Ver Lista",
+                "colorText": "white",
+                "click": "/Administrador/Bonos/Lista"
+            }
+        ]
+    },
+    {
+        "id": 100,
+        "value": "Vista Normal",
+        "icon": "<HomeIcon />",
         "colorText": "white",
-        "click": "/Administrador/Membresias/Lista"
-      }
-    ]
-  },
-  {
-    "id": 13,
-    "value": "Bonos",
-    "icon": "<CardGiftcardIcon />",
-    "colorText": "white",
-    "childs": [
-      {
-        "id": 14,
-        "value": "Crear",
+        "click": "/"
+    },
+    {
+        "id": 101,
+        "value": "Cerrar Sesión",
+        "icon": "<LogoutIcon />",
         "colorText": "white",
-        "click": "/Administrador/Bonos/Crear"
-      },
-      {
-        "id": 15,
-        "value": "Ver Lista",
-        "colorText": "white",
-        "click": "/Administrador/Bonos/Lista"
-      }
-    ]
-  }
-]'
-);
+        "click": "/logout"
+    }
+]');
+
 INSERT INTO membresias (nombre_membresia, bv, precio_membresia) VALUES
     ('Cliente',0, 10000.0),
     ('Pre Junior',50, 20000.0),
