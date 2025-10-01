@@ -146,10 +146,12 @@ CREATE TABLE educacion (
 
 CREATE TABLE contenido_tema (
     id_contenido INT PRIMARY KEY AUTO_INCREMENT,
-    url_documentos TEXT,
-    url_videos TEXT,
+    titulo VARCHAR(50) NOT NULL,
+    url_contenido TEXT,
     tema INT NOT NULL,
-    FOREIGN KEY (tema) REFERENCES educacion(id_tema) ON DELETE CASCADE
+    FOREIGN KEY (tema)
+        REFERENCES educacion(id_tema)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Retiros y transacciones
@@ -570,15 +572,9 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
       "path": "Educacion/Contenido"
     },
     {
-      "id": "url_documentos",
+      "id": "url_contenido",
       "type": "input",
       "label": "URL Documento",
-      "requirements": { "minLength": 1, "maxLength": 255 }
-    },
-    {
-      "id": "url_videos",
-      "type": "input",
-      "label": "URL Video",
       "requirements": { "minLength": 1, "maxLength": 255 }
     },
     {
