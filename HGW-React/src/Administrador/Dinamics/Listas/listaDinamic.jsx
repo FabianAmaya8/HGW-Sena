@@ -63,13 +63,17 @@ const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
             <Box sx={{ display:"flex",gap:1,justifyContent:"center",alignItems:"center" }}>
               {fila[col]&&
                 <Button onClick={()=>{
-                  let file=fila[col]
-                  if(typeof file==="string"&&file.startsWith("http")){
-                    try{file=new URL(file).pathname.split("/").pop()}catch{}
+                  let file = fila[col];
+                  if (typeof file === "string") {
+                    file = file.trim();
                   }
-                  file=typeof file==="string"?file.trim():file
-                  if(!file)return
-                  imagenes.setImagenes({ estado:true,file })
+                  if (!file) return;
+                  if (file.startsWith("http")) {
+                    imagenes.setImagenes({ estado: true, file });
+                  } 
+                  else {
+                    imagenes.setImagenes({ estado: true, file: `${BACKEND}/uploads/${file}` });
+                  }
                 }}>Ver Imagen</Button>
               }
             </Box>:
