@@ -127,6 +127,64 @@ class CarritoService {
     }
   }
 
+  Future<bool> crearDireccion({
+    required int userId,
+    required String lugarEntrega,
+    required String direccion,
+    required String ciudad,
+    required String pais,
+    required String codigoPostal,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}/api/direcciones/crear'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'id_usuario': userId,
+              'lugar_entrega': lugarEntrega,
+              'direccion': direccion,
+              'ciudad': ciudad,
+              'pais': pais,
+              'codigo_postal': codigoPostal,
+            }),
+          )
+          .timeout(ApiConfig.timeout);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = json.decode(response.body);
+        return data['success'] == true;
+      }
+      return false;
+    } catch (e) {
+      print('Error creando dirección: $e');
+      return false;
+    }
+  }
+
+  // Método adicional para obtener ubicaciones disponibles
+  Future<Map<String, List<String>>> obtenerUbicaciones() async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('${ApiConfig.baseUrl}/api/ubicaciones'),
+          )
+          .timeout(ApiConfig.timeout);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          return Map<String, List<String>>.from(data['ubicaciones']
+              .map((key, value) => MapEntry(key, List<String>.from(value))));
+        }
+      }
+      return {};
+    } catch (e) {
+      print('Error obteniendo ubicaciones: $e');
+      return {};
+    }
+  }
+
   Future<List<MedioPago>> obtenerMediosPago() async {
     try {
       final response = await http

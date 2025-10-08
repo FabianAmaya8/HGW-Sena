@@ -5,6 +5,9 @@ import './Registro.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import './main.dart';
+import 'services/auth/auth_service.dart';
+import 'models/personal/usuario.dart';
+import 'config/api_config.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -15,6 +18,12 @@ class Login extends StatefulWidget {
 
 class _ManejadorLogin extends State<Login> {
   Map<String, dynamic> valores = {};
+
+  @override
+  void initState() {
+    super.initState();
+    AuthService.clearSession();
+  }
 
   List<Widget> inputsLogin(List<Map<String, dynamic>> values) {
     return values.map((value) {
@@ -50,34 +59,63 @@ class _ManejadorLogin extends State<Login> {
   }
 
   Future<void> _tryLogin(BuildContext context) async {
-  String usuario = (valores["usuario"] ?? '').toString().trim();
-  String contrasena = (valores["contrasena"] ?? '').toString().trim();
-  if (usuario.isEmpty || contrasena.isEmpty) {
-    showGlobalAlert(context, "Ingresa usuario y contraseña");
-    return;
-  }
+    String usuario = (valores["usuario"] ?? '').toString().trim();
+    String contrasena = (valores["contrasena"] ?? '').toString().trim();
 
-  try {
-    final response = await http.post(
-      Uri.parse(baseUrl + "api/login"),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'usuario': usuario, 'contrasena': contrasena}),
-    );
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final auth = Provider.of<AuthProvider>(context, listen: false);
-      auth.login();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Login exitoso")),
-      );
-    } else {
-      final resp = jsonDecode(response.body);
-      showGlobalAlert(context, resp['message'] ?? "Usuario o contraseña incorrectos");
+    if (usuario.isEmpty || contrasena.isEmpty) {
+      showGlobalAlert(context, "Ingresa usuario y contraseña");
+      return;
     }
-  } catch (e) {
-    showGlobalAlert(context, "⚠️ No se pudo conectar con el servidor");
+
+    await AuthService.clearSession();
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.baseUrl + "/api/login"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'usuario': usuario, 'contrasena': contrasena}),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        if (responseData['usuario'] != null) {
+          final usuarioData = responseData['usuario'];
+
+          final usuarioObj = Usuario(
+            idUsuario: usuarioData['id_usuario'] ?? 0,
+            nombre: usuarioData['nombre'] ?? '',
+            apellido: usuarioData['apellido'] ?? '',
+            nombreUsuario: usuarioData['nombre_usuario'] ?? usuario,
+            correoElectronico: usuarioData['correo_electronico'] ?? '',
+            numeroTelefono: usuarioData['numero_telefono'],
+            urlFotoPerfil: usuarioData['url_foto_perfil'],
+            patrocinador: usuarioData['patrocinador'],
+            nombreMedio: usuarioData['nombre_medio'],
+            direcciones: [],
+            membresia: null,
+          );
+
+          await AuthService.saveSession(
+            usuario: usuarioObj,
+            token: responseData['token'],
+          );
+
+          final auth = Provider.of<AuthProvider>(context, listen: false);
+          auth.login();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("✅ login exitoso")),
+          );
+        }
+      } else {
+        showGlobalAlert(context,
+            responseData['message'] ?? "Usuario o contraseña incorrectos");
+      }
+    } catch (e) {
+      showGlobalAlert(context, "⚠️ No se pudo conectar con el servidor");
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -154,12 +192,15 @@ class _ManejadorLogin extends State<Login> {
                   height: 50,
                   child: OutlinedButton(
                     onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (_) => Registro()));
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (_) => Registro()));
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: Colors.green.shade700, width: 1.5),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      side:
+                          BorderSide(color: Colors.green.shade700, width: 1.5),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(
                       "Registrarme",

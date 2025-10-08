@@ -15,7 +15,6 @@ class CarritoProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _mensaje;
 
-  
   final int _userId = 1;
 
   // Getters
@@ -108,6 +107,41 @@ class CarritoProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> agregarDireccion({
+    required String lugarEntrega,
+    required String direccion,
+    required String ciudad,
+    required String pais,
+    required String codigoPostal,
+  }) async {
+    try {
+      final success = await _service.crearDireccion(
+        userId: _userId,
+        lugarEntrega: lugarEntrega,
+        direccion: direccion,
+        ciudad: ciudad,
+        pais: pais,
+        codigoPostal: codigoPostal,
+      );
+
+      if (success) {
+        // Recargar las direcciones para obtener la nueva dirección con su ID
+        await cargarDirecciones();
+
+        // Si es la primera dirección, seleccionarla automáticamente
+        if (_direcciones.length == 1) {
+          _direccionSeleccionada = _direcciones.first;
+        }
+
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('Error agregando dirección: $e');
+      return false;
+    }
+  }
+
   Future<void> cargarMediosPago() async {
     try {
       _mediosPago = await _service.obtenerMediosPago();
@@ -157,6 +191,15 @@ class CarritoProvider extends ChangeNotifier {
     } catch (e) {
       print('Error creando orden: $e');
       return null;
+    }
+  }
+
+  Future<Map<String, List<String>>> obtenerUbicaciones() async {
+    try {
+      return await _service.obtenerUbicaciones();
+    } catch (e) {
+      print('Error obteniendo ubicaciones: $e');
+      return {};
     }
   }
 

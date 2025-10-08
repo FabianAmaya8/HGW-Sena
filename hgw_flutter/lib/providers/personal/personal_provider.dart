@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/personal/usuario.dart';
 import '../../models/personal/membresia.dart';
 import '../../services/personal/personal_service.dart';
+import '../../services/auth/auth_service.dart';
 
 class PersonalProvider extends ChangeNotifier {
   final PersonalService _service = PersonalService();
@@ -16,6 +17,7 @@ class PersonalProvider extends ChangeNotifier {
   int _lineasDirectas = 0;
   List<Map<String, dynamic>> _miRed = [];
   List<Map<String, dynamic>> _lineasDirectasList = [];
+
   Usuario? get usuario => _usuario;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -58,7 +60,7 @@ class PersonalProvider extends ChangeNotifier {
       int max = rango['max']!;
 
       if (nivel == 'Master') {
-        return 1.0; // Master siempre al 100%
+        return 1.0;
       }
 
       double progreso = (_puntosActuales - min) / (max - min);
@@ -74,7 +76,7 @@ class PersonalProvider extends ChangeNotifier {
       'Pre-Junior': 100,
       'Junior': 300,
       'Senior': 600,
-      'Master': 0, // Ya es el máximo
+      'Master': 0,
     };
 
     return puntosNecesarios[nivelMembresia] ?? 0;
@@ -91,7 +93,7 @@ class PersonalProvider extends ChangeNotifier {
 
     String nivel = nivelMembresia;
     double posicionBase = posiciones[nivel] ?? 0.0;
-    double progresoEnNivel = progresoMembresia * 0.2; // Cada nivel ocupa 20%
+    double progresoEnNivel = progresoMembresia * 0.2;
 
     return (posicionBase + progresoEnNivel).clamp(0.0, 1.0);
   }
@@ -102,8 +104,15 @@ class PersonalProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      int userId =
-          1; 
+      // Obtener el userId de la sesión actual
+      int? userId = await AuthService.getCurrentUserId();
+
+      if (userId == null) {
+        _error = 'No se encontró sesión activa';
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
 
       _usuario = await _service.obtenerDatosPersonales(userId);
 
@@ -164,6 +173,7 @@ class PersonalProvider extends ChangeNotifier {
     }
     return success;
   }
+
   Future<bool> actualizarDireccion(
       int direccionId, Map<String, dynamic> direccion) async {
     try {
@@ -172,7 +182,7 @@ class PersonalProvider extends ChangeNotifier {
           await _service.actualizarDireccion(userId, direccionId, direccion);
 
       if (success) {
-        await cargarDatosPersonales(); // Recargar datos
+        await cargarDatosPersonales();
       }
 
       return success;
@@ -202,7 +212,7 @@ class PersonalProvider extends ChangeNotifier {
       bool success = await _service.eliminarFotoPerfil(userId);
 
       if (success) {
-        await cargarDatosPersonales(); // Recargar datos
+        await cargarDatosPersonales();
       }
 
       return success;
@@ -211,6 +221,43 @@ class PersonalProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  // NUEVO: Método para cerrar sesión
+  Future<void> cerrarSesion() async {
+    try {
+      // Limpiar la sesión guardada
+      await AuthService.clearSession();
+
+      // Limpiar todos los datos en memoria
+      _usuario = null;
+      _puntosActuales = 0;
+      _comprasRealizadas = 0;
+      _personasEnRed = 0;
+      _lineasDirectas = 0;
+      _miRed = [];
+      _lineasDirectasList = [];
+      _error = null;
+
+      // Notificar a los listeners para actualizar la UI
+      notifyListeners();
+    } catch (e) {
+      print('Error al cerrar sesión: $e');
+      _error = 'Error al cerrar sesión';
+      notifyListeners();
+    }
+  }
+
+  void limpiarDatos() {
+    _usuario = null;
+    _puntosActuales = 0;
+    _comprasRealizadas = 0;
+    _personasEnRed = 0;
+    _lineasDirectas = 0;
+    _miRed = [];
+    _lineasDirectasList = [];
+    _error = null;
+    notifyListeners();
   }
 
   void actualizarPuntosPorCompra(double montoCompra) {
