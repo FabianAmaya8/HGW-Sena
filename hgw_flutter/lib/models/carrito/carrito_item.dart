@@ -1,5 +1,3 @@
-import '../../config/api_config.dart';
-
 class CarritoItem {
   final int idProducto;
   final String nombre;
