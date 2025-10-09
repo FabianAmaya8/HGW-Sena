@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/carrito/carrito_provider.dart';
 import '../../utils/constants.dart';
+import '../../models/carrito/direccion.dart';
 import 'pago_screen.dart';
 
 class DireccionesScreen extends StatefulWidget {
@@ -32,6 +33,71 @@ class _DireccionesScreenState extends State<DireccionesScreen> {
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: const _FormularioDireccion(),
+      ),
+    );
+  }
+
+  void _confirmarEliminarDireccion(
+      BuildContext context, CarritoProvider provider, Direccion direccion) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar dirección'),
+        content: Text(
+          '¿Está seguro que desea eliminar la dirección "${direccion.lugarEntrega}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Row(
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        Text('Eliminando dirección...'),
+                      ],
+                    ),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+
+              final success = await provider.eliminarDireccion(direccion.id);
+
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).clearSnackBars();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'Dirección eliminada exitosamente'
+                          : 'Error al eliminar dirección',
+                    ),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                  ),
+                );
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Eliminar'),
+          ),
+        ],
       ),
     );
   }
@@ -163,6 +229,20 @@ class _DireccionesScreenState extends State<DireccionesScreen> {
                                             ),
                                           ),
                                         ],
+                                      ),
+                                    ),
+                                    // ⚠️ NUEVO: Botón de eliminar
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.red,
+                                      ),
+                                      tooltip: 'Eliminar dirección',
+                                      onPressed: () =>
+                                          _confirmarEliminarDireccion(
+                                        context,
+                                        provider,
+                                        direccion,
                                       ),
                                     ),
                                   ],

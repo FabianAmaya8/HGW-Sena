@@ -237,4 +237,27 @@ class CarritoService {
       return null;
     }
   }
+  Future<bool> eliminarDireccion(int userId, int direccionId) async {
+    try {
+      final response = await http
+          .delete(
+            Uri.parse('${ApiConfig.baseUrl}/api/direcciones/eliminar'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'id_usuario': userId,
+              'id_direccion': direccionId,
+            }),
+          )
+          .timeout(ApiConfig.timeout);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['success'] == true;
+      }
+      return false;
+    } catch (e) {
+      print('Error eliminando dirección: $e');
+      return false;
+    }
+  }
 }

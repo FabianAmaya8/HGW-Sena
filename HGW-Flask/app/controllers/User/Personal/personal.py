@@ -291,3 +291,32 @@ def get_ubicaciones():
             return jsonify({'success': True, 'ubicaciones': ubicaciones})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+    # -------------------- Eliminar dirección --------------------
+@personal_bp.route('/api/direcciones/eliminar', methods=['DELETE'])
+def eliminar_direccion():
+    data = request.json
+    direccion_id = data.get('id_direccion')
+    user_id = data.get('id_usuario')
+    
+    if not direccion_id or not user_id:
+        return jsonify({'success': False, 'message': 'Datos incompletos'}), 400
+    
+    try:
+        connection = get_db()
+        with connection.cursor() as cursor:
+            # Verificar que la dirección pertenezca al usuario
+            cursor.execute("""
+                SELECT id_direccion FROM direcciones 
+                WHERE id_direccion = %s AND id_usuario = %s
+            """, (direccion_id, user_id))
+            
+            if not cursor.fetchone():
+                return jsonify({'success': False, 'message': 'Dirección no encontrada'}), 404
+            
+            cursor.execute("DELETE FROM direcciones WHERE id_direccion = %s", (direccion_id,))
+            connection.commit()
+            
+            return jsonify({'success': True, 'message': 'Dirección eliminada exitosamente'})
+    except Exception as e:
+        connection.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500

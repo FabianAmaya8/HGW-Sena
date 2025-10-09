@@ -15,7 +15,7 @@ class CarritoProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _mensaje;
 
-  final int _userId = 1;
+  final int _userId = 1; // usuario fijo
 
   // Getters
   List<CarritoItem> get items => _items;
@@ -125,19 +125,37 @@ class CarritoProvider extends ChangeNotifier {
       );
 
       if (success) {
-        // Recargar las direcciones para obtener la nueva dirección con su ID
         await cargarDirecciones();
-
-        // Si es la primera dirección, seleccionarla automáticamente
         if (_direcciones.length == 1) {
           _direccionSeleccionada = _direcciones.first;
         }
-
         return true;
       }
       return false;
     } catch (e) {
       print('Error agregando dirección: $e');
+      return false;
+    }
+  }
+
+  //eliminar dirección
+  Future<bool> eliminarDireccion(int direccionId) async {
+    try {
+      final success = await _service.eliminarDireccion(_userId, direccionId);
+      if (success) {
+        _direcciones.removeWhere((d) => d.id == direccionId);
+
+        if (_direccionSeleccionada?.id == direccionId) {
+          _direccionSeleccionada =
+              _direcciones.isNotEmpty ? _direcciones.first : null;
+        }
+
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('Error eliminando dirección: $e');
       return false;
     }
   }
