@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
@@ -33,6 +33,9 @@ def create_app():
         "favicon": "./static/hgw_logo.jpeg"
     }
     Swagger(app, template=swagger_template, config=swagger_config)
+    @app.route("/scalar")
+    def scalar_ui():
+        return render_template('scalar.html')
     db.init_app(app)
     CORS(app)
     connection = pymysql.connect(

@@ -55,7 +55,7 @@ function Educacion() {
                                         setActivo(abierto ? null : tema.id_tema)
                                     }
                                 >
-                                    {tema.tema}
+                                    {tema.nombre_tema}
                                 </button>
                             </h2>
                             <div className={`accordion-collapse collapse ${abierto ? "show" : ""}`}>
