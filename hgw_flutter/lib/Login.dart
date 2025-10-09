@@ -8,6 +8,7 @@ import './main.dart';
 import 'services/auth/auth_service.dart';
 import 'models/personal/usuario.dart';
 import 'config/api_config.dart';
+import 'providers/carrito/carrito_provider.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -81,9 +82,10 @@ class _ManejadorLogin extends State<Login> {
       if (response.statusCode == 200 && responseData['success'] == true) {
         if (responseData['usuario'] != null) {
           final usuarioData = responseData['usuario'];
+          final int userId = usuarioData['id_usuario'] ?? 0;
 
           final usuarioObj = Usuario(
-            idUsuario: usuarioData['id_usuario'] ?? 0,
+            idUsuario: userId,
             nombre: usuarioData['nombre'] ?? '',
             apellido: usuarioData['apellido'] ?? '',
             nombreUsuario: usuarioData['nombre_usuario'] ?? usuario,
@@ -101,12 +103,18 @@ class _ManejadorLogin extends State<Login> {
             token: responseData['token'],
           );
 
-          final auth = Provider.of<AuthProvider>(context, listen: false);
-          auth.login();
+          if (mounted) {
+            final auth = Provider.of<AuthProvider>(context, listen: false);
+            final carrito =
+                Provider.of<CarritoProvider>(context, listen: false);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("✅ login exitoso")),
-          );
+            auth.login();
+            carrito.setUserId(userId);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("✅ Login exitoso")),
+            );
+          }
         }
       } else {
         showGlobalAlert(context,

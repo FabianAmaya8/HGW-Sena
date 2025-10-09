@@ -15,9 +15,9 @@ class CarritoProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _mensaje;
 
-  final int _userId = 1; // usuario fijo
+  // userId ahora es nullable y se configura dinámicamente
+  int? _userId;
 
-  // Getters
   List<CarritoItem> get items => _items;
   List<Direccion> get direcciones => _direcciones;
   List<MedioPago> get mediosPago => _mediosPago;
@@ -29,12 +29,30 @@ class CarritoProvider extends ChangeNotifier {
   double get total => _items.fold(0, (sum, item) => sum + item.subtotal);
   int get cantidadTotal => _items.fold(0, (sum, item) => sum + item.cantidad);
 
+  void setUserId(int userId) {
+    _userId = userId;
+    notifyListeners();
+  }
+
+  void limpiarEstado() {
+    _userId = null;
+    _items = [];
+    _direcciones = [];
+    _mediosPago = [];
+    _direccionSeleccionada = null;
+    _medioPagoSeleccionado = null;
+    _mensaje = null;
+    notifyListeners();
+  }
+
   Future<void> cargarCarrito() async {
+    if (_userId == null) return;
+
     _isLoading = true;
     notifyListeners();
 
     try {
-      final result = await _service.obtenerCarrito(_userId);
+      final result = await _service.obtenerCarrito(_userId!);
       _items = result['items'] ?? [];
       _mensaje = result['mensaje'];
 
@@ -53,9 +71,11 @@ class CarritoProvider extends ChangeNotifier {
   }
 
   Future<bool> agregarProducto(int idProducto, int cantidad) async {
+    if (_userId == null) return false;
+
     try {
       final success =
-          await _service.agregarProducto(_userId, idProducto, cantidad);
+          await _service.agregarProducto(_userId!, idProducto, cantidad);
       if (success) {
         await cargarCarrito();
         return true;
@@ -68,11 +88,11 @@ class CarritoProvider extends ChangeNotifier {
   }
 
   Future<void> actualizarCantidad(int idProducto, int nuevaCantidad) async {
-    if (nuevaCantidad <= 0) return;
+    if (_userId == null || nuevaCantidad <= 0) return;
 
     try {
-      final success =
-          await _service.actualizarCantidad(_userId, idProducto, nuevaCantidad);
+      final success = await _service.actualizarCantidad(
+          _userId!, idProducto, nuevaCantidad);
       if (success) {
         final item = _items.firstWhere((i) => i.idProducto == idProducto);
         item.cantidad = nuevaCantidad;
@@ -84,8 +104,10 @@ class CarritoProvider extends ChangeNotifier {
   }
 
   Future<void> eliminarProducto(int idProducto) async {
+    if (_userId == null) return;
+
     try {
-      final success = await _service.eliminarProducto(_userId, idProducto);
+      final success = await _service.eliminarProducto(_userId!, idProducto);
       if (success) {
         _items.removeWhere((item) => item.idProducto == idProducto);
         notifyListeners();
@@ -96,11 +118,20 @@ class CarritoProvider extends ChangeNotifier {
   }
 
   Future<void> cargarDirecciones() async {
+    if (_userId == null) return;
+
     try {
-      _direcciones = await _service.obtenerDirecciones(_userId);
+      _direcciones = await _service.obtenerDirecciones(_userId!);
+
+      if (_direccionSeleccionada != null &&
+          !_direcciones.any((d) => d.id == _direccionSeleccionada!.id)) {
+        _direccionSeleccionada = null;
+      }
+
       if (_direcciones.isNotEmpty && _direccionSeleccionada == null) {
         _direccionSeleccionada = _direcciones.first;
       }
+
       notifyListeners();
     } catch (e) {
       print('Error cargando direcciones: $e');
@@ -114,9 +145,11 @@ class CarritoProvider extends ChangeNotifier {
     required String pais,
     required String codigoPostal,
   }) async {
+    if (_userId == null) return false;
+
     try {
       final success = await _service.crearDireccion(
-        userId: _userId,
+        userId: _userId!,
         lugarEntrega: lugarEntrega,
         direccion: direccion,
         ciudad: ciudad,
@@ -126,9 +159,6 @@ class CarritoProvider extends ChangeNotifier {
 
       if (success) {
         await cargarDirecciones();
-        if (_direcciones.length == 1) {
-          _direccionSeleccionada = _direcciones.first;
-        }
         return true;
       }
       return false;
@@ -138,10 +168,12 @@ class CarritoProvider extends ChangeNotifier {
     }
   }
 
-  //eliminar dirección
   Future<bool> eliminarDireccion(int direccionId) async {
+    if (_userId == null) return false;
+
     try {
-      final success = await _service.eliminarDireccion(_userId, direccionId);
+      final success = await _service.eliminarDireccion(_userId!, direccionId);
+
       if (success) {
         _direcciones.removeWhere((d) => d.id == direccionId);
 
@@ -183,7 +215,8 @@ class CarritoProvider extends ChangeNotifier {
   }
 
   Future<int?> crearOrden() async {
-    if (_direccionSeleccionada == null ||
+    if (_userId == null ||
+        _direccionSeleccionada == null ||
         _medioPagoSeleccionado == null ||
         _items.isEmpty) {
       return null;
@@ -191,7 +224,7 @@ class CarritoProvider extends ChangeNotifier {
 
     try {
       final idOrden = await _service.crearOrden(
-        _userId,
+        _userId!,
         _direccionSeleccionada!.id,
         _medioPagoSeleccionado!.id,
         total,
