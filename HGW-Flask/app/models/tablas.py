@@ -20,11 +20,15 @@ def get_fk_display(obj):
 
 def serializar_con_fk_lookup(objetos):
     fk_tablas = {
-        'categoria':    'categorias',
-        'subcategoria': 'subcategoria',
-        'membresia':    'membresias',
-        'medio_pago':   'medios_pago',
-        'rol':          'roles'
+        'categoria':      'categorias',
+        'subcategoria':   'subcategoria',
+        'membresia':      'membresias',
+        'medio_pago':     'medios_pago',
+        'rol':            'roles',
+        'id_usuario':     'usuarios',
+        'id_direccion':   'direcciones',
+        'id_medio_pago':  'medios_pago',
+        'tema':           'educacion'
     }
     lista = []
     for o in objetos:
@@ -54,6 +58,7 @@ bp_tablas = Blueprint("tablas", __name__)
 def get_tabla(nombre):
     claves = {k.lower(): k for k in tablas.classes.keys()}
     return tablas.classes.get(claves.get(nombre.lower()))
+
 # ---------------- RUTAS ---------------- #
 
 @bp_tablas.route("/registro", methods=["POST","OPTIONS"])
@@ -123,9 +128,35 @@ def consultaTabla():
     if request.method == "OPTIONS":
         return Response(status=200)
     req = request.get_json()
-    tabla = get_tabla(req["table"])
+    tabla_nombre = req.get("table")
+    tabla = get_tabla(tabla_nombre)
+    
     if not tabla:
-        return jsonify({"error": f"Tabla '{req['table']}' no encontrada"}), 400
+        return jsonify({"error": f"Tabla '{tabla_nombre}' no encontrada"}), 400
+
+    if tabla_nombre.lower() == "ordenes":
+        from sqlalchemy import text
+        try:
+            query = text("""
+                SELECT 
+                    o.id_orden,
+                    CONCAT(u.nombre, ' ', u.apellido) AS usuario,
+                    u.correo_electronico,
+                    o.total,
+                    DATE_FORMAT(o.fecha_creacion, '%Y-%m-%d %H:%i') AS fecha_creacion,
+                    mp.nombre_medio AS medio_pago
+                FROM ordenes o
+                JOIN usuarios u ON o.id_usuario = u.id_usuario
+                JOIN medios_pago mp ON o.id_medio_pago = mp.id_medio
+                ORDER BY o.fecha_creacion DESC
+            """)
+            result = db.session.execute(query)
+            columnas = [{"name": col.replace("_", " ").title(), "field": col} for col in result.keys()]
+            filas = [dict(row._mapping) for row in result]
+            return jsonify({"filas": filas, "columnas": columnas})
+        except Exception as e:
+            print(f"Error en query de órdenes: {e}")
+            pass
 
     objetos = db.session.query(tabla).all()
     filas = serializar_con_fk_lookup(objetos)
@@ -134,6 +165,67 @@ def consultaTabla():
         "field": col.name
     } for col in tabla.__table__.columns]
     return jsonify({"filas": filas, "columnas": columnas})
+
+@bp_tablas.route("/ordenDetalle/<int:id_orden>", methods=["GET","OPTIONS"])
+@cross_origin()
+def orden_detalle(id_orden):
+    if request.method == "OPTIONS":
+        return Response(status=200)
+    
+    from sqlalchemy import text
+    try:
+        query_orden = text("""
+            SELECT 
+                o.id_orden,
+                CONCAT(u.nombre, ' ', u.apellido) AS usuario,
+                u.correo_electronico,
+                u.numero_telefono,
+                o.total,
+                DATE_FORMAT(o.fecha_creacion, '%Y-%m-%d %H:%i:%s') AS fecha_creacion,
+                mp.nombre_medio AS medio_pago,
+                d.direccion,
+                d.codigo_postal,
+                CONCAT(
+                    ub_ciudad.nombre, ', ', ub_pais.nombre
+                ) AS ubicacion
+            FROM ordenes o
+            JOIN usuarios u ON o.id_usuario = u.id_usuario
+            JOIN medios_pago mp ON o.id_medio_pago = mp.id_medio
+            JOIN direcciones d ON o.id_direccion = d.id_direccion
+            LEFT JOIN ubicaciones ub_ciudad ON d.id_ubicacion = ub_ciudad.id_ubicacion
+            LEFT JOIN ubicaciones ub_pais ON ub_ciudad.ubicacion_padre = ub_pais.id_ubicacion
+            WHERE o.id_orden = :id_orden
+        """)
+        result_orden = db.session.execute(query_orden, {"id_orden": id_orden})
+        orden = dict(result_orden.fetchone()._mapping) if result_orden.rowcount > 0 else None
+        
+        if not orden:
+            return jsonify({"error": "Orden no encontrada"}), 404
+        
+        query_productos = text("""
+            SELECT 
+                p.nombre_producto,
+                p.imagen_producto,
+                op.cantidad,
+                op.precio_unitario,
+                (op.cantidad * op.precio_unitario) AS subtotal,
+                p.bv_puntos,
+                (p.bv_puntos * op.cantidad) AS bv_total
+            FROM ordenes_productos op
+            JOIN productos p ON op.id_producto = p.id_producto
+            WHERE op.id_orden = :id_orden
+        """)
+        result_productos = db.session.execute(query_productos, {"id_orden": id_orden})
+        productos = [dict(row._mapping) for row in result_productos]
+        
+        return jsonify({
+            "orden": orden,
+            "productos": productos
+        }), 200
+        
+    except Exception as e:
+        print(f"Error en orden_detalle: {e}")
+        return jsonify({"error": "Error al obtener detalle de orden"}), 500
 
 @bp_tablas.route("/eliminar", methods=["POST","OPTIONS"])
 @cross_origin()

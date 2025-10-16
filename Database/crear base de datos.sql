@@ -306,7 +306,7 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
     {
       "variant": "contained",
       "type": "submit",
-      "label": "Crear Categoria",
+      "label": "Crear Subcategoria",
       "click": "",
       "submit": "subcategoria"
     }
@@ -339,6 +339,14 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
       "label": "Stock",
       "dependency": "",
       "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
+    },
+    {
+      "id": "bv_puntos",
+      "typeOf": "number",
+      "type": "input",
+      "label": "BV Puntos",
+      "dependency": "",
+      "requirements": { "maxLength": 10, "minLength": 0, "value": [] }
     },
     {
       "id": "descripcion",
@@ -390,76 +398,65 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
     {
       "id": "nombre",
       "type": "input",
-      "label": "ingrese el nombre",
-      "dependency": "",
+      "label": "Ingrese el nombre",
       "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "apellido",
       "type": "input",
-      "label": "ingrese el apellido",
-      "dependency": "",
+      "label": "Ingrese el apellido",
       "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "nombre_usuario",
       "type": "input",
-      "label": "ingrese el nombre de usuario",
-      "dependency": "",
+      "label": "Ingrese el nombre de usuario",
       "requirements": { "maxLength": 50, "minLength": 1, "value": [] }
     },
     {
       "id": "pss",
       "typeOf": "password",
       "type": "input",
-      "label": "ingrese su contraseña",
-      "dependency": "",
+      "label": "Ingrese su contraseña",
       "requirements": { "minLength": 1, "maxLength": 255, "value": [] }
     },
     {
       "id": "rol",
       "type": "select",
-      "label": "Eliga el rol",
-      "dependency": "",
+      "label": "Elija el rol",
       "childs": { "table": "roles" },
       "requirements": { "minLength": 1 }
     },
     {
       "id": "correo_electronico",
       "type": "input",
-      "label": "ingrese el correo electronico",
-      "dependency": "",
+      "label": "Ingrese el correo electrónico",
       "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "numero_telefono",
       "typeOf": "number",
       "type": "input",
-      "label": "ingrese el numero de telefono",
-      "dependency": "",
+      "label": "Ingrese el número de teléfono",
       "requirements": { "maxLength": 20, "minLength": 1, "value": [] }
     },
     {
       "id": "url_foto_perfil",
       "type": "img",
       "label": "",
-      "dependency": "",
       "childs": ["anoche", "ayer", "hoy"],
       "requirements": { "minLength": 0 }
     },
     {
       "id": "patrocinador",
-      "typeOf": "string",
       "type": "input",
-      "label": "ingrese el patrocinador",
-      "dependency": "",
+      "label": "Ingrese el patrocinador",
       "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "membresia",
       "type": "select",
-      "label": "Eliga la membresia",
-      "dependency": "",
+      "label": "Elija la membresía",
       "childs": { "table": "membresias" },
       "requirements": { "minLength": 1 }
     },
@@ -467,43 +464,38 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
       "variant": "contained",
       "type": "submit",
       "label": "Crear Usuario",
-      "click": "",
       "submit": "usuarios"
     }
   ],
   [
     {
-      "title": ["Editar Membresia", "Crear Membresia"],
+      "title": ["Editar Membresía", "Crear Membresía"],
       "req": { "table": "membresias" },
       "path": "Membresias"
     },
     {
       "id": "nombre_membresia",
       "type": "input",
-      "label": "Nombre Membresia",
-      "dependency": "",
+      "label": "Nombre Membresía",
       "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
       "id": "precio_membresia",
       "typeOf": "number",
       "type": "input",
-      "label": "precio membresia",
-      "dependency": "",
-      "childs": ["anoche", "ayer", "hoy"],
+      "label": "Precio Membresía",
       "requirements": { "minLength": 1 }
     },
     {
       "variant": "contained",
       "type": "submit",
-      "label": "Crear Membresia",
-      "click": "",
+      "label": "Crear Membresía",
       "submit": "membresias"
     }
   ],
   [
     {
-      "title": ["Editar bono", "Crear bono"],
+      "title": ["Editar Bono", "Crear Bono"],
       "req": { "table": "bonos" },
       "path": "Bonos"
     },
@@ -511,7 +503,6 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
       "id": "nombre_bono",
       "type": "input",
       "label": "Nombre Bono",
-      "dependency": "",
       "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
     },
     {
@@ -519,14 +510,12 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
       "typeOf": "number",
       "type": "input",
       "label": "Porcentaje Bono",
-      "dependency": "",
       "requirements": { "maxLength": 10, "minLength": 1, "value": [] }
     },
     {
       "id": "tipo",
       "type": "input",
       "label": "Tipo",
-      "dependency": "",
       "requirements": { "maxLength": 50, "minLength": 1, "value": [] }
     },
     {
@@ -534,14 +523,12 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
       "typeOf": "number",
       "type": "input",
       "label": "Costo Activación",
-      "dependency": "",
       "requirements": { "maxLength": 19, "minLength": 1, "value": [] }
     },
     {
       "variant": "contained",
       "type": "submit",
-      "label": "Crear bono",
-      "click": "",
+      "label": "Crear Bono",
       "submit": "bonos"
     }
   ],
@@ -552,7 +539,7 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
       "path": "Educacion"
     },
     {
-      "id": "tema",
+      "id": "nombre_tema",
       "type": "input",
       "label": "Nombre del Tema",
       "requirements": { "maxLength": 100, "minLength": 1, "value": [] }
@@ -572,6 +559,12 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
       "path": "Educacion/Contenido"
     },
     {
+      "id": "titulo",
+      "type": "input",
+      "label": "Nombre título",
+      "requirements": { "maxLength": 50, "minLength": 1, "value": [] }
+    },
+    {
       "id": "url_contenido",
       "type": "input",
       "label": "URL Documento",
@@ -581,9 +574,7 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
       "id": "tema",
       "type": "select",
       "label": "Seleccione el tema",
-      "dependency": "",
-      "childs": { "table": "educacion" },
-      "requirements": {}
+      "childs": { "table": "educacion" }
     },
     {
       "variant": "contained",
@@ -591,8 +582,16 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
       "label": "Crear Contenido",
       "submit": "contenido_tema"
     }
+  ],
+  [
+    {
+      "title": ["Detalle de Orden", "Órdenes"],
+      "req": { "table": "ordenes" },
+      "path": "Ordenes"
+    }
   ]
-]', '[
+]',
+'[
     {
         "id": 102,
         "value": "Educacion",
@@ -601,8 +600,10 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
         "childs": [
             { "id": 103, "value": "Crear Tema", "click": "/Administrador/Educacion/Crear" },
             { "id": 104, "value": "Ver Temas", "click": "/Administrador/Educacion/Lista" },
-            { "id": 105, "value": "Crear Contenido", "click": "/Administrador/Educacion/Contenido/Crear" },
-            { "id": 106, "value": "Ver Contenido", "click": "/Administrador/Educacion/Contenido/Lista" }
+            { "id": 114, "value": "Contenidos", "colorText": "white", "childs": [
+                { "id": 115, "value": "Crear Contenido", "click": "/Administrador/Educacion/Contenido/Crear" },
+                { "id": 116, "value": "Ver Contenido", "click": "/Administrador/Educacion/Contenido/Lista" }
+            ]}
         ]
     },
     {
@@ -611,37 +612,12 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
         "icon": "<CategoryIcon />",
         "colorText": "white",
         "childs": [
-            {
-                "id": 2,
-                "value": "Crear",
-                "colorText": "white",
-                "click": "/Administrador/Categorias/Crear"
-            },
-            {
-                "id": 3,
-                "value": "Ver Lista",
-                "colorText": "white",
-                "click": "/Administrador/Categorias/Lista"
-            },
-            {
-                "id": 30,
-                "value": "Subcategorias",
-                "colorText": "white",
-                "childs": [
-                    {
-                        "id": 31,
-                        "value": "Crear",
-                        "colorText": "white",
-                        "click": "/Administrador/Categorias/Subcategorias/Crear"
-                    },
-                    {
-                        "id": 32,
-                        "value": "Ver Lista",
-                        "colorText": "white",
-                        "click": "/Administrador/Categorias/Subcategorias/Lista"
-                    }
-                ]
-            }
+            { "id": 2, "value": "Crear", "click": "/Administrador/Categorias/Crear" },
+            { "id": 3, "value": "Ver Lista", "click": "/Administrador/Categorias/Lista" },
+            { "id": 30, "value": "Subcategorias", "childs": [
+                { "id": 31, "value": "Crear", "click": "/Administrador/Categorias/Subcategorias/Crear" },
+                { "id": 32, "value": "Ver Lista", "click": "/Administrador/Categorias/Subcategorias/Lista" }
+            ]}
         ]
     },
     {
@@ -650,18 +626,8 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
         "icon": "<Inventory2Icon />",
         "colorText": "white",
         "childs": [
-            {
-                "id": 5,
-                "value": "Crear",
-                "colorText": "white",
-                "click": "/Administrador/Productos/Crear"
-            },
-            {
-                "id": 6,
-                "value": "Ver Lista",
-                "colorText": "white",
-                "click": "/Administrador/Productos/Lista"
-            }
+            { "id": 5, "value": "Crear", "click": "/Administrador/Productos/Crear" },
+            { "id": 6, "value": "Ver Lista", "click": "/Administrador/Productos/Lista" }
         ]
     },
     {
@@ -670,18 +636,8 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
         "icon": "<PeopleIcon />",
         "colorText": "white",
         "childs": [
-            {
-                "id": 8,
-                "value": "Crear",
-                "colorText": "white",
-                "click": "/Administrador/Usuarios/Crear"
-            },
-            {
-                "id": 9,
-                "value": "Ver Lista",
-                "colorText": "white",
-                "click": "/Administrador/Usuarios/Lista"
-            }
+            { "id": 8, "value": "Crear", "click": "/Administrador/Usuarios/Crear" },
+            { "id": 9, "value": "Ver Lista", "click": "/Administrador/Usuarios/Lista" }
         ]
     },
     {
@@ -690,18 +646,8 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
         "icon": "<CardMembershipIcon />",
         "colorText": "white",
         "childs": [
-            {
-                "id": 11,
-                "value": "Crear",
-                "colorText": "white",
-                "click": "/Administrador/Membresias/Crear"
-            },
-            {
-                "id": 12,
-                "value": "Ver Lista",
-                "colorText": "white",
-                "click": "/Administrador/Membresias/Lista"
-            }
+            { "id": 11, "value": "Crear", "click": "/Administrador/Membresias/Crear" },
+            { "id": 12, "value": "Ver Lista", "click": "/Administrador/Membresias/Lista" }
         ]
     },
     {
@@ -710,33 +656,18 @@ INSERT INTO `modulosAdmin` (`id`, `navbar`, `vistas`) VALUES
         "icon": "<CardGiftcardIcon />",
         "colorText": "white",
         "childs": [
-            {
-                "id": 14,
-                "value": "Crear",
-                "colorText": "white",
-                "click": "/Administrador/Bonos/Crear"
-            },
-            {
-                "id": 15,
-                "value": "Ver Lista",
-                "colorText": "white",
-                "click": "/Administrador/Bonos/Lista"
-            }
+            { "id": 14, "value": "Crear", "click": "/Administrador/Bonos/Crear" },
+            { "id": 15, "value": "Ver Lista", "click": "/Administrador/Bonos/Lista" }
         ]
     },
     {
-        "id": 100,
-        "value": "Vista Normal",
-        "icon": "<HomeIcon />",
+        "id": 17,
+        "value": "Ordenes",
+        "icon": "<ReceiptLongIcon />",
         "colorText": "white",
-        "click": "/"
-    },
-    {
-        "id": 101,
-        "value": "Cerrar Sesión",
-        "icon": "<LogoutIcon />",
-        "colorText": "white",
-        "click": "/logout"
+        "childs": [
+            { "id": 18, "value": "Ver Lista", "click": "/Administrador/Ordenes/Lista" }
+        ]
     }
 ]');
 
