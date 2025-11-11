@@ -1,6 +1,6 @@
-import { memo, useCallback, useEffect, useState, useContext, useMemo } from 'react'
+import React, { memo, useCallback, useEffect, useState, useContext, useMemo, lazy, Suspense } from 'react'
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
-import { Fade, Stack } from '@mui/material';
+import { Fade } from '@mui/material';
 import "../../../font.module.scss"
 import { AppContext } from '../../../controlador';
 import Style from './ListaDinamic.module.scss'
@@ -11,18 +11,20 @@ import {
   Button, Box, Dialog, Slide, IconButton, Typography
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import DinamicForm from '../formularios/Dinamics';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Carga from '../../intermedias/carga';
 import { findWorkingBaseUrl } from '../../../urlDB';
 
+const DinamicForm = lazy(() => import('../formularios/Dinamics'));
 const BACKEND = findWorkingBaseUrl().replace(/\/$/, "");
 
 const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
   const [confirmacion, setConfirmacion] = useState({ estado:false,table:"",filaDatos:null,columnas:[] })
-  const columnas = useMemo(()=>[...datos.columnas.map(c=>c.field),"Editar/Eliminar"],[datos.columnas])
-  const renderHeader = useCallback(()=>(
+
+  const columnas = useMemo(()=>[...datos.columnas.map(c=>c.field), table == "ordenes" ? "Ver detalle" : "Editar/Eliminar"],[datos.columnas, table])
+
+  const renderHeader = useMemo(()=>(
     <TableRow sx={{ background:"#9BCC4B" }}>
       {datos.columnas.map((c,i)=>
         <TableCell key={c.field+"_"+i} sx={{ minWidth:"80px" }}>
@@ -30,14 +32,16 @@ const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
         </TableCell>
       )}
       <TableCell key="editarEliminar_header">
-        <Typography sx={{ color:"white",textAlign:"center" }}>Editar/Eliminar</Typography>
+        <Typography sx={{ color:"white",textAlign:"center" }}>{table == "ordenes" ? "Ver detalle" : "Editar/Eliminar"}</Typography>
       </TableCell>
     </TableRow>
-  ),[datos.columnas])
+  ),[datos.columnas, table])
+
   const edit = useCallback(id=>{
     editar.setId(id);
     editar.setDialog(true)
-  },[editar])
+  },[editar.setId, editar.setDialog])
+
   const eliminar = useCallback(async(tbl,fila,cols)=>{
     await fetch(`${BACKEND}/eliminar`,{
       method:"POST",
@@ -45,12 +49,29 @@ const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
       body:JSON.stringify({ table:tbl,id:fila[cols[0]] })
     })
     padre.setRender(r=>!r)
-  },[padre])
+  },[padre.setRender])
+
+  const createImageHandler = useCallback((file) => {
+    return () => {
+      let f = file;
+      if (typeof f === "string") f = f.trim();
+      if (!f) return;
+      if (f.startsWith("http") || f.startsWith("data:image/")) {
+        imagenes.setImagenes({ estado: true, file: f });
+      } else {
+        imagenes.setImagenes({ estado: true, file: `${BACKEND}/uploads/${f}` });
+      }
+    };
+  }, [imagenes]);
+
   const renderRows = useMemo(()=>datos.filas.map((fila,i)=>
-    <TableRow key={"fila_"+i}>
+    <TableRow key={fila.id ?? fila[columnas[0]] ?? "fila_"+i}>
       {columnas.map(col=>
-        <TableCell key={i+"_"+col}>
-          {col==="Editar/Eliminar"?
+        <TableCell key={(fila.id ?? i) + "_" + col}>
+          {
+          col === "Ver detalle" ? 
+            <Button>Detalle Orden</Button>
+          : col==="Editar/Eliminar"?
             <Box sx={{ display:"flex",gap:1,justifyContent:"center",alignItems:"center" }}>
               <Button onClick={()=>edit({ id:fila[columnas[0]],table })}>
                 <EditIcon sx={{ color:"black" }}/>
@@ -58,33 +79,23 @@ const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
               <Button sx={{ background:"red",borderRadius:"2rem" }} onClick={()=>setConfirmacion({ estado:true,table,filaDatos:fila,columnas })}>
                 <DeleteIcon sx={{ color:"white" }}/>
               </Button>
-            </Box>:
-          col.toLowerCase().includes("img")||col.toLowerCase().includes("imagen")||col.toLowerCase().includes("foto")?
+            </Box>
+          : col.toLowerCase().includes("img")||col.toLowerCase().includes("imagen")||col.toLowerCase().includes("foto")?
             <Box sx={{ display:"flex",gap:1,justifyContent:"center",alignItems:"center" }}>
               {fila[col]&&
-                <Button onClick={()=>{
-                  let file = fila[col];
-                  if (typeof file === "string") {
-                    file = file.trim();
-                  }
-                  if (!file) return;
-                  if (file.startsWith("http")) {
-                    imagenes.setImagenes({ estado: true, file });
-                  } 
-                  else {
-                    imagenes.setImagenes({ estado: true, file: `${BACKEND}/uploads/${file}` });
-                  }
-                }}>Ver Imagen</Button>
+                <Button onClick={createImageHandler(fila[col])}>Ver Imagen</Button>
               }
-            </Box>:
+            </Box>
+          :
             <Box sx={{ display:"flex",gap:1,justifyContent:"center",alignItems:"center" }}>
-              {fila[col]?.value??fila[col]}
+              {fila[col]?.value ?? fila[col]}
             </Box>
           }
         </TableCell>
       )}
     </TableRow>
-  ),[datos.filas,columnas,edit,table,imagenes])
+  ),[datos.filas,columnas,edit,table,imagenes,createImageHandler])
+
   return (
     <>
       <Dialog
@@ -140,7 +151,7 @@ const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
         >
           {!datos.columnas.length && <Carga/>}
           <Table stickyHeader sx={{ "& .MuiTableCell-stickyHeader":{ backgroundColor:"	#29293D",color:"white" } }}>
-            <TableHead>{renderHeader()}</TableHead>
+            <TableHead>{renderHeader}</TableHead>
             <TableBody>{renderRows}</TableBody>
           </Table>
         </TableContainer>
@@ -156,21 +167,23 @@ const ListaDinamic = ({ datos, padre, form, consultas }) => {
   const [consultaEditar, setConsultaEditar] = useState({});
   const [id, setId] = useState(null);
   const [clickEdit, setClickEdit] = useState(false);
+
   useEffect(() => {
     if (!id) return;
-    let ignore = false;
+    const controller = new AbortController();
     (async () => {
       try {
         const res = await fetch(`${BACKEND}/consultaFilas`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify(id)
+          body: JSON.stringify(id),
+          signal: controller.signal
         });
         const json = await res.json();
-        if (!ignore) setConsultaEditar(json);
-      } catch { }
+        setConsultaEditar(json);
+      } catch (err) {}
     })();
-    return () => { ignore = true };
+    return () => controller.abort();
   }, [id, padre.render]);
 
   const contenidoWidth = useMemo(() => anchoDrawer.isOpen
@@ -179,27 +192,31 @@ const ListaDinamic = ({ datos, padre, form, consultas }) => {
 
   useEffect(() => {
     let tabla = datos.table;
-    let ignore = false;
+    const controller = new AbortController();
     (async () => {
       try {
         const res = await fetch(`${BACKEND}/consultaTabla`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ table: tabla })
+          body: JSON.stringify({ table: tabla }),
+          signal: controller.signal
         });
         const json = await res.json();
-        if (!ignore) setConsulta(json);
-      } catch { }
+        setConsulta(json);
+      } catch (err) {}
     })();
-    return () => { ignore = true };
+    return () => controller.abort();
   }, [datos.table, padre.render]);
 
   const handleClose = useCallback(() => {
     alerta.setAlerta({ estado: false, valor: { title: '', content: "" }, lado: 'derecho' });
     setDialog(false);
-  }, [alerta]);
+  }, [alerta.setAlerta]);
+
   const datosEnvioEdit = useMemo(() => ({ estado: true, datos: consultaEditar, setClick: setClickEdit , click: clickEdit ? true: false }), [consultaEditar, clickEdit]);
-  const editarMemo = useMemo(() => ({ setDialog, setId }), []);
+
+  const editarMemo = useMemo(() => ({ setDialog, setId }), [setDialog, setId]);
+
   return (
     <>
       <Box sx={{
@@ -230,7 +247,9 @@ const ListaDinamic = ({ datos, padre, form, consultas }) => {
           </Box>
         </Box>
         {Object.keys(consultaEditar).length > 0 && (
-          <DinamicForm padre={padre} form={form} edit={datosEnvioEdit} consultas={consultas} />
+          <Suspense fallback={null}>
+            <DinamicForm padre={padre} form={form} edit={datosEnvioEdit} consultas={consultas} />
+          </Suspense>
         )}
       </Box>
       <Box className="box-contenidos" sx={{

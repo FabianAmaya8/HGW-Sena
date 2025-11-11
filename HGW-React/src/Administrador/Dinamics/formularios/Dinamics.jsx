@@ -11,12 +11,14 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import Carga from '../../intermedias/carga'
 import Style from './Dinamics.module.scss'
 import { findWorkingBaseUrl } from '../../../urlDB'
+import { datosToken } from '../../../auth'
 
 const BACKEND = findWorkingBaseUrl().replace(/\/$/, "");
+const token = datosToken();
 
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 
-function PasswordField({
+const PasswordField = memo(function PasswordField({
   id,
   label,
   value,
@@ -26,6 +28,8 @@ function PasswordField({
   sx
 }) {
   const [visible, setVisible] = useState(false)
+
+  const handleMouseDown = useCallback(e => e.preventDefault(), [])
 
   return (
     <TextField
@@ -48,7 +52,7 @@ function PasswordField({
             <IconButton
               aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               onClick={() => setVisible(v => !v)}
-              onMouseDown={e => e.preventDefault()}
+              onMouseDown={handleMouseDown}
               edge="end"
             >
               {visible ? <VisibilityOff /> : <Visibility />}
@@ -58,7 +62,7 @@ function PasswordField({
       }}
     />
   )
-}
+})
 
 const useConsultas = (initial, payload) => {
   const [data, setData] = useState(initial)
@@ -134,7 +138,18 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
   }, [])
 
   const crearObjeto = useCallback(datos => {
-    const res = {}
+    const res = editara ? {editor: {
+      value: token?.id ?? '',
+      error: false,
+      helperText: '',
+      id: 'editor'
+    }}
+    : {creador: {
+      value: token?.id ?? '',
+      error: false,
+      helperText: '',
+      id: 'creador'
+    }}
     for (const e of datos) {
       if (!e.id) continue
       let val = ''
@@ -168,33 +183,35 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
 
   useEffect(() => {
     if (editara) dispatch({ type: 'RESET', objeto: crearObjeto(form) })
-  }, [editara, datosEdit])
+  }, [editara, datosEdit, crearObjeto, form])
 
   const setValuesChilds = useCallback(async (el, padreVal, reset) => {
-    const r = await fetch(`${BACKEND}/consultas`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        table: el.changeTable.table,
-        columnDependency: el.changeTable.columnDependency,
-        foreign: padreVal
+    try {
+      const r = await fetch(`${BACKEND}/consultas`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          table: el.changeTable.table,
+          columnDependency: el.changeTable.columnDependency,
+          foreign: padreVal
+        })
       })
-    })
-    const j = await r.json()
-    setConsultasCargadas(p => ({ ...p, ...j }))
-    const t = el.changeTable.table
-    const opts = Object.values(j)[0] || []
-    if (reset) {
-      dispatch({ id: t, value: '' })
-      return
-    }
-    const cur = valoresRef.current[t]?.value
-    if (opts.some(o => String(o.id) === String(cur)))
-      dispatch({ id: t, value: cur })
-    else {
-      const dv = datosEdit[t]?.id ?? ''
-      dispatch({ id: t, value: opts.some(o => String(o.id) === String(dv)) ? dv : '' })
-    }
+      const j = await r.json()
+      setConsultasCargadas(p => ({ ...p, ...j }))
+      const t = el.changeTable.table
+      const opts = Object.values(j)[0] || []
+      if (reset) {
+        dispatch({ id: t, value: '' })
+        return
+      }
+      const cur = valoresRef.current[t]?.value
+      if (opts.some(o => String(o.id) === String(cur)))
+        dispatch({ id: t, value: cur })
+      else {
+        const dv = datosEdit[t]?.id ?? ''
+        dispatch({ id: t, value: opts.some(o => String(o.id) === String(dv)) ? dv : '' })
+      }
+    } catch (e) { }
   }, [datosEdit, setConsultasCargadas])
 
   const verDep = useCallback(d => {
@@ -235,7 +252,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
     }
   }, [opcionesPorTabla, editara, datosEdit, subKey])
 
-  const validaciones = (datos, h, form) => {
+  const validaciones = useCallback((datos, h, form) => {
     let ok = true;
     form.forEach(f => {
       if (f.id) h({ id: f.id, error: false, helperText: '' });
@@ -304,7 +321,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
     });
 
     return ok;
-  };
+  }, [])
 
   useEffect(() => {
     if (!editara) return
@@ -333,20 +350,22 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
     if (editara && idKey) payload.append('id', String(datosEdit[idKey]));
     dispatch({ type: 'RESET', objeto: valoresRef.current });
     const url = editara ? `${BACKEND}/editar` : `${BACKEND}/registro`;
-    const res = await fetch(url, { method: 'POST', body: payload });
-    const json = await res.json();
-    if (json.uploaded) {
-      Object.entries(json.uploaded).forEach(([cid, fn]) =>
-        dispatch({ id: cid, value: `${BACKEND}/images/${fn}` })
-      );
-    }
-    alerta.setAlerta({
-      estado: true,
-      valor: { title: 'Completado', content: json.respuesta },
-      ...(editara && { lado: 'izquierdo' })
-    });
-    if (editara) padre.setRender(r => !r);
-  }, [validaciones, form, editara, datosEdit, padre, alerta, edit]);
+    try {
+      const res = await fetch(url, { method: 'POST', body: payload });
+      const json = await res.json();
+      if (json.uploaded) {
+        Object.entries(json.uploaded).forEach(([cid, fn]) =>
+          dispatch({ id: cid, value: `${BACKEND}/images/${fn}` })
+        );
+      }
+      alerta.setAlerta({
+        estado: true,
+        valor: { title: 'Completado', content: json.respuesta },
+        ...(editara && { lado: 'izquierdo' })
+      });
+      if (editara) padre.setRender(r => !r);
+    } catch (e) { }
+  }, [validaciones, form, editara, datosEdit, padre, alerta, edit])
 
   useEffect(() => {
     if (edit.click) envio()
@@ -473,11 +492,11 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
                 handle(e.target.value, 'select', el.id)
               }}
             >
-              {opts.map((o, index) =>
-                <MenuItem key={o.id + index} value={o.id}>
+              {opts.map((o, index) => {
+                return  <MenuItem key={o.id + index} value={o.id}>
                   {o.nombre}
                 </MenuItem>
-              )}
+              })}
             </Select>
           </FormControl>
         )
@@ -543,7 +562,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
     }
 
     return null
-  }), [form, opcionesPorTabla, valores, handle, validaciones, verDep, editara, medidas, setValuesChilds, datosEdit, padre, alerta])
+  }), [form, opcionesPorTabla, valores, handle, verDep, editara, medidas, setValuesChilds, datosEdit, envio])
 
   return (
     <Slide in direction="left" timeout={400}>
@@ -639,7 +658,7 @@ const DinamicForm = memo(({ form, consultas, edit, padre }) => {
       anchoDrawer.isOpen
         ? `calc(100% - ${anchoDrawer.ancho.open - 15}rem)`
         : `calc(100% - ${anchoDrawer.ancho.close - 4}rem)`,
-    [anchoDrawer]
+    [anchoDrawer.isOpen, anchoDrawer.ancho.open, anchoDrawer.ancho.close]
   )
   return (
     <Box

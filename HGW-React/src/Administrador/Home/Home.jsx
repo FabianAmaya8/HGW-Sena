@@ -121,7 +121,7 @@ export default function Home() {
                 fontSize: medidas === 'movil' ? '1rem' : '1.25rem'
               }}
             >
-              {!terminoCarga ? frases[fraseIndex] : "¡Bienvenido de nuevo!"}
+              {!terminoCarga ? frases[fraseIndex] : "¡Bienvenido!"}
             </Typography>
           </Paper>
         </Fade>

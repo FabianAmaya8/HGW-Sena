@@ -8,6 +8,7 @@ import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Title } from '@mui/icons-material';
+import { useMemo } from 'react';
 
 export const objeto = [
     {id: 1, value: "Categorias", icon: <CategoryIcon />, colorText: "white", childs: [
@@ -46,7 +47,6 @@ export const objeto = [
     }
   ];
 export const objectSpeedDial = [
-    {arialLabel: "Usuario", icon: <AccountCircleIcon />, rute: ""},
-    {arialLabel: "Cerrar Sesion", icon: <LogoutIcon />, rute: ""},
-    {arialLabel: "Home", icon: <HomeIcon />, rute: "/Administrador/Home"},
-];
+    {arialLabel: "Cerrar Sesion", icon: <LogoutIcon />, rute: "/"},
+    {arialLabel: "Home", icon: <HomeIcon />, rute: "/"},
+]
