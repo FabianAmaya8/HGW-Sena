@@ -47,6 +47,6 @@ export const objeto = [
     }
   ];
 export const objectSpeedDial = [
-    {arialLabel: "Cerrar Sesion", icon: <LogoutIcon />, rute: "/"},
+    {arialLabel: "Cerrar Sesion", icon: <LogoutIcon />, rute: "/Login"},
     {arialLabel: "Home", icon: <HomeIcon />, rute: "/"},
 ]
