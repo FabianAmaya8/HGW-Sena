@@ -21,7 +21,7 @@ export default function Header() {
     ];
 
     const opciones = [
-        { to: "/", text: "Cerrar sesión", action: () => logout() },
+        { to: "/", text: "Cerrar sesión", action: () => { logout() } },
         ...(user?.role === 1
             ? [{ to: "/administrador", text: "Administrador" }]
             : user?.role === 2

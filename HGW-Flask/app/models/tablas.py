@@ -4,6 +4,7 @@ from flask import Blueprint, request, jsonify, Response
 from flask_cors import cross_origin
 from sqlalchemy.ext.automap import automap_base
 from app import db
+from sqlalchemy import select, func, join, text
 from werkzeug.utils import secure_filename
 from flasgger import swag_from
 from app.controllers.User.utils.upload_image import upload_image_to_supabase
@@ -49,7 +50,8 @@ def serializar_con_fk_lookup(objetos):
                 except Exception:
                     pass
             
-            data[col.name] = valor
+            if(col.name != "creador" and col.name != "editor" and col.name != "activo"):
+                data[col.name] = valor
         lista.append(data)
     return lista
 
@@ -163,7 +165,7 @@ def consultaTabla():
     columnas = [{
         "name": col.name.replace("_", " ").title(),
         "field": col.name
-    } for col in tabla.__table__.columns]
+    } for col in tabla.__table__.columns if col.name != "editor" and col.name != "creador" and col.name.lower() != "activo"]
     return jsonify({"filas": filas, "columnas": columnas})
 
 @bp_tablas.route("/ordenDetalle/<int:id_orden>", methods=["GET","OPTIONS"])
@@ -272,21 +274,73 @@ def editar():
     if not tablaActual:
         return jsonify({"error": f"Tabla '{request.form['table']}' no encontrada"}), 400
 
-    elementoG = db.session.get(tablaActual, request.form["id"])
+    id = request.form["id"]
+    elementoG = db.session.get(tablaActual, id)
     if not elementoG:
         return jsonify({"error": "Registro no encontrado"}), 404
 
+    id_usuario = ""
+    import json
+    import re
+    _bcrypt_re = re.compile(r'^\$2[aby]\$[./A-Za-z0-9]{56}$')
+
+    def _extract_text_from_maybe_json(val):
+        if isinstance(val, dict):
+            t = val.get("text", None)
+        else:
+            t = val
+        if isinstance(t, str) and t.strip().startswith("{"):
+            try:
+                inner = json.loads(t)
+                if isinstance(inner, dict) and "text" in inner:
+                    return inner.get("text")
+                return inner
+            except json.JSONDecodeError:
+                return t
+        return t
+
     for clave, valor in request.form.items():
         try:
-            lista = json.loads(valor)
-            if "password" in lista:
-                valor = bcrypt.generate_password_hash(lista.get("text")).decode('utf-8')
-            elif "text" in lista:
-                valor = lista.get("text")
-            setattr(elementoG, clave, valor)
-        except (json.JSONDecodeError, TypeError):
+            try:
+                lista = json.loads(valor)
+            except (json.JSONDecodeError, TypeError):
+                lista = valor
+
+            if clave == "id_usuario":
+                id_usuario = lista if not isinstance(lista, dict) else lista.get("text", "")
+
+            if isinstance(lista, dict) and "password" in lista:
+                nuevo_val = _extract_text_from_maybe_json(lista)
+                hash_actual = getattr(elementoG, "pss", None)
+
+                if isinstance(nuevo_val, str) and nuevo_val == hash_actual:
+                    valor_a_guardar = hash_actual
+                elif isinstance(nuevo_val, str):
+                    valor_a_guardar = bcrypt.generate_password_hash(nuevo_val).decode("utf-8")
+                else:
+                    valor_a_guardar = hash_actual
+
+                setattr(elementoG, clave, valor_a_guardar)
+
+            elif isinstance(lista, dict) and "text" in lista:
+                valor_a_guardar = _extract_text_from_maybe_json(lista)
+                setattr(elementoG, clave, valor_a_guardar)
+
+            else:
+                if clave not in ("table", "id", "req"):
+                    if isinstance(lista, str) and lista == "":
+                        lista = None
+                    setattr(elementoG, clave, lista)
+
+        except Exception as e:
             if clave not in ("table", "id", "req"):
-                setattr(elementoG, clave, valor)
+                val_to_set = valor
+                if isinstance(val_to_set, str) and val_to_set == "":
+                    val_to_set = None
+                try:
+                    setattr(elementoG, clave, val_to_set)
+                except Exception:
+                    pass
 
     for clave, archivo in request.files.items():
         url, filename = upload_image_to_supabase(archivo, folder=request.form["table"])
@@ -294,3 +348,13 @@ def editar():
 
     db.session.commit()
     return jsonify({"respuesta": "Se actualizó el registro"})
+
+
+@bp_tablas.route("/consultasInformes", methods = ["POST"])
+def consultasInformes():
+    datos = request.get_json()
+    consulta = select(func.count().label("Total_Compras_Ultimo_Mes")).select_from(tablas.classes.ordenes).where((tablas.classes.ordenes.fecha_creacion > func.now() - text("interval 1 month")) & (tablas.classes.ordenes.fecha_creacion <= func.now()))
+    respuesta = db.session.execute(consulta).mappings().all()
+    respuesta = [dict(i) for i in respuesta]
+    respuesta = respuesta if len(respuesta) > 1 else respuesta[0]
+    return jsonify(respuesta)
