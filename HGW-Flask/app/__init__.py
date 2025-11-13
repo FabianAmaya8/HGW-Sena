@@ -37,14 +37,7 @@ def create_app():
     def scalar_ui():
         return render_template('scalar.html')
     db.init_app(app)
-    CORS(app, resources={
-        r"/*": {
-            "origins": ["http://localhost:3001", "http://localhost:3000", "http://127.0.0.1:3001", "http://127.0.0.1:3000"],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True
-        }
-    })
+    CORS(app)
     connection = pymysql.connect(
         host=app.config['MYSQL_HOST'],
         user=app.config['MYSQL_USER'],
