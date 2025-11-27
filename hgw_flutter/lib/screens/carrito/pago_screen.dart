@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/carrito/carrito_item.dart';
+import '../../models/carrito/direccion.dart';
 import '../../providers/carrito/carrito_provider.dart';
+import '../../providers/personal/personal_provider.dart'; // Importante
 import '../../utils/constants.dart';
 import 'confirmacion_screen.dart';
 
@@ -12,7 +15,7 @@ class PagoScreen extends StatefulWidget {
 }
 
 class _PagoScreenState extends State<PagoScreen> {
-  bool _isProcessing = false;
+  bool _loading = false;
 
   @override
   void initState() {
@@ -22,16 +25,75 @@ class _PagoScreenState extends State<PagoScreen> {
     });
   }
 
+  Future<void> _procesarPago() async {
+    final carritoProvider = context.read<CarritoProvider>();
+    if (carritoProvider.medioPagoSeleccionado == null) return;
+
+    setState(() => _loading = true);
+
+    // 1. Guardamos copia de los datos para el recibo (antes de que se borren)
+    final itemsParaRecibo = List<CarritoItem>.from(carritoProvider.items);
+    final totalParaRecibo = carritoProvider.total;
+    final direccionParaRecibo = carritoProvider.direccionSeleccionada;
+
+    // 2. Creamos la orden
+    final idOrden = await carritoProvider.crearOrden();
+
+    if (idOrden != null) {
+      // 3. Recargamos los puntos del usuario (para que suba la barra)
+      // Obtenemos el ID del usuario actual desde el provider
+      // Nota: Si tu CarritoProvider no expone el userId públicamente,
+      // asegúrate de obtenerlo de donde lo tengas guardado (AuthService, etc.)
+      // Aquí asumo que lo tienes disponible o lo sacas del Auth.
+      // Por seguridad, usamos un try-catch silencioso para la recarga
+      try {
+        if (mounted) {
+          // Ajusta esto según cómo obtengas tu ID real.
+          // Si está en el PersonalProvider, úsalo.
+          final personalProvider = context.read<PersonalProvider>();
+          final userId = personalProvider.usuario?.idUsuario;
+
+          if (userId != null) {
+            await personalProvider.cargarDatosPersonales();
+          }
+        }
+      } catch (_) {}
+
+      if (!mounted) return;
+      setState(() => _loading = false);
+
+      // 4. Navegamos a confirmación pasando los datos
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ConfirmacionScreen(
+            idOrden: idOrden.toString(),
+            itemsCompra: itemsParaRecibo,
+            totalCompra: totalParaRecibo,
+            direccionCompra: direccionParaRecibo,
+          ),
+        ),
+        (route) => route.isFirst,
+      );
+    } else {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Error al procesar el pago'),
+            backgroundColor: AppColors.errorColor),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isSmallScreen = MediaQuery.of(context).size.width < 600;
-
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: const Text('Método de Pago'),
         backgroundColor: AppColors.primaryGreen,
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.white, // Texto blanco en AppBar
         elevation: 0,
       ),
       body: Consumer<CarritoProvider>(
@@ -39,194 +101,72 @@ class _PagoScreenState extends State<PagoScreen> {
           return Column(
             children: [
               Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.all(isSmallScreen ? 12 : 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Resumen del pedido
-                      Card(
+                child: ListView(
+                  padding: const EdgeInsets.all(20),
+                  children: [
+                    _buildInfoCard(
+                      icon: Icons.shopping_bag_outlined,
+                      title: 'Resumen',
+                      content:
+                          '${provider.cantidadTotal} productos • \$${provider.total.toStringAsFixed(2)}',
+                    ),
+                    const SizedBox(height: 16),
+                    if (provider.direccionSeleccionada != null)
+                      _buildInfoCard(
+                        icon: Icons.location_on_outlined,
+                        title: 'Enviando a',
+                        content: provider.direccionSeleccionada!.direccion,
+                      ),
+                    const SizedBox(height: 24),
+                    const Text('Selecciona método de pago:',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 12),
+                    ...provider.mediosPago.map((medio) {
+                      final isSelected =
+                          provider.medioPagoSeleccionado?.id == medio.id;
+                      return Card(
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.receipt_long,
-                                    color: AppColors.primaryGreen,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    'Resumen del Pedido',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Divider(height: 24),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    '${provider.cantidadTotal} productos',
-                                    style: TextStyle(
-                                      fontSize: isSmallScreen ? 13 : 14,
-                                      color: AppColors.textMedium,
-                                    ),
-                                  ),
-                                  Text(
-                                    '\$${provider.total.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.local_shipping,
-                                    size: 16,
-                                    color: AppColors.textMedium,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Enviar a:',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.textMedium,
-                                          ),
-                                        ),
-                                        Text(
-                                          provider.direccionSeleccionada
-                                                  ?.lugarEntrega ??
-                                              '',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Text(
-                                          provider.direccionSeleccionada
-                                                  ?.direccion ??
-                                              '',
-                                          style: TextStyle(
-                                            fontSize: isSmallScreen ? 12 : 13,
-                                            color: AppColors.textMedium,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          side: BorderSide(
+                            color: isSelected
+                                ? AppColors.primaryGreen
+                                : Colors.grey.shade300,
+                            width: isSelected ? 2 : 1,
                           ),
                         ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Métodos de pago
-                      const Text(
-                        'Selecciona método de pago:',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      ...provider.mediosPago.map((medio) {
-                        final isSelected =
-                            provider.medioPagoSeleccionado?.id == medio.id;
-
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
+                        child: RadioListTile<int>(
+                          value: medio.id,
+                          groupValue: provider.medioPagoSeleccionado?.id,
+                          onChanged: (_) =>
+                              provider.seleccionarMedioPago(medio),
+                          activeColor: AppColors.primaryGreen,
+                          title: Text(medio.nombre,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600)),
+                          secondary: Icon(Icons.payment,
                               color: isSelected
                                   ? AppColors.primaryGreen
-                                  : AppColors.borderColor,
-                              width: isSelected ? 2 : 1,
-                            ),
-                          ),
-                          color: isSelected
-                              ? AppColors.primaryGreen.withOpacity(0.05)
-                              : null,
-                          child: InkWell(
-                            onTap: () => provider.seleccionarMedioPago(medio),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Padding(
-                              padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
-                              child: Row(
-                                children: [
-                                  Radio<int>(
-                                    value: medio.id,
-                                    groupValue:
-                                        provider.medioPagoSeleccionado?.id,
-                                    activeColor: AppColors.primaryGreen,
-                                    onChanged: (_) =>
-                                        provider.seleccionarMedioPago(medio),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Icon(
-                                    _getPaymentIcon(medio.nombre),
-                                    color: isSelected
-                                        ? AppColors.primaryGreen
-                                        : AppColors.textMedium,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    medio.nombre,
-                                    style: TextStyle(
-                                      fontSize: isSmallScreen ? 14 : 16,
-                                      fontWeight: isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ],
-                  ),
+                                  : Colors.grey),
+                        ),
+                      );
+                    }).toList(),
+                  ],
                 ),
               ),
-
-              // Total y botón confirmar
               Container(
-                padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceWhite,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(24),
-                  ),
+                  color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, -5),
-                    ),
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -5))
                   ],
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(24)),
                 ),
                 child: SafeArea(
                   child: Column(
@@ -235,93 +175,41 @@ class _PagoScreenState extends State<PagoScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Total a pagar:',
-                                style: TextStyle(
-                                  fontSize: isSmallScreen ? 14 : 16,
-                                  color: AppColors.textMedium,
-                                ),
-                              ),
-                              if (provider.medioPagoSeleccionado != null)
-                                Text(
-                                  provider.medioPagoSeleccionado!.nombre,
-                                  style: TextStyle(
-                                    fontSize: isSmallScreen ? 12 : 13,
-                                    color: AppColors.primaryGreen,
-                                  ),
-                                ),
-                            ],
-                          ),
-                          Text(
-                            '\$${provider.total.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: isSmallScreen ? 24 : 28,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryGreen,
-                            ),
-                          ),
+                          const Text('Total a Pagar:',
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey)),
+                          Text('\$${provider.total.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primaryGreen)),
                         ],
                       ),
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: provider.medioPagoSeleccionado != null &&
-                                  !_isProcessing
-                              ? () async {
-                                  setState(() => _isProcessing = true);
-
-                                  final idOrden = await provider.crearOrden();
-
-                                  if (idOrden != null && mounted) {
-                                    Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => ConfirmacionScreen(
-                                            idOrden: idOrden),
-                                      ),
-                                      (route) => route.isFirst,
-                                    );
-                                  } else if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            Text('Error al procesar el pedido'),
-                                        backgroundColor: AppColors.warningColor,
-                                      ),
-                                    );
-                                    setState(() => _isProcessing = false);
-                                  }
-                                }
+                          onPressed: (provider.medioPagoSeleccionado != null &&
+                                  !_loading)
+                              ? _procesarPago
                               : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryGreen,
-                            padding: EdgeInsets.symmetric(
-                              vertical: isSmallScreen ? 14 : 16,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                                borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: _isProcessing
+                          child: _loading
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
                                   child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(
-                                  'Confirmar Pedido',
+                                      color: Colors.white, strokeWidth: 2))
+                              : const Text('Confirmar Pago',
                                   style: TextStyle(
-                                    fontSize: isSmallScreen ? 14 : 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white)), // Texto blanco
                         ),
                       ),
                     ],
@@ -335,17 +223,33 @@ class _PagoScreenState extends State<PagoScreen> {
     );
   }
 
-  IconData _getPaymentIcon(String nombre) {
-    if (nombre.toLowerCase().contains('tarjeta') ||
-        nombre.toLowerCase().contains('crédito') ||
-        nombre.toLowerCase().contains('débito')) {
-      return Icons.credit_card;
-    } else if (nombre.toLowerCase().contains('efectivo')) {
-      return Icons.payments;
-    } else if (nombre.toLowerCase().contains('paypal')) {
-      return Icons.account_balance_wallet;
-    } else {
-      return Icons.payment;
-    }
+  Widget _buildInfoCard(
+      {required IconData icon,
+      required String title,
+      required String content}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.primaryGreen),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(content,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14)),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

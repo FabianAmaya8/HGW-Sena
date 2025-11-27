@@ -4,7 +4,8 @@ import '../models/producto.dart';
 import '../services/api_service.dart';
 
 class ProductosProvider extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;ProductosProvider({ApiService? apiService})
+  : _apiService = apiService ?? ApiService();
 
   List<Producto> _productos = [];
   List<Categoria> _categorias = [];
@@ -13,7 +14,6 @@ class ProductosProvider extends ChangeNotifier {
   String? _selectedCategoria;
   String? _selectedSubcategoria;
   String _searchQuery = '';
-
 
   List<Producto> get productos {
     if (_selectedCategoria == null && _searchQuery.isEmpty) {
@@ -65,7 +65,6 @@ class ProductosProvider extends ChangeNotifier {
         .toSet();
   }
 
-  // Métodos
   Future<void> cargarProductos() async {
     _isLoading = true;
     _error = null;

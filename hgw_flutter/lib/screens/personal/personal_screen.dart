@@ -15,6 +15,8 @@ class PersonalScreen extends StatefulWidget {
   State<PersonalScreen> createState() => _PersonalScreenState();
 }
 
+
+
 class _PersonalScreenState extends State<PersonalScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
