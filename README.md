@@ -15,7 +15,7 @@ Este repositorio incluye:
 | Plataforma             | Descripción                                      | Enlace                                   |
 | ---------------------- | ------------------------------------------------ | ---------------------------------------- |
 | 🌍 **Web (React)**     | Interfaz principal accesible desde navegador.    | [🔗 Enlace al despliegue web](https://hgw.up.railway.app/)         |
-| 🧠 **Backend (Flask)** | API REST que gestiona la lógica y base de datos. | [🔗 Enlace al backend](hgwflask.up.railway.app/scalar)                |
+| 🧠 **Backend (Flask)** | API REST que gestiona la lógica y base de datos. | [🔗 Enlace al backend](https://hgwflask.up.railway.app/scalar)                |
 | 📱 **Móvil (Flutter)** | Versión móvil multiplataforma.                   | [🔗 Enlace al despliegue móvil / APK](#) |
 
 ---

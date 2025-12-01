@@ -152,7 +152,7 @@ def actualizar_cantidad_carrito():
     id_producto = datos.get("id_producto")
     nueva_cantidad = datos.get("nueva_cantidad")
 
-    if not all([id_usuario, id_producto, nueva_cantidad]):
+    if id_usuario is None or id_producto is None or nueva_cantidad is None:
         return jsonify({"error": "Faltan datos obligatorios"}), 400
 
     if nueva_cantidad <= 0:
@@ -232,7 +232,8 @@ def crear_orden():
         with connection.cursor() as cursor:
             # Insertar orden principal
             cursor.execute(
-                "INSERT INTO ordenes (id_usuario, id_direccion, id_medio_pago, total) VALUES (%s, %s, %s, %s)",
+                "INSERT INTO ordenes (id_usuario, id_direccion, id_medio_pago, total) "
+                "VALUES (%s, %s, %s, %s)",
                 (id_usuario, id_direccion, id_medio_pago, total)
             )
             connection.commit()
@@ -259,7 +260,10 @@ def crear_orden():
 
             #Disminuir cantidad de productos
             for item in items:
-                cursor.execute("UPDATE productos SET stock = stock - %s WHERE id_producto = %s", (item["cantidad"], item["id_producto"]))
+                cursor.execute(
+                    "UPDATE productos SET stock = stock - %s WHERE id_producto = %s",
+                    (item["cantidad"], item["id_producto"])
+                )
                 connection.commit()
 
             # Eliminar carrito

@@ -6,7 +6,7 @@ from flasgger import swag_from
 header_bp = Blueprint('header_bp', __name__)
 
 @header_bp.route("/api/header", methods=["GET"])
-@swag_from('../Doc/user.yml')
+@swag_from('../../Doc/Personal/Info_Header.yml')
 def obtener_usuario():
     user_id = request.args.get("id", type=int)
 

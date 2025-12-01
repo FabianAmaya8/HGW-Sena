@@ -1,7 +1,8 @@
 from flask import Blueprint, request, current_app, jsonify
 from flask_bcrypt import Bcrypt
+from app.controllers.db import get_db
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flasgger import swag_from
 
 login_bp = Blueprint('login_bp', __name__)
@@ -20,7 +21,7 @@ def login():
     if not usuario or not contrasena:
         return jsonify(success=False, message='Debes enviar usuario y contraseña.'), 400
 
-    connection = current_app.config['MYSQL_CONNECTION']
+    connection = get_db()
 
     try:
         with connection.cursor() as cursor:
@@ -45,7 +46,7 @@ def login():
             usuario_encontrado = cursor.fetchone()
 
             if usuario_encontrado and bcrypt.check_password_hash(usuario_encontrado['password'], contrasena):
-                exp_time = datetime.utcnow() + timedelta(days=180)
+                exp_time = datetime.now(timezone.utc) + timedelta(days=180)
                 payload = {
                     "id": usuario_encontrado['id'],
                     "role": usuario_encontrado['role_id'],
