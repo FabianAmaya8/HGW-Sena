@@ -100,7 +100,7 @@ flutter run
 
 ### 5. manual de usuario
 
-### Link a carpeta de documentación: https://drive.google.com/drive/folders/1vgMMDgUwKKG6BJwgCkQgj8fXW5RS_f81?usp=drive_link
+ * **carpeta manuales** [ver documento](https://drive.google.com/drive/folders/1vgMMDgUwKKG6BJwgCkQgj8fXW5RS_f81?usp=drive_link)
 
 ## 6. Pruebas Caja Negra
 
