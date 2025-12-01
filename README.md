@@ -112,9 +112,13 @@ flutter clean
 flutter pub get
 flutter run
 ```
-### 5. manual de usuario
+### 5️⃣ Manual de usuario
 
  * **carpeta manuales** [ver documento](https://drive.google.com/drive/folders/1vgMMDgUwKKG6BJwgCkQgj8fXW5RS_f81?usp=drive_link)
+
+### 6️⃣ Pruebas Caja Negra
+
+* **React:** [Ver Documento](https://drive.google.com/drive/folders/1Hw9H8KQTs4Rx4t10U57GpNj70Ph0IjXO?usp=sharing)
 
 ---
 
