@@ -104,7 +104,7 @@ flutter run
 
 ## 6. Pruebas Caja Negra
 
-* **React:** [Ver Documento](https://github.com/FabianAmaya8](https://drive.google.com/drive/folders/1Hw9H8KQTs4Rx4t10U57GpNj70Ph0IjXO?usp=sharing)
+* **React:** [Ver Documento](https://drive.google.com/drive/folders/1Hw9H8KQTs4Rx4t10U57GpNj70Ph0IjXO?usp=sharing)
  
 
 
