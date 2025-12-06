@@ -1,64 +1,37 @@
-import { useState, useEffect } from 'react';
-import { urlDB } from '../../urlDB';
+import { useProductsContext } from "../../pages/Context/ProductsContext.jsx";
 
+export default function useCatalogo() {
+    const { catalogo, loading } = useProductsContext();
 
-const useCatalogo = () => {
-    const [categories, setCategories] = useState([]);
-    const [subcategories, setSubcategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    if (!catalogo) return { categories: [], subcategories: [], loading };
 
-    useEffect(() => {
-        const fetchCatalogo = async () => {
-        try {
-            const endpoint = 'api/catalogo';
-            const urlFetch = await urlDB(endpoint);
-            const res = await fetch(urlFetch);
-            if (!res.ok) {
-            throw new Error(`Error cargando catálogo: ${res.status} ${res.statusText}`);
-            }
-            const data = await res.json();
+    // reconstruimos lo que ya hacías
+    const categoriesMap = {};
+    const subcategoriesList = [];
 
-            const categoriesMap = {};
-            const subcategoriesList = [];
+    catalogo.forEach((item) => {
+        const catId = item.id_categoria;
+        const catName = item.nombre_categoria;
+        const catImg = item.img_categoria || "";
+        const subId = item.id_subcategoria;
+        const subName = item.nombre_subcategoria;
 
-            data.forEach((item) => {
-            const catId = item.id_categoria;
-            const catName = item.nombre_categoria;
-            const catImg = item.img_categoria || '';
-            const subId = item.id_subcategoria;
-            const subName = item.nombre_subcategoria;
-
-            if (!categoriesMap[catId]) {
-                categoriesMap[catId] = { 
-                    id: catId, 
-                    nombre: catName,
-                    img: catImg,
-                };
-            }
-
-            subcategoriesList.push({
-                id: subId,
-                nombre: subName,
-                categoryId: catId,
-            });
-            });
-
-            const categoriesList = Object.values(categoriesMap);
-
-            setCategories(categoriesList);
-            setSubcategories(subcategoriesList);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
+        if (!categoriesMap[catId]) {
+            categoriesMap[catId] = {
+                id: catId,
+                nombre: catName,
+                img: catImg,
+            };
         }
-        };
 
-        fetchCatalogo();
-    }, []);
+        subcategoriesList.push({
+            id: subId,
+            nombre: subName,
+            categoryId: catId,
+        });
+    });
 
-    return { categories, subcategories, loading, error };
-};
+    const categories = Object.values(categoriesMap);
 
-export default useCatalogo;
+    return { categories, subcategories: subcategoriesList, loading };
+}

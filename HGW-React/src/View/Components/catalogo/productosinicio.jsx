@@ -95,7 +95,7 @@ function ProductCard({ product }) {
 
 
 export function ProductsList1() {
-    const productos = useProducts();
+    const {productos} = useProducts();
 
     return (
         <div className="carts">

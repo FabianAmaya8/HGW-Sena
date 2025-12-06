@@ -43,7 +43,7 @@ const LoginModal = () => {
                 type="button"
                 className="btn btn-secondary modal-button"
                 data-bs-dismiss="modal"
-                onClick={() => {navigate(opcion.to); showLoginModal();}}
+                onClick={() => navigate(opcion.to)}
               >
                 {opcion.label}
               </button>

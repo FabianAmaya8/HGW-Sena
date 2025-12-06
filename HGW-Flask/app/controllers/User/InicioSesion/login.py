@@ -52,7 +52,7 @@ def login():
                     "role": usuario_encontrado['role_id'],
                     "exp": int(exp_time.timestamp())
                 }
-                token = jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm="HS256")
+                token = jwt.encode(payload, current_app.config['JWT_SECRET_KEY'], algorithm="HS256")
                 role_redirects = {
                     1: '/Administrador',
                     2: '/moderador',

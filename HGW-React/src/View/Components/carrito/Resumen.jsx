@@ -1,3 +1,5 @@
+import { formatPrice } from "../../hooks/useCarrito";
+
 export default function OrderSummaryCard({
     carrito,
     taxRate = 0,
@@ -24,12 +26,12 @@ export default function OrderSummaryCard({
             </div>
             <div className="card-body">
             <p><strong>Productos:</strong> {totalCantidad}</p>
-            <p><strong>Subtotal:</strong> ${subtotal.toFixed(2)}</p>
-            <p><strong>Envío:</strong> ${envio.toFixed(2)}</p>
-            <p><strong>Impuestos:</strong> ${impuestos.toFixed(2)}</p>
+            <p><strong>Subtotal:</strong> {formatPrice(subtotal)}</p>
+        
+            <p><strong>Envío:</strong> {formatPrice(envio)}</p>
+            <p><strong>Impuestos:</strong> {formatPrice(impuestos)}</p>
             <hr />
-            <h5 className="text-success">Total: ${totalFinal.toFixed(2)}</h5>
-
+            <h5 className="text-success">Total: {formatPrice(totalFinal)}</h5>
             {/* Buttons logic based on current step */}
             {step === 'cart' && (
                 <button

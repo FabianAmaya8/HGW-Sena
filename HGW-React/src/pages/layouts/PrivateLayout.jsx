@@ -7,7 +7,7 @@ import PrivateRoute from '../Context/PrivateRoute';
 
 export default function PrivateLayout() {
     if (!isLoggedIn()) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/" replace />;
     }
 
     return (
