@@ -17,7 +17,7 @@ class Direccion {
 
   factory Direccion.fromJson(Map<String, dynamic> json) {
     return Direccion(
-      id: json['id_direccion'] ?? 0,
+      id: json['id'] ?? json['id_direccion'] ?? 0,
       direccion: json['direccion'] ?? '',
       codigoPostal: json['codigo_postal'] ?? '',
       lugarEntrega: json['lugar_entrega'] ?? '',
@@ -26,10 +26,14 @@ class Direccion {
     );
   }
 
-  String get direccionCompleta {
-    String result = direccion;
-    if (ciudad != null) result += ', $ciudad';
-    if (pais != null) result += ', $pais';
-    return result;
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'direccion': direccion,
+      'codigo_postal': codigoPostal,
+      'lugar_entrega': lugarEntrega,
+      'ciudad': ciudad,
+      'pais': pais,
+    };
   }
 }

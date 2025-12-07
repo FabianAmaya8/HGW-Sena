@@ -7,7 +7,9 @@ import PeopleIcon from '@mui/icons-material/People'
 import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import SettingsIcon from '@mui/icons-material/Settings';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { Title } from '@mui/icons-material';
+import { useMemo } from 'react';
 
 export const objeto = [
     {id: 1, value: "Categorias", icon: <CategoryIcon />, colorText: "white", childs: [
@@ -38,15 +40,18 @@ export const objeto = [
         {id: 15, value: "Ver Lista", icon: <></>, colorText: "white", click: "/Administrador/Bonos/Lista" },
       ]
     },
+    {id: 17, value: "Ordenes", icon: <ReceiptLongIcon />, colorText: "white", childs: [
+        {id: 18, value: "Ver Lista", icon: <></>, colorText: "white", click: "/Administrador/Ordenes/Lista" },
+      ]
+    },
     {
       id: 16, value: "Modulos", icon: <SettingsIcon />, colorText: "white", childs: [
-        {id: 17, value: "Crear", icon: <></>, colorText: "white", click: "/Administrador/GestionVistas/Crear" },
-        {id: 18, value: "Editar", icon: <></>, colorText: "white", click: "/Administrador/Bonos/Lista" },
+        {id: 19, value: "Crear", icon: <></>, colorText: "white", click: "/Administrador/GestionVistas/Crear" },
+        {id: 20, value: "Editar", icon: <></>, colorText: "white", click: "/Administrador/Bonos/Lista" },
       ]
     }
-  ];
-export const objectSpeedDial = [
-    {arialLabel: "Usuario", icon: <AccountCircleIcon />, rute: ""},
-    {arialLabel: "Cerrar Sesion", icon: <LogoutIcon />, rute: ""},
-    {arialLabel: "Home", icon: <HomeIcon />, rute: "/Administrador/Home"},
 ];
+export const objectSpeedDial = [
+    {arialLabel: "Cerrar Sesion", icon: <LogoutIcon />, rute: "/Login"},
+    {arialLabel: "Home", icon: <HomeIcon />, rute: "/"},
+]

@@ -12,7 +12,7 @@ import { ProductosLimitados } from './productos';
 import { ProductsList } from './productos';
 
 const InicioView = () => {
-    const productos = useProducts();
+    const { products } = useProducts();
     const limiteCarusel = 4
 return (
     <main className="contenido">
@@ -77,7 +77,7 @@ return (
                         <div className={`carousel-item ${i === 0 ? 'active' : ''}`} key={i}>
                             <ProductosLimitados limit={limiteCarusel}
                             start={i*limiteCarusel}
-                            productos={productos}/>
+                            productos={products}/>
                         </div>
                     ))}
                     </div>
@@ -104,7 +104,7 @@ return (
             <div className="productos">
                 <h2>Productos</h2>
                 <div className="productos-container">
-                    <ProductosLimitados limit={20} productos={productos}/>
+                    <ProductosLimitados limit={20} productos={products}/>
                 </div>
             </div>
         </div>

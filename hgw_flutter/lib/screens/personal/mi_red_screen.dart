@@ -9,81 +9,15 @@ class MiRedScreen extends StatefulWidget {
     Key? key,
     this.mostrarSoloLineasDirectas = false,
   }) : super(key: key);
+
   @override
   State<MiRedScreen> createState() => _MiRedScreenState();
 }
+
 class _MiRedScreenState extends State<MiRedScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  final List<Map<String, dynamic>> _miRed = [
-    {
-      'nombre': 'Juanito',
-      'nivel': 'Senior',
-      'ventas': 2500000,
-      'fecha': '22/01/2025',
-      'activo': true
-    },
-    {
-      'nombre': 'hernesto el elefante',
-      'nivel': 'Junior',
-      'ventas': 1200000,
-      'fecha': '22/01/2025',
-      'activo': true
-    },
-    {
-      'nombre': 'Carlitos',
-      'nivel': 'Pre-Junior',
-      'ventas': 450000,
-      'fecha': '10/02/2025',
-      'activo': false
-    },
-    {
-      'nombre': 'pepe',
-      'nivel': 'Master',
-      'ventas': 5200000,
-      'fecha': '05/01/2025',
-      'activo': true
-    },
-    {
-      'nombre': 'ye',
-      'nivel': 'Junior',
-      'ventas': 980000,
-      'fecha': '18/02/2025',
-      'activo': true
-    },
-  ];
-
-  final List<Map<String, dynamic>> _lineasDirectas = [
-    {
-      'nombre': 'onichansita',
-      'nivel': 'Junior',
-      'ventas': 1500000,
-      'puntos': 150,
-      'activo': true
-    },
-    {
-      'nombre': '',
-      'nivel': 'paconi',
-      'ventas': 600000,
-      'puntos': 60,
-      'activo': true
-    },
-    {
-      'nombre': 'criptocaca',
-      'nivel': 'Senior',
-      'ventas': 3200000,
-      'puntos': 320,
-      'activo': true
-    },
-    {
-      'nombre': 'julio iglesias',
-      'nivel': 'Cliente',
-      'ventas': 200000,
-      'puntos': 20,
-      'activo': false
-    },
-  ];
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -93,6 +27,19 @@ class _MiRedScreenState extends State<MiRedScreen>
       vsync: this,
       initialIndex: widget.mostrarSoloLineasDirectas ? 1 : 0,
     );
+
+    // Cargar datos de la red
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _cargarDatos();
+    });
+  }
+
+  Future<void> _cargarDatos() async {
+    setState(() => _isLoading = true);
+    final provider = context.read<PersonalProvider>();
+    await provider.cargarMiRed();
+    await provider.cargarLineasDirectas();
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -129,19 +76,36 @@ class _MiRedScreenState extends State<MiRedScreen>
                 ],
               ),
       ),
-      body: widget.mostrarSoloLineasDirectas
-          ? _buildLineasDirectasContent()
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildMiRedContent(),
-                _buildLineasDirectasContent(),
-              ],
-            ),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primaryGreen,
+              ),
+            )
+          : widget.mostrarSoloLineasDirectas
+              ? _buildLineasDirectasContent(provider)
+              : TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildMiRedContent(provider),
+                    _buildLineasDirectasContent(provider),
+                  ],
+                ),
     );
   }
 
-  Widget _buildMiRedContent() {
+  Widget _buildMiRedContent(PersonalProvider provider) {
+    final miRed = provider.miRed;
+
+    if (miRed.isEmpty) {
+      return _buildEmptyState('No tienes personas en tu red aún');
+    }
+
+    // Calcular estadísticas
+    int totalActivos = miRed.where((m) => m['activo'] == 1).length;
+    double ventasTotales = miRed.fold<double>(
+        0, (sum, m) => sum + (m['puntos_bv'] ?? 0).toDouble());
+
     return Column(
       children: [
         // Estadísticas
@@ -163,35 +127,45 @@ class _MiRedScreenState extends State<MiRedScreen>
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildStatItem(
-                  'Total en Red', _miRed.length.toString(), Icons.group),
+                  'Total en Red', miRed.length.toString(), Icons.group),
               _buildStatItem(
-                  'Activos',
-                  _miRed.where((m) => m['activo']).length.toString(),
-                  Icons.check_circle),
+                  'Activos', totalActivos.toString(), Icons.check_circle),
               _buildStatItem(
-                  'Ventas Totales',
-                  '\$${(_miRed.fold<double>(0, (sum, m) => sum + m['ventas']) / 1000000).toStringAsFixed(1)}M',
-                  Icons.attach_money),
+                  'Puntos BV', ventasTotales.toStringAsFixed(0), Icons.stars),
             ],
           ),
         ),
 
         // Lista de personas
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: _miRed.length,
-            itemBuilder: (context, index) {
-              final persona = _miRed[index];
-              return _buildPersonaCard(persona);
-            },
+          child: RefreshIndicator(
+            onRefresh: _cargarDatos,
+            color: AppColors.primaryGreen,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: miRed.length,
+              itemBuilder: (context, index) {
+                final persona = miRed[index];
+                return _buildPersonaCard(persona);
+              },
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildLineasDirectasContent() {
+  Widget _buildLineasDirectasContent(PersonalProvider provider) {
+    final lineasDirectas = provider.lineasDirectasList;
+
+    if (lineasDirectas.isEmpty) {
+      return _buildEmptyState('No tienes líneas directas aún');
+    }
+
+    // Calcular estadísticas de líneas directas
+    int puntosTotal = lineasDirectas.fold<int>(
+        0, (sum, l) => sum + (l['puntos_bv'] ?? 0) as int);
+
     return Column(
       children: [
         Container(
@@ -222,7 +196,7 @@ class _MiRedScreenState extends State<MiRedScreen>
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${_lineasDirectas.length} personas',
+                      '${lineasDirectas.length} personas',
                       style: TextStyle(
                         color: AppColors.primaryGreen,
                         fontWeight: FontWeight.bold,
@@ -236,32 +210,69 @@ class _MiRedScreenState extends State<MiRedScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildLineaStatItem(
-                      'Puntos Totales',
-                      _lineasDirectas
-                          .fold<int>(0, (sum, l) => sum + (l['puntos'] as int))
-                          .toString(),
-                      Colors.blue),
+                      'Puntos BV Total', puntosTotal.toString(), Colors.blue),
                   _buildLineaStatItem(
-                      'Ventas Mes',
-                      '\$${(_lineasDirectas.fold<double>(0, (sum, l) => sum + l['ventas']) / 1000000).toStringAsFixed(1)}M',
+                      'Promedio BV',
+                      lineasDirectas.isNotEmpty
+                          ? (puntosTotal / lineasDirectas.length)
+                              .toStringAsFixed(0)
+                          : '0',
                       Colors.green),
                 ],
               ),
             ],
           ),
         ),
-
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: _lineasDirectas.length,
-            itemBuilder: (context, index) {
-              final linea = _lineasDirectas[index];
-              return _buildLineaDirectaCard(linea);
-            },
+          child: RefreshIndicator(
+            onRefresh: _cargarDatos,
+            color: AppColors.primaryGreen,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: lineasDirectas.length,
+              itemBuilder: (context, index) {
+                final linea = lineasDirectas[index];
+                return _buildLineaDirectaCard(linea);
+              },
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.group_off,
+            size: 80,
+            color: AppColors.textMedium.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: TextStyle(
+              color: AppColors.textMedium,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _cargarDatos,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Actualizar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryGreen,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -312,7 +323,20 @@ class _MiRedScreenState extends State<MiRedScreen>
   }
 
   Widget _buildPersonaCard(Map<String, dynamic> persona) {
-    Color nivelColor = _getNivelColor(persona['nivel']);
+    String nombreMembresia = persona['nombre_membresia'] ?? 'Cliente';
+    Color nivelColor = _getNivelColor(nombreMembresia);
+    bool activo = persona['activo'] == 1;
+
+    // Formatear fecha
+    String fechaRegistro = 'Sin fecha';
+    if (persona['fecha_registro'] != null) {
+      try {
+        DateTime fecha = DateTime.parse(persona['fecha_registro']);
+        fechaRegistro = '${fecha.day}/${fecha.month}/${fecha.year}';
+      } catch (e) {
+        fechaRegistro = persona['fecha_registro'].toString();
+      }
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -330,16 +354,23 @@ class _MiRedScreenState extends State<MiRedScreen>
       ),
       child: Row(
         children: [
+          // Avatar
           CircleAvatar(
             radius: 25,
             backgroundColor: nivelColor.withOpacity(0.2),
-            child: Text(
-              persona['nombre'].split(' ').map((n) => n[0]).take(2).join(),
-              style: TextStyle(
-                color: nivelColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            backgroundImage: persona['url_foto_perfil'] != null
+                ? NetworkImage(persona['url_foto_perfil'])
+                : null,
+            child: persona['url_foto_perfil'] == null
+                ? Text(
+                    _getInitials(
+                        persona['nombre'] ?? '', persona['apellido'] ?? ''),
+                    style: TextStyle(
+                      color: nivelColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -349,11 +380,11 @@ class _MiRedScreenState extends State<MiRedScreen>
                 Row(
                   children: [
                     Text(
-                      persona['nombre'],
+                      '${persona['nombre'] ?? ''} ${persona['apellido'] ?? ''}',
                       style: AppStyles.heading3,
                     ),
                     const SizedBox(width: 8),
-                    if (persona['activo'])
+                    if (activo)
                       Container(
                         width: 8,
                         height: 8,
@@ -375,7 +406,7 @@ class _MiRedScreenState extends State<MiRedScreen>
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        persona['nivel'],
+                        nombreMembresia,
                         style: TextStyle(
                           color: nivelColor,
                           fontSize: 12,
@@ -385,10 +416,15 @@ class _MiRedScreenState extends State<MiRedScreen>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Desde ${persona['fecha']}',
+                      'Nivel ${persona['nivel'] ?? 1}',
                       style: AppStyles.caption,
                     ),
                   ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Desde $fechaRegistro',
+                  style: AppStyles.caption,
                 ),
               ],
             ),
@@ -397,7 +433,7 @@ class _MiRedScreenState extends State<MiRedScreen>
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '\$${(persona['ventas'] / 1000000).toStringAsFixed(1)}M',
+                '${persona['puntos_bv'] ?? 0}',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -405,8 +441,16 @@ class _MiRedScreenState extends State<MiRedScreen>
                 ),
               ),
               Text(
-                'Ventas',
+                'BV',
                 style: AppStyles.caption,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Red: ${persona['total_red'] ?? 0}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMedium,
+                ),
               ),
             ],
           ),
@@ -416,7 +460,9 @@ class _MiRedScreenState extends State<MiRedScreen>
   }
 
   Widget _buildLineaDirectaCard(Map<String, dynamic> linea) {
-    Color nivelColor = _getNivelColor(linea['nivel']);
+    String nombreMembresia = linea['nombre_membresia'] ?? 'Cliente';
+    Color nivelColor = _getNivelColor(nombreMembresia);
+    bool activo = linea['activo'] == 1;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -425,7 +471,7 @@ class _MiRedScreenState extends State<MiRedScreen>
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: linea['activo']
+          color: activo
               ? Colors.green.withOpacity(0.3)
               : Colors.grey.withOpacity(0.2),
           width: 2,
@@ -445,13 +491,19 @@ class _MiRedScreenState extends State<MiRedScreen>
               CircleAvatar(
                 radius: 25,
                 backgroundColor: nivelColor.withOpacity(0.2),
-                child: Text(
-                  linea['nombre'].split(' ').map((n) => n[0]).take(2).join(),
-                  style: TextStyle(
-                    color: nivelColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                backgroundImage: linea['url_foto_perfil'] != null
+                    ? NetworkImage(linea['url_foto_perfil'])
+                    : null,
+                child: linea['url_foto_perfil'] == null
+                    ? Text(
+                        _getInitials(
+                            linea['nombre'] ?? '', linea['apellido'] ?? ''),
+                        style: TextStyle(
+                          color: nivelColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -459,32 +511,41 @@ class _MiRedScreenState extends State<MiRedScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      linea['nombre'],
+                      '${linea['nombre'] ?? ''} ${linea['apellido'] ?? ''}',
                       style: AppStyles.heading3,
                     ),
                     const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: nivelColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        linea['nivel'],
-                        style: TextStyle(
-                          color: nivelColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: nivelColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            nombreMembresia,
+                            style: TextStyle(
+                              color: nivelColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '@${linea['nombre_usuario'] ?? ''}',
+                          style: AppStyles.caption,
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
               Icon(
-                linea['activo'] ? Icons.check_circle : Icons.cancel,
-                color: linea['activo'] ? Colors.green : Colors.grey,
+                activo ? Icons.check_circle : Icons.cancel,
+                color: activo ? Colors.green : Colors.grey,
               ),
             ],
           ),
@@ -492,13 +553,14 @@ class _MiRedScreenState extends State<MiRedScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildLineaInfo('Puntos BV', '${linea['puntos']}', Icons.stars),
               _buildLineaInfo(
-                  'Ventas',
-                  '\$${(linea['ventas'] / 1000000).toStringAsFixed(1)}M',
-                  Icons.attach_money),
-              _buildLineaInfo('Estado', linea['activo'] ? 'Activo' : 'Inactivo',
-                  Icons.info),
+                  'Puntos BV', '${linea['puntos_bv'] ?? 0}', Icons.stars),
+              _buildLineaInfo('Red', '${linea['total_red'] ?? 0}', Icons.group),
+              _buildLineaInfo(
+                  'Estado', activo ? 'Activo' : 'Inactivo', Icons.info),
+              if (linea['numero_telefono'] != null)
+                _buildLineaInfo(
+                    'Teléfono', linea['numero_telefono'], Icons.phone),
             ],
           ),
         ],
@@ -529,6 +591,14 @@ class _MiRedScreenState extends State<MiRedScreen>
     );
   }
 
+  String _getInitials(String nombre, String apellido) {
+    String initials = '';
+    if (nombre.isNotEmpty) initials += nombre[0];
+    if (apellido.isNotEmpty) initials += apellido[0];
+    if (initials.isEmpty) initials = 'U';
+    return initials.toUpperCase();
+  }
+
   Color _getNivelColor(String nivel) {
     switch (nivel) {
       case 'Master':
@@ -539,6 +609,7 @@ class _MiRedScreenState extends State<MiRedScreen>
         return Colors.blue;
       case 'Pre-Junior':
         return Colors.green;
+      case 'Cliente':
       default:
         return Colors.grey;
     }

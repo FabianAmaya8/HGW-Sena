@@ -19,294 +19,156 @@ class ProductoCard extends StatefulWidget {
   State<ProductoCard> createState() => _ProductoCardState();
 }
 
-class _ProductoCardState extends State<ProductoCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
+class _ProductoCardState extends State<ProductoCard> {
   bool _isAddingToCart = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) => _controller.reverse(),
-      onTapCancel: () => _controller.reverse(),
       onTap: widget.onTap,
-      child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primaryGreen.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Imagen con badge
+            Expanded(
+              flex: 3,
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
+                    ),
+                    child: widget.producto.imagen != null
+                        ? CachedNetworkImage(
+                            imageUrl: widget.producto.imagen!,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            errorWidget: (context, url, error) => Icon(
+                              Icons.image_not_supported,
+                              color: Colors.grey[400],
+                            ),
+                          )
+                        : Icon(
+                            Icons.image_not_supported,
+                            color: Colors.grey[400],
+                            size: 40,
+                          ),
+                  ),
+                  // Badge stock
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: widget.producto.stock > 0
+                            ? AppColors.primaryGreen
+                            : Colors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        widget.producto.stock > 0 ? 'Disponible' : 'Agotado',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
-              child: Card(
-                clipBehavior: Clip.antiAlias,
+            ),
+            // Contenido
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      flex: 3,
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Color(0xFFF8F9FA),
-                                  Color(0xFFFFFFFF),
-                                ],
-                              ),
-                            ),
-                            child: _buildProductImage(),
-                          ),
-                          Positioned(
-                            top: 12,
-                            right: 12,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: widget.producto.stock > 5
-                                    ? AppColors.successColor
-                                    : widget.producto.stock > 0
-                                        ? AppColors.warningColor
-                                        : AppColors.errorColor,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Text(
-                                widget.producto.stock > 5
-                                    ? 'Disponible'
-                                    : widget.producto.stock > 0
-                                        ? 'Últimas ${widget.producto.stock}'
-                                        : 'Agotado',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                    // Nombre
+                    Text(
+                      widget.producto.nombre,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    // Información del producto
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
+                    // Precio y botón
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    widget.producto.subcategoria,
-                                    style: AppStyles.caption.copyWith(
-                                      color: AppColors.primaryGreen,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    widget.producto.nombre,
-                                    style: AppStyles.heading3
-                                        .copyWith(fontSize: 16),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                            Text(
+                              '\$${widget.producto.precio.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryGreen,
                               ),
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Precio',
-                                        style: AppStyles.caption,
-                                      ),
-                                      FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text(
-                                          '\$${widget.producto.precio.toStringAsFixed(2)}',
-                                          style: AppStyles.price
-                                              .copyWith(fontSize: 20),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Botón de agregar al carrito
-                                GestureDetector(
-                                  onTap: widget.producto.stock > 0 &&
-                                          !_isAddingToCart
-                                      ? () async {
-                                          setState(() {
-                                            _isAddingToCart = true;
-                                          });
-
-                                          widget.onAddToCart();
-
-                                          await Future.delayed(const Duration(
-                                              milliseconds: 500));
-
-                                          if (mounted) {
-                                            setState(() {
-                                              _isAddingToCart = false;
-                                            });
-                                          }
-                                        }
-                                      : null,
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 300),
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: _isAddingToCart
-                                          ? AppColors.successColor
-                                          : widget.producto.stock > 0
-                                              ? AppColors.primaryGreen
-                                                  .withOpacity(0.1)
-                                              : Colors.grey.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      _isAddingToCart
-                                          ? Icons.check
-                                          : Icons.add_shopping_cart,
-                                      color: _isAddingToCart
-                                          ? Colors.white
-                                          : widget.producto.stock > 0
-                                              ? AppColors.primaryGreen
-                                              : Colors.grey,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              '${widget.producto.puntosBV} BV',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ],
                         ),
-                      ),
+                        IconButton(
+                          onPressed: widget.producto.stock > 0
+                              ? () async {
+                                  setState(() => _isAddingToCart = true);
+                                  widget.onAddToCart();
+                                  await Future.delayed(
+                                    const Duration(milliseconds: 500),
+                                  );
+                                  if (mounted) {
+                                    setState(() => _isAddingToCart = false);
+                                  }
+                                }
+                              : null,
+                          icon: Icon(
+                            _isAddingToCart
+                                ? Icons.check
+                                : Icons.add_shopping_cart,
+                            size: 20,
+                          ),
+                          color: widget.producto.stock > 0
+                              ? AppColors.primaryGreen
+                              : Colors.grey,
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildProductImage() {
-    if (widget.producto.imagen == null || widget.producto.imagen!.isEmpty) {
-      return Center(
-        child: Icon(
-          Icons.shopping_bag_outlined,
-          size: 50,
-          color: AppColors.textLight.withOpacity(0.3),
-        ),
-      );
-    }
-
-    String imageUrl = widget.producto.imagen!;
-    if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
-      imageUrl =
-          'https://via.placeholder.com/300x300/00C896/ffffff?text=${Uri.encodeComponent(widget.producto.nombre)}';
-    }
-
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: double.infinity,
-      placeholder: (context, url) => Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primaryGreen.withOpacity(0.3),
-          strokeWidth: 2,
+          ],
         ),
       ),
-      errorWidget: (context, url, error) {
-        return Container(
-          color: AppColors.backgroundLight,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.broken_image_outlined,
-                  size: 40,
-                  color: AppColors.textLight.withOpacity(0.3),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.producto.nombre,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textLight.withOpacity(0.5),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

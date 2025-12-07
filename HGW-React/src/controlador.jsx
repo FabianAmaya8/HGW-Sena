@@ -13,9 +13,13 @@ import Nofound from './Administrador/Services/no-found.jsx'
 import CircularProgress from '@mui/material/CircularProgress';
 import CreacionVistas from './Administrador/ModulosGestionVista/Creacion.jsx'
 import EditarModulo from './Administrador/ModulosGestionVista/Edicion.jsx'
+import Log from './Administrador/Administracion/log.jsx'
+import Informes from './Administrador/Administracion/informes.jsx'
+import Ordenes from './Administrador/Administracion/Ordenes.jsx';
 import { findWorkingBaseUrl } from './urlDB.js'
 
-const BACKEND = findWorkingBaseUrl()
+const BACKEND = findWorkingBaseUrl().replace(/\/$/, "");
+
 const tema = createTheme({
   palette: {
     primary: { main: "#29293D", contrastText: 'rgba(255, 255, 255, 0.88)' },
@@ -39,6 +43,7 @@ const Controlador = () => {
     })
       .then(r => r.json())
       .then(setForm)
+      
   }, [])
   const moviles = useMediaQuery(tema.breakpoints.down("sm"))
   const tablets = useMediaQuery(tema.breakpoints.between("sm", "md"))
@@ -56,9 +61,27 @@ const Controlador = () => {
   }, [form.filas])
   const drawerItems = useMemo(() => {
     if (!Array.isArray(form?.filas)) return []
-    try {
       let valoresDrawer = JSON.parse(form.filas[0].vistas)
-      valoresDrawer.push({
+      valoresDrawer.push(
+        /*{
+        "id": 26,
+        "value": "Administración",
+        "icon": "<SettingsIcon />",
+        "colorText": "white",
+        "childs": [
+          {
+            "id": 28,
+            "value": "Informes",
+            "colorText": "white",
+            "click": "/Administrador/Administracion/Informes"
+          },
+          {
+            "id": 29,
+            "value": "Ordenes",
+            "colorText": "white",
+            "click": "/Administrador/Administracion/Ordenes"
+          }
+        ]
         "id": 16,
         "value": "Modulos",
         "icon": "<SettingsIcon />",
@@ -77,9 +100,8 @@ const Controlador = () => {
             "click": "/Administrador/GestionVistas/Editar"
           }
         ]
-      })
+      }*/)
       return valoresDrawer
-    } catch { return [] }
   }, [form.filas])
   const rutas = useMemo(() => menu.flatMap(datos => {
     const llave = datos[0].path
@@ -90,13 +112,7 @@ const Controlador = () => {
     ]
   }), [menu, padre])
 
-  // después de const rutas = useMemo(...)
-  console.log('<------------------------->');
-console.log('RUTAS REGISTRADAS POR CONTROLADOR:', rutas.map(r => r.props.path));
-console.log('MENU (navbar paths):', menu.map(m => m[0]?.path));
-console.log('DRAWER ITEMS (vistas tal cual):', drawerItems);
-console.log('<------------------------->');
-  return (
+    return (
     <ThemeProvider theme={tema}>
       <AppContext.Provider value={ctx}>
         <Navbar objeto={drawerItems} imagenes={navImgs} alerta={alerta} setAlerta={setAlerta} />
@@ -106,6 +122,7 @@ console.log('<------------------------->');
               <Route path="*" element={<Nofound />} />
               <Route index element={<Navigate to="Home" replace />} />
               {rutas}
+              
               <Route path="GestionVistas/Crear" element={<Secure><CreacionVistas /></Secure>} />
               <Route path="GestionVistas/Editar" element={<Secure><EditarModulo vistas={menu} /></Secure>} />
               <Route path="Home" element={<Secure><Home /></Secure>} />

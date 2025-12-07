@@ -7,14 +7,15 @@ export const useModal = () => useContext(ModalContext);
 
 export const ModalProvider = ({ children }) => {
   const loginModalRef = useRef(null);
+  const modalRef = useRef(null);
 
   const showLoginModal = () => {
-    if (loginModalRef.current) {
-      const modal = new Modal(loginModalRef.current, {
-        backdrop: false // <--- Desactiva el backdrop
+    if (!modalRef.current) {
+      modalRef.current = new Modal(loginModalRef.current, {
+        backdrop: false
       });
-      modal.show();
     }
+    modalRef.current.show();
   };
 
   return (

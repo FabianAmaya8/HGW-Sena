@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '../../providers/personal/personal_provider.dart';
-import '../../services/personal/personal_service.dart';
 import '../../utils/constants.dart';
 
 class EditarPerfilScreen extends StatefulWidget {
@@ -15,16 +14,16 @@ class EditarPerfilScreen extends StatefulWidget {
 
 class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nombreController = TextEditingController();
-  final _apellidoController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _telefonoController = TextEditingController();
-
-  // Controllers para dirección
-  final _direccionController = TextEditingController();
-  final _codigoPostalController = TextEditingController();
-  final _lugarEntregaController = TextEditingController();
-  final _ciudadController = TextEditingController();
+  final _controllers = {
+    'nombre': TextEditingController(),
+    'apellido': TextEditingController(),
+    'email': TextEditingController(),
+    'telefono': TextEditingController(),
+    'direccion': TextEditingController(),
+    'codigoPostal': TextEditingController(),
+    'lugarEntrega': TextEditingController(),
+    'ciudad': TextEditingController(),
+  };
 
   File? _imagenSeleccionada;
   final ImagePicker _picker = ImagePicker();
@@ -42,56 +41,44 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
     final usuario = provider.usuario;
 
     if (usuario != null) {
-      _nombreController.text = usuario.nombre;
-      _apellidoController.text = usuario.apellido;
-      _emailController.text = usuario.correoElectronico;
-      _telefonoController.text = usuario.numeroTelefono ?? '';
+      _controllers['nombre']!.text = usuario.nombre;
+      _controllers['apellido']!.text = usuario.apellido;
+      _controllers['email']!.text = usuario.correoElectronico;
+      _controllers['telefono']!.text = usuario.numeroTelefono ?? '';
+
       if (usuario.direcciones.isNotEmpty) {
         final direccion = usuario.direcciones.first;
         _direccionId = direccion.idDireccion;
-        _direccionController.text = direccion.direccion;
-        _codigoPostalController.text = direccion.codigoPostal ?? '';
-        _lugarEntregaController.text = direccion.lugarEntrega ?? '';
-        _ciudadController.text = direccion.ciudad ?? '';
+        _controllers['direccion']!.text = direccion.direccion;
+        _controllers['codigoPostal']!.text = direccion.codigoPostal ?? '';
+        _controllers['lugarEntrega']!.text = direccion.lugarEntrega ?? '';
+        _controllers['ciudad']!.text = direccion.ciudad ?? '';
       }
     }
   }
 
   @override
   void dispose() {
-    _nombreController.dispose();
-    _apellidoController.dispose();
-    _emailController.dispose();
-    _telefonoController.dispose();
-    _direccionController.dispose();
-    _codigoPostalController.dispose();
-    _lugarEntregaController.dispose();
-    _ciudadController.dispose();
+    _controllers.values.forEach((controller) => controller.dispose());
     super.dispose();
   }
 
   Future<void> _seleccionarImagen(ImageSource source) async {
     try {
       final XFile? imagen = await _picker.pickImage(
-        source: source,
-        maxWidth: 800,
-        maxHeight: 800,
-        imageQuality: 80,
-      );
+          source: source, maxWidth: 800, maxHeight: 800, imageQuality: 80);
 
-      if (imagen != null) {
-        setState(() {
-          _imagenSeleccionada = File(imagen.path);
-        });
-      }
+      if (imagen != null)
+        setState(() => _imagenSeleccionada = File(imagen.path));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al seleccionar imagen: $e'),
-          backgroundColor: AppColors.errorColor,
-        ),
-      );
+      _mostrarSnackbar('Error al seleccionar imagen: $e', AppColors.errorColor);
     }
+  }
+
+  void _mostrarSnackbar(String mensaje, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensaje), backgroundColor: color),
+    );
   }
 
   void _mostrarOpcionesImagen() {
@@ -107,38 +94,19 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Cambiar foto de perfil',
-                  style: AppStyles.heading2,
-                ),
+                Text('Cambiar foto de perfil', style: AppStyles.heading2),
                 const SizedBox(height: 20),
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryGreen.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child:
-                        Icon(Icons.camera_alt, color: AppColors.primaryGreen),
-                  ),
-                  title: const Text('Tomar foto'),
+                _buildOpcionImagen(
+                  icon: Icons.camera_alt,
+                  texto: 'Tomar foto',
                   onTap: () {
                     Navigator.pop(context);
                     _seleccionarImagen(ImageSource.camera);
                   },
                 ),
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryGreen.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(Icons.photo_library,
-                        color: AppColors.primaryGreen),
-                  ),
-                  title: const Text('Elegir de la galería'),
+                _buildOpcionImagen(
+                  icon: Icons.photo_library,
+                  texto: 'Elegir de la galería',
                   onTap: () {
                     Navigator.pop(context);
                     _seleccionarImagen(ImageSource.gallery);
@@ -146,28 +114,16 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                 ),
                 if (context.read<PersonalProvider>().usuario?.urlFotoPerfil !=
                     null)
-                  ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.delete, color: Colors.red),
-                    ),
-                    title: const Text('Eliminar foto actual'),
+                  _buildOpcionImagen(
+                    icon: Icons.delete,
+                    texto: 'Eliminar foto actual',
+                    color: Colors.red,
                     onTap: () async {
                       Navigator.pop(context);
                       final provider = context.read<PersonalProvider>();
                       bool success = await provider.eliminarFotoPerfil();
-                      if (success && mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Foto eliminada'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
+                      if (success && mounted)
+                        _mostrarSnackbar('Foto eliminada', Colors.green);
                     },
                   ),
               ],
@@ -177,68 +133,75 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
       },
     );
   }
+  ListTile _buildOpcionImagen(
+      {required IconData icon,
+      required String texto,
+      Color color = AppColors.primaryGreen,
+      required VoidCallback onTap}) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: color),
+      ),
+      title: Text(texto),
+      onTap: onTap,
+    );
+  }
 
   Future<void> _guardarCambios() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _guardando = true;
-    });
+    setState(() => _guardando = true);
 
     try {
       final provider = context.read<PersonalProvider>();
+      provider.limpiarError();
 
-      // Datos personales
       Map<String, dynamic> datos = {
-        'nombre': _nombreController.text.trim(),
-        'apellido': _apellidoController.text.trim(),
-        'correo_electronico': _emailController.text.trim(),
-        'numero_telefono': _telefonoController.text.trim(),
+        'nombre': _controllers['nombre']!.text.trim(),
+        'apellido': _controllers['apellido']!.text.trim(),
+        'correo_electronico': _controllers['email']!.text.trim(),
+        'numero_telefono': _controllers['telefono']!.text.trim(),
       };
 
-      // Si hay dirección, incluirla
-      if (_direccionController.text.isNotEmpty) {
+      if (_controllers['direccion']!.text.isNotEmpty) {
         datos['direcciones'] = [
           {
             'id_direccion': _direccionId,
-            'direccion': _direccionController.text.trim(),
-            'codigo_postal': _codigoPostalController.text.trim(),
-            'lugar_entrega': _lugarEntregaController.text.trim(),
-            'ciudad': _ciudadController.text.trim(),
+            'direccion': _controllers['direccion']!.text.trim(),
+            'codigo_postal': _controllers['codigoPostal']!.text.trim(),
+            'lugar_entrega': _controllers['lugarEntrega']!.text.trim(),
+            'ciudad': _controllers['ciudad']!.text.trim(),
           }
         ];
       }
-
       bool success = await provider.actualizarDatosPersonales(
         datos,
         fotoPerfil: _imagenSeleccionada,
       );
-
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Perfil actualizado correctamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pop(context);
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al actualizar: ${provider.error}'),
-            backgroundColor: AppColors.errorColor,
-          ),
+      if (!mounted) return;
+      if (provider.error == null || provider.error!.isEmpty) {
+        _mostrarSnackbar('Perfil actualizado correctamente', Colors.green);
+        await Future.delayed(const Duration(milliseconds: 600));
+        if (mounted) Navigator.pop(context);
+      } else {
+        _mostrarSnackbar(provider.error!, AppColors.errorColor);
+      }
+    } catch (e) {
+      if (mounted) {
+        _mostrarSnackbar(
+          'Error inesperado: ${e.toString()}',
+          AppColors.errorColor,
         );
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _guardando = false;
-        });
-      }
+      if (mounted) setState(() => _guardando = false);
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PersonalProvider>();
@@ -253,25 +216,20 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
         actions: [
           if (_guardando)
             const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: SizedBox(
+                child: Padding(
+              padding: EdgeInsets.all(16),
+              child: SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            )
+                  child: CircularProgressIndicator(strokeWidth: 2)),
+            ))
           else
             TextButton(
               onPressed: _guardarCambios,
-              child: Text(
-                'Guardar',
-                style: TextStyle(
-                  color: AppColors.primaryGreen,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: Text('Guardar',
+                  style: TextStyle(
+                      color: AppColors.primaryGreen,
+                      fontWeight: FontWeight.bold)),
             ),
         ],
       ),
@@ -284,70 +242,60 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
             children: [
               // Foto de perfil
               Center(
-                child: GestureDetector(
-                  onTap: _mostrarOpcionesImagen,
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 120,
+                  child: GestureDetector(
+                onTap: _mostrarOpcionesImagen,
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border:
+                            Border.all(color: AppColors.primaryGreen, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primaryGreen.withOpacity(0.2),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          )
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: _imagenSeleccionada != null
+                            ? Image.file(_imagenSeleccionada!,
+                                fit: BoxFit.cover)
+                            : provider.usuario?.urlFotoPerfil != null
+                                ? Image.network(
+                                    provider.usuario!.urlFotoPerfil!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error,
+                                            stackTrace) =>
+                                        _buildDefaultAvatar(provider.usuario))
+                                : _buildDefaultAvatar(provider.usuario),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
+                          color: AppColors.primaryGreen,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.primaryGreen,
-                            width: 3,
-                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primaryGreen.withOpacity(0.2),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 10)
                           ],
                         ),
-                        child: ClipOval(
-                          child: _imagenSeleccionada != null
-                              ? Image.file(
-                                  _imagenSeleccionada!,
-                                  fit: BoxFit.cover,
-                                )
-                              : provider.usuario?.urlFotoPerfil != null
-                                  ? Image.network(
-                                      '${PersonalService.baseUrl}/${provider.usuario!.urlFotoPerfil}',
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error,
-                                              stackTrace) =>
-                                          _buildDefaultAvatar(provider.usuario),
-                                    )
-                                  : _buildDefaultAvatar(provider.usuario),
-                        ),
+                        child: const Icon(Icons.camera_alt,
+                            size: 20, color: Colors.white),
                       ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryGreen,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 10,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            size: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
+              )),
               const SizedBox(height: 32),
 
               // Sección de Información Personal
@@ -356,99 +304,62 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
 
               // Campos del formulario
               _buildTextField(
-                controller: _nombreController,
-                label: 'Nombre',
-                icon: Icons.person,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'El nombre es requerido';
-                  }
-                  return null;
-                },
-              ),
+                  controller: _controllers['nombre']!,
+                  label: 'Nombre',
+                  icon: Icons.person,
+                  validator: _validarRequerido),
               const SizedBox(height: 20),
-
               _buildTextField(
-                controller: _apellidoController,
-                label: 'Apellido',
-                icon: Icons.person_outline,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'El apellido es requerido';
-                  }
-                  return null;
-                },
-              ),
+                  controller: _controllers['apellido']!,
+                  label: 'Apellido',
+                  icon: Icons.person_outline,
+                  validator: _validarRequerido),
               const SizedBox(height: 20),
-
               _buildTextField(
-                controller: _emailController,
-                label: 'Correo electrónico',
-                icon: Icons.email,
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'El correo es requerido';
-                  }
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                      .hasMatch(value)) {
-                    return 'Ingrese un correo válido';
-                  }
-                  return null;
-                },
-              ),
+                  controller: _controllers['email']!,
+                  label: 'Correo electrónico',
+                  icon: Icons.email,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: _validarEmail),
               const SizedBox(height: 20),
-
               _buildTextField(
-                controller: _telefonoController,
-                label: 'Teléfono',
-                icon: Icons.phone,
-                keyboardType: TextInputType.phone,
-              ),
-
+                  controller: _controllers['telefono']!,
+                  label: 'Teléfono',
+                  icon: Icons.phone,
+                  keyboardType: TextInputType.phone),
               const SizedBox(height: 32),
 
               // Sección de Dirección
               Text('Dirección de Envío', style: AppStyles.heading2),
               const SizedBox(height: 20),
-
               _buildTextField(
-                controller: _direccionController,
-                label: 'Dirección',
-                icon: Icons.location_on,
-                maxLines: 2,
-              ),
+                  controller: _controllers['direccion']!,
+                  label: 'Dirección',
+                  icon: Icons.location_on,
+                  maxLines: 2),
               const SizedBox(height: 20),
-
               Row(
                 children: [
                   Expanded(
-                    child: _buildTextField(
-                      controller: _codigoPostalController,
-                      label: 'Código Postal',
-                      icon: Icons.markunread_mailbox,
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
+                      child: _buildTextField(
+                          controller: _controllers['codigoPostal']!,
+                          label: 'Código Postal',
+                          icon: Icons.markunread_mailbox,
+                          keyboardType: TextInputType.number)),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildTextField(
-                      controller: _ciudadController,
-                      label: 'Ciudad',
-                      icon: Icons.location_city,
-                    ),
-                  ),
+                      child: _buildTextField(
+                          controller: _controllers['ciudad']!,
+                          label: 'Ciudad',
+                          icon: Icons.location_city)),
                 ],
               ),
               const SizedBox(height: 20),
-
               _buildTextField(
-                controller: _lugarEntregaController,
-                label: 'Lugar de Entrega (Referencias)',
-                icon: Icons.place,
-                maxLines: 2,
-              ),
-
+                  controller: _controllers['lugarEntrega']!,
+                  label: 'Lugar de Entrega (Referencias)',
+                  icon: Icons.place,
+                  maxLines: 2),
               const SizedBox(height: 40),
 
               // Información adicional no editable
@@ -459,9 +370,7 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.08),
-                      blurRadius: 10,
-                    ),
+                        color: Colors.grey.withOpacity(0.08), blurRadius: 10)
                   ],
                 ),
                 child: Column(
@@ -470,26 +379,16 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
                     Text('Información de cuenta', style: AppStyles.heading3),
                     const SizedBox(height: 16),
                     _buildInfoRow(
-                      'Usuario',
-                      '@${provider.usuario?.nombreUsuario ?? ''}',
-                      Icons.alternate_email,
-                    ),
+                        'Usuario',
+                        '@${provider.usuario?.nombreUsuario ?? ''}',
+                        Icons.alternate_email),
+                    _buildInfoRow('Membresía', provider.nivelMembresia,
+                        Icons.card_membership),
                     _buildInfoRow(
-                      'Membresía',
-                      provider.nivelMembresia,
-                      Icons.card_membership,
-                    ),
-                    _buildInfoRow(
-                      'Puntos BV',
-                      '${provider.puntosActuales}',
-                      Icons.stars,
-                    ),
+                        'Puntos BV', '${provider.puntosActuales}', Icons.stars),
                     if (provider.usuario?.patrocinador != null)
-                      _buildInfoRow(
-                        'Patrocinador',
-                        provider.usuario!.patrocinador!,
-                        Icons.person_add,
-                      ),
+                      _buildInfoRow('Patrocinador',
+                          provider.usuario!.patrocinador!, Icons.person_add),
                   ],
                 ),
               ),
@@ -498,6 +397,16 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
         ),
       ),
     );
+  }
+
+  String? _validarRequerido(String? value) =>
+      (value == null || value.isEmpty) ? 'Este campo es requerido' : null;
+
+  String? _validarEmail(String? value) {
+    if (value == null || value.isEmpty) return 'El correo es requerido';
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value))
+      return 'Ingrese un correo válido';
+    return null;
   }
 
   Widget _buildTextField({
@@ -518,27 +427,22 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
         prefixIcon: maxLines > 1
             ? Padding(
                 padding: const EdgeInsets.only(bottom: 40),
-                child: Icon(icon, color: AppColors.primaryGreen),
-              )
+                child: Icon(icon, color: AppColors.primaryGreen))
             : Icon(icon, color: AppColors.primaryGreen),
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey.shade200),
-        ),
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.shade200)),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: AppColors.primaryGreen, width: 2),
-        ),
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: AppColors.primaryGreen, width: 2)),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: AppColors.errorColor),
-        ),
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: AppColors.errorColor)),
       ),
     );
   }
@@ -550,20 +454,11 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
         children: [
           Icon(icon, size: 20, color: AppColors.textMedium),
           const SizedBox(width: 12),
-          Text(
-            '$label: ',
-            style: TextStyle(
-              color: AppColors.textMedium,
-              fontSize: 14,
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
+          Text('$label: ',
+              style: TextStyle(color: AppColors.textMedium, fontSize: 14)),
+          Text(value,
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
         ],
       ),
     );
@@ -573,18 +468,14 @@ class _EditarPerfilScreenState extends State<EditarPerfilScreen> {
     String inicial = usuario != null
         ? (usuario.nombre.isNotEmpty ? usuario.nombre[0] : 'U')
         : 'U';
-
     return Container(
       color: AppColors.accentGreen,
       child: Center(
-        child: Text(
-          inicial.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 48,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        child: Text(inicial.toUpperCase(),
+            style: const TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+                color: Colors.white)),
       ),
     );
   }

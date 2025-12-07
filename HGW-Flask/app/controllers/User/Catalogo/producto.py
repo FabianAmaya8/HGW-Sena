@@ -18,6 +18,7 @@ def api_obtener_productos():
                     sc.nombre_subcategoria AS subcategoria,
                     p.nombre_producto AS nombre,
                     p.precio_producto AS precio, 
+                    p.bv_puntos AS puntos_bv,
                     p.imagen_producto AS imagen, 
                     p.stock
                 FROM productos p

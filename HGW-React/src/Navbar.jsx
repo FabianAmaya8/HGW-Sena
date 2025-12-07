@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback, useContext, memo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, useContext, memo, useLayoutEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import JsxParser from 'react-jsx-parser';
 import "./font.module.scss"
@@ -28,10 +28,10 @@ import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { findWorkingBaseUrl } from './urlDB';
+import { User2Icon } from 'lucide-react';
 
-const BACKEND = findWorkingBaseUrl();
+const BACKEND = findWorkingBaseUrl().replace(/\/$/, "");
 
-// ---------- AÑADIR justo después de los imports ----------
 const iconComponents = {
   AccountCircleIcon,
   LogoutIcon,
@@ -45,8 +45,44 @@ const iconComponents = {
   CardGiftcardIcon,
   SettingsIcon
 };
-// -------------------------------------------------------
 
+const IconRenderer = memo(({ jsx }) => <JsxParser components={iconComponents} jsx={jsx} />);
+
+const DespliegeNavbar = memo(({datos, navegar})=>{
+  const [ancho, setAncho] = useState(0);
+  const [activo, setActivo] = useState(false);
+
+  useEffect(()=>{
+    const a = datos.reduce((acc, v) => acc + (v.arialLabel ? v.arialLabel.length * 0.734 : 0), 0);
+    setAncho(a);
+  }, [datos]);
+
+  const hijosMemo = useMemo(() => {
+    return datos.map((v, i) => (
+      <Button key={"navbutton"+i} sx={{color: "black", textWrap: "nowrap", height: "100%", display: 'flex', alignItems: "center", justifyContent: "center"}} onClick={()=>{
+          navegar(v.rute);
+          if(v.arialLabel == "Cerrar Sesion"){
+            localStorage.removeItem("token");
+          }
+        }}>
+        {v.arialLabel}
+      </Button>
+    ));
+  }, [datos, navegar]);
+
+  return (
+    <Box sx={{height: "100%", display: 'flex'}}>
+      <Button sx={{height: "100%", borderRadius: 0}} onClick={()=>setActivo(!activo)}>
+        <User2Icon></User2Icon>
+      </Button>
+      <Box sx={{transition: "350ms", height: "100%", width: activo ? ancho+"rem": 0, overflow: "hidden", flexDirection: "row", display: 'flex'}}>
+        <Box sx={{width: ancho+"rem", height: "100%", flexDirection: "row", display: 'flex'}}>
+          { hijosMemo }
+        </Box>
+      </Box>
+    </Box>
+  )
+})
 
 const Arboles = memo(({ elementos, hoverDrawer }) => {
   const { medidas: dispositivo, anchoDrawer } = useContext(AppContext);
@@ -79,6 +115,10 @@ const Arboles = memo(({ elementos, hoverDrawer }) => {
   }, [elementos]);
 
   const [expandedMap, setExpandedMap] = useState(initial);
+
+  useEffect(() => {
+    setExpandedMap(initial);
+  }, [initial]);
 
   const handleChange = useCallback((id, siblingIds) => (_e, isOpen) => {
     setExpandedMap(prev => {
@@ -129,7 +169,7 @@ const Arboles = memo(({ elementos, hoverDrawer }) => {
                 gap: anchoDrawer.isOpen ? '1rem' : '1.2rem',
                 transition: 'gap 450ms'
               }}>
-                {"icon" in el && <JsxParser components={iconComponents} jsx={el.icon} />}
+                {"icon" in el && <IconRenderer jsx={el.icon} />}
                 <Typography variant="body1" noWrap>{el.value}</Typography>
               </Box>
             </AccordionSummary>
@@ -158,7 +198,7 @@ const Arboles = memo(({ elementos, hoverDrawer }) => {
           sx={{ color: 'primary.contrastText', width: '100%', textTransform: 'none', whiteSpace: 'nowrap' }}
         >
           <Box className={Style.boxElementsNavbar}>
-            {"icon" in el ? <JsxParser components={iconComponents} jsx={el.icon} /> : null}
+            {"icon" in el ? <IconRenderer jsx={el.icon} /> : null}
             <Typography variant="body1" noWrap>{el.value}</Typography>
           </Box>
         </Button>
@@ -205,21 +245,28 @@ const App = memo(({objeto}) => {
   const navigate = useNavigate();
   const posicionScroll = useRef(0);
   const [hiddenNavbar, setHiddenNavbar] = useState(false);
+  const rafRef = useRef(null);
 
   useEffect(() => {
     function scrollNavbar() {
-      if (window.scrollY > posicionScroll.current && posicionScroll.current > 125) {
-        setHiddenNavbar(true);
-      } else {
-        setHiddenNavbar(false);
-      }
-      posicionScroll.current = window.scrollY;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        if (window.scrollY > posicionScroll.current && posicionScroll.current > 125) {
+          setHiddenNavbar(true);
+        } else {
+          setHiddenNavbar(false);
+        }
+        posicionScroll.current = window.scrollY;
+      });
     }
-    document.addEventListener('scroll', scrollNavbar);
-    return () => document.removeEventListener('scroll', scrollNavbar);
+    document.addEventListener('scroll', scrollNavbar, { passive: true });
+    return () => {
+      document.removeEventListener('scroll', scrollNavbar);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
-  const objetoEstado = useMemo(() => ({ isOpen, setIsOpen }), [isOpen]);
+  const objetoEstado = useMemo(() => ({ isOpen, setIsOpen }), [isOpen, setIsOpen]);
   const anchoNavbar = anchoDrawer.isOpen
     ? `calc(100% - ${(anchoDrawer.ancho.open) - 14}rem)`
     : `calc(100% - ${(anchoDrawer.ancho.close) - 3}rem)`;
@@ -243,7 +290,7 @@ const App = memo(({objeto}) => {
         height: hiddenNavbar ? '0px' : '75px',
         transition: 'width 450ms'
       }}>
-        <Button disableTouchRipple onClick={() => setIsOpen(!isOpen)}>
+        <Button sx={{'&:hover': {boxShadow: "none", backgroundColor: 'transparent',}}} disableTouchRipple onClick={() => setIsOpen(!isOpen)}>
           {dispositivo === 'movil' ? (
             <HomeIcon sx={{ color: 'black', fontSize: '25px' }} />
           ) : (
@@ -271,9 +318,12 @@ const App = memo(({objeto}) => {
             </Box>
           )}
         </Button>
-        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', padding: 0, margin: 0 }}>
-          <Typography variant="h4" sx={{fontWeight: 600, padding: 0, margin: 0}}>HGW|</Typography>
-          <Typography variant='p' sx={{ fontWeight: 600 , padding: 0, margin: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '65%' }}>Admin</Typography>
+        <Box sx={{display: "flex", alignItems: "space-between", gap: 1, alignItems: "center", height: "100%"}}>
+          { dispositivo != "movil" && <DespliegeNavbar datos = {objectSpeedDial} navegar = {navigate} /> }
+          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', padding: 0, margin: 0 }}>
+            <Typography variant="h4" sx={{fontWeight: 600, padding: 0, margin: 0}}>HGW|</Typography>
+            <Typography variant='p' sx={{ fontWeight: 600 , padding: 0, margin: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '65%' }}>Admin</Typography>
+          </Box>
         </Box>
       </Box>
       <MyDrawer switch={objetoEstado} data={objeto} />
@@ -287,18 +337,17 @@ const App = memo(({objeto}) => {
 });
 
 function Navbar({ alerta, setAlerta, imagenes, objeto }) {
-  const [anchoAlert, setAncho] = useState('-180px');
-
-  useEffect(() => {
+  const anchoAlert = useMemo(() => {
     if (alerta.valor.content.length > 0) {
-      setAncho(`-${9 * alerta.valor.content.length}px`);
+      return `-${9 * alerta.valor.content.length}px`;
     }
+    return '-180px';
   }, [alerta]);
 
-  
   const closeAlert = useCallback(() => {
     setAlerta({ estado: false, valor: { title: '', content: '' } });
-  }, []);
+  }, [setAlerta]);
+
   const safeSrc = useMemo(() => {
     const src = (imagenes.imagenes.file || '').trim();
     if (src.startsWith('http') || src.startsWith('data:image/')) return src;

@@ -55,7 +55,7 @@ function Educacion() {
                                         setActivo(abierto ? null : tema.id_tema)
                                     }
                                 >
-                                    {tema.tema}
+                                    {tema.nombre_tema}
                                 </button>
                             </h2>
                             <div className={`accordion-collapse collapse ${abierto ? "show" : ""}`}>
@@ -65,21 +65,12 @@ function Educacion() {
                                     ) : (
                                         <ul className="list-unstyled">
                                             {contenidosTema.map((contenido) => {
-                                                const videoId = getYouTubeId(contenido.url_videos);
+                                                const videoId = getYouTubeId(contenido.url_contenido);
 
                                                 return (
                                                     <li key={contenido.id_contenido} className="mb-4 temaContenido">
-                                                        <a 
-                                                            href={contenido.url_documentos} 
-                                                            target="_blank" 
-                                                            rel="noopener noreferrer" 
-                                                            className="Texto"
-                                                        >
-                                                            <i className='bx bxs-file-pdf contenidoTexto-icon'></i>
-                                                            Documento PDF
-                                                        </a>
-
-                                                        {videoId && (
+                                                        { videoId ?
+                                                        (
                                                             <div className="video-wrapper">
                                                                 <LiteYouTubeEmbed 
                                                                     id={videoId}
@@ -87,7 +78,16 @@ function Educacion() {
                                                                     poster="mqdefault"
                                                                 />
                                                             </div>
-                                                        )}
+                                                        ):
+                                                        (<a 
+                                                            href={contenido.url_contenido} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer" 
+                                                            className="Texto"
+                                                        >
+                                                            <i className='bx bxs-file-pdf contenidoTexto-icon'></i>
+                                                            Documento PDF
+                                                        </a>)}
                                                     </li>
                                                 );
                                             })}

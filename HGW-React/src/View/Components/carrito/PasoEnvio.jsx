@@ -1,58 +1,50 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Swal from 'sweetalert2';
 import Resumen from "./Resumen";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
-export default function PasoEnvio({ carrito, direcciones , onNext, onBack }) {
-    const [direcDisponible, setDirecDisponible] = useState(true);
-    const arryDirecciones = direcciones[0];
-
-    const [usuario, setUsuario]       = useState(arryDirecciones?.id_direccion);
-    const [direccion, setDireccion]   = useState(arryDirecciones?.direccion);
-    const [codigoPostal, setCP]       = useState(arryDirecciones?.codigo_postal);
-    const [ciudad, setCiudad]       = useState(arryDirecciones?.ciudad);
-    const [pais, setPais]           = useState(arryDirecciones?.pais);
-    const [lugarEntrega, setLugar]    = useState(arryDirecciones?.lugar_entrega);
-    const [error, setError]           = useState("");
-
-    useEffect(() => {
-        const u = JSON.parse(localStorage.getItem("user"));
-        if (u?.id) setUsuario(u);
-    }, []);
+export default function PasoEnvio({
+    carrito,
+    direcciones,
+    direccionSeleccionada,
+    setDireccionSeleccionada,
+    onNext,
+    onBack
+}) {
+    const sinDirecciones = direcciones.length === 0;
+    const navigation = useNavigate();
 
     useEffect(() => {
-        if (direcciones.length > 0) {
-            setDirecDisponible(false);
-        } else {
-            setDirecDisponible(true);
+        if (direcciones.length > 0 && !direccionSeleccionada) {
+            setDireccionSeleccionada(direcciones[0]);
         }
-    }, []);
+    }, [direcciones]);
 
     const handleContinuar = () => {
-        direcDisponible ?
-        Swal.fire({
-            title: "No tienes dirección de envío registrada",
-            text: "Debes registrar tu información de envío para continuar.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Continuar",
-            cancelButtonText: "No",
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                useNavigate("/Informacion-Personal");
-            }
-        })
-        :
+        if (sinDirecciones) {
+            Swal.fire({
+                title: "No tienes dirección de envío registrada",
+                text: "Debes registrar una dirección para continuar.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Ir a registrar",
+                cancelButtonText: "Cancelar"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    navigation("/Informacion-Personal");
+                }
+            });
+            return;
+        }
+
         Swal.fire({
             title: "¿Tus datos son correctos?",
-            text: "Verifica que tu información de envío sea la adecuada.",
+            text: "Confirma tu dirección antes de continuar.",
             icon: "question",
             showCancelButton: true,
-            confirmButtonText: "Continuar",
-            cancelButtonText: "No",
-            reverseButtons: true
-        }).then((result) => {
+            confirmButtonText: "Sí, continuar",
+            cancelButtonText: "No"
+        }).then(result => {
             if (result.isConfirmed) {
                 onNext();
             }
@@ -63,41 +55,55 @@ export default function PasoEnvio({ carrito, direcciones , onNext, onBack }) {
         <div className="container my-4">
             <h2 className="mb-4">Información de Envío</h2>
 
-            {error && <div className="alert alert-danger">{error}</div>}
-
             <div className="row">
-                {/* Sección de Dirección */}
+                
+                {/* LISTA DE DIRECCIONES */}
                 <div className="col-md-6">
                     <div className="card mb-4">
-                        <h2 >Dirección de Entrega</h2>
+                        <h2 className="p-3">Selecciona una dirección</h2>
+
                         <div className="card-body">
-                            <div className="mb-3">
-                                <label className="form-label">Dirección</label>
-                                <p className="form-control-plaintext border rounded p-2">{direccion || "No disponible"}</p>
-                            </div>
-                            <div className="mb-3">
-                                <label className="form-label">Código Postal</label>
-                                <p className="form-control-plaintext border rounded p-2">{codigoPostal || "No disponible"}</p>
-                            </div>
-                            <div className="mb-3">
-                                <label className="form-label">Ciudad</label>
-                                <p className="form-control-plaintext border rounded p-2">{ciudad || "No disponible"}</p>
-                            </div>
-                            <div className="mb-3">
-                                <label className="form-label">País</label>
-                                <p className="form-control-plaintext border rounded p-2">{pais || "No disponible"}</p>
-                            </div>
-                            <div className="mb-4">
-                                <label className="form-label">Lugar de Entrega</label>
-                                <p className="form-control-plaintext border rounded p-2">{lugarEntrega || "No disponible"}</p>
-                            </div>
+
+                            {sinDirecciones ? (
+                                <p>No tienes direcciones registradas.</p>
+                            ) : (
+                                direcciones.map((d) => (
+                                    <div
+                                        key={d.id}
+                                        className={`border rounded p-3 mb-3 direccion-card ${direccionSeleccionada?.id === d.id ? "bg-light border-success" : ""}`}
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => setDireccionSeleccionada(d)}
+                                    >
+                                        <div className="form-check">
+                                            <input
+                                                className="form-check-input"
+                                                type="radio"
+                                                name="direccion"
+                                                checked={direccionSeleccionada?.id === d.id}
+                                                onChange={() => setDireccionSeleccionada(d)}
+                                            />
+                                            <label className="form-check-label ms-2">
+                                                <strong>{d.direccion}</strong>  
+                                                <br />
+                                                {d.ciudad}, {d.pais}
+                                                <br />
+                                                CP: {d.codigo_postal}
+                                                <br />
+                                                Entrega: {d.lugar_entrega}
+                                            </label>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+
                         </div>
                     </div>
                 </div>
 
+                {/* RESUMEN */}
                 <Resumen
                     carrito={carrito}
-                    loading={direcDisponible}
+                    loading={sinDirecciones}
                     step="shipping"
                     onNext={handleContinuar}
                     onBack={onBack}

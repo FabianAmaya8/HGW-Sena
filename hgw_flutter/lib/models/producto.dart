@@ -5,6 +5,7 @@ class Producto {
   final String subcategoria;
   final String nombre;
   final double precio;
+  final int puntosBV;
   final String? imagen;
   final int stock;
 
@@ -14,6 +15,7 @@ class Producto {
     required this.subcategoria,
     required this.nombre,
     required this.precio,
+    required this.puntosBV,
     this.imagen,
     required this.stock,
   });
@@ -34,6 +36,14 @@ class Producto {
         if (value is String) return int.tryParse(value) ?? 0;
         return 0;
       }
+
+      int parseBV(dynamic value) {
+        if (value == null) return 0;
+        if (value is int) return value;
+        if (value is String) return int.tryParse(value) ?? 0;
+        return 0;
+      }
+
       String? parseImagen(dynamic value) {
         if (value == null || value.toString().isEmpty) {
           return 'https://via.placeholder.com/300x300/00C896/ffffff?text=Producto';
@@ -53,6 +63,7 @@ class Producto {
         subcategoria: json['subcategoria']?.toString() ?? 'Sin subcategoría',
         nombre: json['nombre']?.toString() ?? 'Producto sin nombre',
         precio: parsePrecio(json['precio']),
+        puntosBV: parseBV(json['puntos_bv']),
         imagen: parseImagen(json['imagen']),
         stock: parseStock(json['stock']),
       );

@@ -10,12 +10,25 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 import './assets/css/fijos/index.css';
 import './assets/css/fijos/style.css';
 
-import { AuthProvider } from './pages/Context/AuthContext.jsx';
+import { AuthProvider, useAuth } from './pages/Context/AuthContext.jsx';
+import { HeaderProvider } from './pages/Context/HeaderContext.jsx';
+import { ProductsProvider } from './pages/Context/ProductsContext.jsx';
+
+function ProvidersWrapper() {
+  const { user } = useAuth();
+  return (
+    <HeaderProvider user={user}>
+      <ProductsProvider>
+        <RouterProvider router={router} />
+      </ProductsProvider>
+    </HeaderProvider>
+  );
+}
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
+    <AuthProvider>
+      <ProvidersWrapper />
+    </AuthProvider>
   </StrictMode>
 );

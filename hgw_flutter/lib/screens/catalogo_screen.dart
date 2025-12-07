@@ -20,6 +20,7 @@ class _CatalogoScreenState extends State<CatalogoScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
   bool _showBackToTop = false;
 
   @override
@@ -45,6 +46,7 @@ class _CatalogoScreenState extends State<CatalogoScreen>
   void dispose() {
     _fadeController.dispose();
     _scrollController.dispose();
+    _searchController.dispose(); // Limpieza del controller
     super.dispose();
   }
 
@@ -64,6 +66,29 @@ class _CatalogoScreenState extends State<CatalogoScreen>
           CustomScrollView(
             controller: _scrollController,
             slivers: [
+              // Espacio para el status bar
+              const SliverToBoxAdapter(child: SizedBox(height: 50)),
+
+              // Título opcional
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                  child: Text(
+                    "Catálogo",
+                    style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark),
+                  ),
+                ),
+              ),
+
+              // 2. Aquí insertamos la Barra de Búsqueda
+              SliverToBoxAdapter(
+                child: _buildSearchBar(),
+              ),
+
               Consumer<ProductosProvider>(
                 builder: (context, provider, child) {
                   if (provider.categoriasUnicas.isEmpty) {
@@ -81,7 +106,11 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                           _buildCategoryChip(
                             'Todos',
                             provider.selectedCategoria == null,
-                            () => provider.limpiarFiltros(),
+                            () {
+                              provider.limpiarFiltros();
+                              _searchController
+                                  .clear();
+                            },
                             Icons.apps,
                           ),
                           ...provider.categoriasUnicas.map((categoria) {
@@ -119,12 +148,16 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                   return SliverPadding(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
                     sliver: SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 0.75,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 20,
+                        childAspectRatio:
+                            MediaQuery.of(context).size.width < 375
+                                ? 0.70
+                                : 0.75,
+                        crossAxisSpacing:
+                            MediaQuery.of(context).size.width < 375 ? 8 : 12,
+                        mainAxisSpacing:
+                            MediaQuery.of(context).size.width < 375 ? 12 : 16,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -277,6 +310,50 @@ class _CatalogoScreenState extends State<CatalogoScreen>
       ),
     );
   }
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: TextField(
+          controller: _searchController,
+          onChanged: (value) {
+            // Llamamos al método nuevo del Provider
+            context.read<ProductosProvider>().onSearchChanged(value);
+          },
+          decoration: InputDecoration(
+            hintText: 'Buscar productos...',
+            hintStyle: TextStyle(color: AppColors.textMedium.withOpacity(0.5)),
+            prefixIcon: Icon(Icons.search, color: AppColors.primaryGreen),
+            // Icono para borrar el texto
+            suffixIcon: _searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: Icon(Icons.clear, color: AppColors.textMedium),
+                    onPressed: () {
+                      _searchController.clear();
+                      context.read<ProductosProvider>().onSearchChanged('');
+                      setState(() {}); // Actualizamos para ocultar la X
+                    },
+                  )
+                : null,
+            border: InputBorder.none,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildCategoryChip(
       String label, bool isSelected, VoidCallback onTap, IconData icon) {
@@ -410,27 +487,28 @@ class _CatalogoScreenState extends State<CatalogoScreen>
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.inventory_2_outlined,
+                Icons.search_off, // Icono cambiado para reflejar búsqueda vacía
                 size: 64,
                 color: AppColors.primaryGreen,
               ),
             ),
             const SizedBox(height: 24),
-            Text('Sin productos', style: AppStyles.heading2),
+            Text('Sin resultados', style: AppStyles.heading2),
             const SizedBox(height: 8),
             Text(
-              'No hay productos disponibles en este momento',
+              'No encontramos productos con ese nombre o categoría.',
               style: AppStyles.body,
               textAlign: TextAlign.center,
             ),
-            if (provider.selectedCategoria != null) ...[
-              const SizedBox(height: 24),
-              TextButton.icon(
-                onPressed: () => provider.limpiarFiltros(),
-                icon: const Icon(Icons.clear),
-                label: const Text('Limpiar filtros'),
-              ),
-            ],
+            const SizedBox(height: 24),
+            TextButton.icon(
+              onPressed: () {
+                provider.limpiarFiltros();
+                _searchController.clear();
+              },
+              icon: const Icon(Icons.clear),
+              label: const Text('Limpiar filtros y búsqueda'),
+            ),
           ],
         ),
       ),

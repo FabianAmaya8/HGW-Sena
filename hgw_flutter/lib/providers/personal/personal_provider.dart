@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/personal/usuario.dart';
 import '../../models/personal/membresia.dart';
 import '../../services/personal/personal_service.dart';
+import '../../services/auth/auth_service.dart';
 
 class PersonalProvider extends ChangeNotifier {
   final PersonalService _service = PersonalService();
@@ -10,13 +11,12 @@ class PersonalProvider extends ChangeNotifier {
   Usuario? _usuario;
   bool _isLoading = false;
   String? _error;
-
   int _puntosActuales = 45;
   int _comprasRealizadas = 0;
-
-  // Datos de red
   int _personasEnRed = 0;
   int _lineasDirectas = 0;
+  List<Map<String, dynamic>> _miRed = [];
+  List<Map<String, dynamic>> _lineasDirectasList = [];
 
   Usuario? get usuario => _usuario;
   bool get isLoading => _isLoading;
@@ -25,6 +25,9 @@ class PersonalProvider extends ChangeNotifier {
   int get comprasRealizadas => _comprasRealizadas;
   int get personasEnRed => _personasEnRed;
   int get lineasDirectas => _lineasDirectas;
+  List<Map<String, dynamic>> get miRed => _miRed;
+  List<Map<String, dynamic>> get lineasDirectasList => _lineasDirectasList;
+
   String get nivelMembresia {
     if (_usuario?.membresia != null) {
       return _usuario!.membresia!.nombreMembresia;
@@ -57,7 +60,7 @@ class PersonalProvider extends ChangeNotifier {
       int max = rango['max']!;
 
       if (nivel == 'Master') {
-        return 1.0; // Master siempre al 100%
+        return 1.0;
       }
 
       double progreso = (_puntosActuales - min) / (max - min);
@@ -73,7 +76,7 @@ class PersonalProvider extends ChangeNotifier {
       'Pre-Junior': 100,
       'Junior': 300,
       'Senior': 600,
-      'Master': 0, // Ya es el máximo
+      'Master': 0,
     };
 
     return puntosNecesarios[nivelMembresia] ?? 0;
@@ -90,7 +93,7 @@ class PersonalProvider extends ChangeNotifier {
 
     String nivel = nivelMembresia;
     double posicionBase = posiciones[nivel] ?? 0.0;
-    double progresoEnNivel = progresoMembresia * 0.2; // Cada nivel ocupa 20%
+    double progresoEnNivel = progresoMembresia * 0.2;
 
     return (posicionBase + progresoEnNivel).clamp(0.0, 1.0);
   }
@@ -101,16 +104,28 @@ class PersonalProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      int userId = 1; // Por ahora hardcodeado
+      // Obtener el userId de la sesión actual
+      int? userId = await AuthService.getCurrentUserId();
+
+      if (userId == null) {
+        _error = 'No se encontró sesión activa';
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
 
       _usuario = await _service.obtenerDatosPersonales(userId);
 
       if (_usuario == null) {
         _error = 'No se pudieron cargar los datos personales';
+      } else {
+        if (_usuario!.membresia != null) {
+          _puntosActuales = _usuario!.membresia!.puntosActuales;
+        }
+        await cargarMiRed();
+        await cargarLineasDirectas();
+        _comprasRealizadas = 15;
       }
-      _personasEnRed = 127;
-      _lineasDirectas = 8;
-      _comprasRealizadas = 15;
     } catch (e) {
       _error = 'Error al cargar datos personales: $e';
     } finally {
@@ -119,23 +134,44 @@ class PersonalProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> actualizarDatosPersonales(Map<String, dynamic> datos,
-      {File? fotoPerfil}) async {
+  Future<void> cargarMiRed() async {
     try {
       int userId = _usuario?.idUsuario ?? 1;
-      bool success = await _service.actualizarDatosPersonales(userId, datos,
-          fotoPerfil: fotoPerfil);
-
-      if (success) {
-        await cargarDatosPersonales(); // Recargar datos
-      }
-
-      return success;
-    } catch (e) {
-      _error = 'Error al actualizar datos: $e';
+      _miRed = await _service.obtenerMiRed(userId);
+      _personasEnRed = _miRed.length;
       notifyListeners();
-      return false;
+    } catch (e) {
+      print('Error al cargar mi red: $e');
     }
+  }
+
+  Future<void> cargarLineasDirectas() async {
+    try {
+      int userId = _usuario?.idUsuario ?? 1;
+      _lineasDirectasList =
+          _miRed.where((persona) => persona['nivel'] == 1).toList();
+      _lineasDirectas = _lineasDirectasList.length;
+      notifyListeners();
+    } catch (e) {
+      print('Error al cargar líneas directas: $e');
+    }
+  }
+
+  Future<bool> actualizarDatosPersonales(Map<String, dynamic> datos,
+      {File? fotoPerfil}) async {
+    _error = null;
+    int userId = _usuario?.idUsuario ?? 1;
+
+    bool success = await _service.actualizarDatosPersonales(
+      userId,
+      datos,
+      fotoPerfil: fotoPerfil,
+    );
+    if (success) {
+      await cargarDatosPersonales();
+      _error = null;
+    }
+    return success;
   }
 
   Future<bool> actualizarDireccion(
@@ -146,7 +182,7 @@ class PersonalProvider extends ChangeNotifier {
           await _service.actualizarDireccion(userId, direccionId, direccion);
 
       if (success) {
-        await cargarDatosPersonales(); // Recargar datos
+        await cargarDatosPersonales();
       }
 
       return success;
@@ -176,7 +212,7 @@ class PersonalProvider extends ChangeNotifier {
       bool success = await _service.eliminarFotoPerfil(userId);
 
       if (success) {
-        await cargarDatosPersonales(); // Recargar datos
+        await cargarDatosPersonales();
       }
 
       return success;
@@ -186,6 +222,44 @@ class PersonalProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  // NUEVO: Método para cerrar sesión
+  Future<void> cerrarSesion() async {
+    try {
+      // Limpiar la sesión guardada
+      await AuthService.clearSession();
+
+      // Limpiar todos los datos en memoria
+      _usuario = null;
+      _puntosActuales = 0;
+      _comprasRealizadas = 0;
+      _personasEnRed = 0;
+      _lineasDirectas = 0;
+      _miRed = [];
+      _lineasDirectasList = [];
+      _error = null;
+
+      // Notificar a los listeners para actualizar la UI
+      notifyListeners();
+    } catch (e) {
+      print('Error al cerrar sesión: $e');
+      _error = 'Error al cerrar sesión';
+      notifyListeners();
+    }
+  }
+
+  void limpiarDatos() {
+    _usuario = null;
+    _puntosActuales = 0;
+    _comprasRealizadas = 0;
+    _personasEnRed = 0;
+    _lineasDirectas = 0;
+    _miRed = [];
+    _lineasDirectasList = [];
+    _error = null;
+    notifyListeners();
+  }
+
   void actualizarPuntosPorCompra(double montoCompra) {
     int puntosGanados = (montoCompra / 10000).floor();
     _puntosActuales += puntosGanados;

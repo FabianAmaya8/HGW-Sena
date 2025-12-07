@@ -4,6 +4,7 @@ class ProductoDetalle {
   final int idProducto;
   final String nombre;
   final double precio;
+  final int puntosBv; // Nuevo campo para puntos BV
   final String? imagen;
   final List<String> imagenes;
   final String? descripcion;
@@ -15,6 +16,7 @@ class ProductoDetalle {
     required this.idProducto,
     required this.nombre,
     required this.precio,
+    required this.puntosBv, // Añadido al constructor
     this.imagen,
     required this.imagenes,
     this.descripcion,
@@ -73,10 +75,19 @@ class ProductoDetalle {
         return 0;
       }
 
+      int parsePuntosBv(dynamic value) {
+        if (value == null) return 0;
+        if (value is int) return value;
+        if (value is String) return int.tryParse(value) ?? 0;
+        return 0;
+      }
+
       return ProductoDetalle(
         idProducto: json['id_producto'] ?? 0,
         nombre: json['nombre']?.toString() ?? 'Producto sin nombre',
         precio: parsePrecio(json['precio']),
+        puntosBv:
+            parsePuntosBv(json['puntos_bv']), // Parseando puntos_bv del JSON
         imagen: buildImageUrl(json['imagen']?.toString()),
         imagenes: parseImagenes(json['imagenes']),
         descripcion: json['descripcion']?.toString(),

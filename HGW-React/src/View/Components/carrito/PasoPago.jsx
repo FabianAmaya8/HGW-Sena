@@ -1,23 +1,25 @@
 import { useState, useEffect } from "react";
 import { urlDB } from "../../../urlDB";
 import Resumen from "./Resumen";
-import { useCarrito } from "../../hooks/useCarrito";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../pages/Context/AuthContext";
+import { formatPrice } from "../../hooks/useCarrito";
 
-export default function PasoPago({ carrito, clearCart, onBack }) {
-    const { direccion, obtenerDirecciones } = useCarrito();
+export default function PasoPago({ carrito, direccionSeleccionada, actualizarCantidad, clearCart, onBack }) {
     const [medios, setMedios] = useState([]);
     const [medioPago, setMedioPago] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const { user } = useAuth();
     const navigate = useNavigate();
 
-    const dirSel = direccion[0] || null;
-    const subtotal = carrito.reduce((sum, p) => sum + p.precio * p.cantidad, 0);
+    const subtotal = carrito.reduce((s, p) => s + p.precio * p.cantidad, 0);
     const envio = 5000;
     const impuestos = Math.round(subtotal * 0.19);
     const totalFinal = subtotal + envio + impuestos;
+
+    const dirSel = direccionSeleccionada;
 
     useEffect(() => {
         async function fetchMedios() {
@@ -31,41 +33,37 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
             }
         }
         fetchMedios();
-        obtenerDirecciones();
     }, []);
 
     const confirmarPago = async () => {
-        if (!dirSel?.id_direccion) {
+        if (!dirSel?.id) {
             setError("Debes seleccionar una dirección de envío");
             return;
         }
-        const { id_usuario, id_direccion } = dirSel;
-        if (!id_usuario) {
-            setError("Usuario inválido");
-            return;
-        }
+
         if (!medioPago) {
             setError("Debes seleccionar un método de pago");
             return;
         }
+
         if (!carrito.length) {
             setError("Tu carrito está vacío");
             return;
         }
 
-        setError("");
         setLoading(true);
+        setError("");
 
         try {
             const payload = {
-                id_usuario: Number(id_usuario),
-                id_direccion: Number(id_direccion),
+                id_usuario: user.id,
+                id_direccion: Number(dirSel.id),
                 id_medio_pago: Number(medioPago),
                 total: totalFinal,
-                items: carrito.map(({ id_producto, cantidad, precio }) => ({
-                    id_producto,
-                    cantidad,
-                    precio_unitario: precio
+                items: carrito.map(p => ({
+                    id_producto: p.id_producto,
+                    cantidad: p.cantidad,
+                    precio_unitario: p.precio
                 }))
             };
 
@@ -76,24 +74,69 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
                 body: JSON.stringify(payload)
             });
 
-            if (!res.ok) {
-                const { error: msg } = await res.json();
-                throw new Error(msg || "Error al procesar la orden");
+            const data = await res.json();
+
+            // 🟥 SI LA API REPORTA FALTA DE STOCK
+            if (!res.ok && data.error === "Stock insuficiente") {
+
+                const result = await Swal.fire({
+                    icon: "error",
+                    title: "Stock insuficiente",
+                    html: `
+                        <p><strong>Producto:</strong> ${data.producto}</p>
+                        <p><strong>Solicitado:</strong> ${data.solicitado}</p>
+                        <p><strong>Disponible:</strong> ${data.stock_disponible}</p>
+                        <br>
+                        <p>¿Deseas ajustar tu pedido al stock actual?</p>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, ajustar",
+                    cancelButtonText: "No",
+                    reverseButtons: true
+                });
+
+                if (result.isConfirmed) {
+
+                    await actualizarCantidad(data.id_producto, data.stock_disponible);
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "Pedido ajustado",
+                        text: "Se actualizó la cantidad al stock disponible.",
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                }
+
+                setLoading(false);
+                return;
             }
 
+            // 🟥 OTROS ERRORES
+            if (!res.ok) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error al procesar la orden",
+                    text: data.error || "No se pudo completar la compra.",
+                });
+                setLoading(false);
+                return;
+            }
+
+            // 🟩 SI TODO ESTÁ BIEN
             clearCart();
             Swal.fire({
                 title: "Pago realizado",
                 text: "Tu orden ha sido procesada exitosamente.",
-                icon: "success",
-                confirmButtonText: "Aceptar"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    navigate("/");
-                }
+                icon: "success"
+            }).then(() => navigate("/"));
+
+        } catch (err) {
+            Swal.fire({
+                icon: "error",
+                title: "Error interno",
+                text: err.message,
             });
-        } catch (e) {
-            setError(e.message);
         } finally {
             setLoading(false);
         }
@@ -102,13 +145,15 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
     return (
         <div className="container">
             <h2 className="mb-4">Confirmar Pago</h2>
+
             {error && <div className="alert alert-danger">{error}</div>}
+
             <div className="row">
                 <div className="col-md-6">
                     <div className="card mb-4">
                         <div className="card-header bg-primary text-white">Métodos de Pago</div>
                         <div className="card-body">
-                            {medios.map((m) => (
+                            {medios.map(m => (
                                 <div key={m.id_medio} className="form-check mb-2">
                                     <input
                                         className="form-check-input"
@@ -116,7 +161,7 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
                                         name="metodoPago"
                                         value={m.id_medio}
                                         checked={medioPago === String(m.id_medio)}
-                                        onChange={(e) => setMedioPago(e.target.value)}
+                                        onChange={e => setMedioPago(e.target.value)}
                                         disabled={loading}
                                     />
                                     <label className="form-check-label">{m.nombre_medio}</label>
@@ -124,6 +169,7 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
                             ))}
                         </div>
                     </div>
+
                     <div className="card mb-4">
                         <div className="card-header bg-secondary text-white">Dirección de Envío</div>
                         <div className="card-body">
@@ -140,20 +186,21 @@ export default function PasoPago({ carrito, clearCart, onBack }) {
                             )}
                         </div>
                     </div>
+
                     <div className="card mb-4">
                         <div className="card-header bg-dark text-white">Productos</div>
                         <div className="card-body">
-                            {carrito.map((p) => (
+                            {carrito.map(p => (
                                 <div key={p.id_producto} className="d-flex justify-content-between border-bottom py-1">
                                     <span>{p.nombre}</span>
                                     <span>{p.cantidad}×</span>
-                                    <span>${(p.precio * p.cantidad).toFixed(2)}</span>
+                                    <span>{formatPrice(p.precio * p.cantidad)}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
-
                 </div>
+
                 <Resumen
                     carrito={carrito}
                     taxRate={0.19}

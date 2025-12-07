@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/personal/personal_provider.dart';
+import '../../main.dart';
 import '../../utils/constants.dart';
+import '../../Login.dart';
 import 'editar_perfil_screen.dart';
 import 'mi_red_screen.dart';
 import 'cambiar_contrasena_screen.dart';
@@ -12,6 +14,8 @@ class PersonalScreen extends StatefulWidget {
   @override
   State<PersonalScreen> createState() => _PersonalScreenState();
 }
+
+
 
 class _PersonalScreenState extends State<PersonalScreen>
     with TickerProviderStateMixin {
@@ -82,7 +86,6 @@ class _PersonalScreenState extends State<PersonalScreen>
             opacity: _fadeAnimation,
             child: CustomScrollView(
               slivers: [
-                // Header con foto de perfil
                 SliverAppBar(
                   expandedHeight: 280,
                   floating: false,
@@ -112,23 +115,16 @@ class _PersonalScreenState extends State<PersonalScreen>
                     ),
                   ),
                 ),
-
-                // Contenido
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Barra de Membresía
                         _buildMembershipBar(provider),
                         const SizedBox(height: 32),
-
-                        // Estadísticas rápidas
                         _buildQuickStats(provider),
                         const SizedBox(height: 32),
-
-                        // Opciones del menú
                         _buildMenuOptions(context, provider),
                       ],
                     ),
@@ -293,8 +289,6 @@ class _PersonalScreenState extends State<PersonalScreen>
             ],
           ),
           const SizedBox(height: 20),
-
-          // Barra de progreso principal
           Stack(
             children: [
               Container(
@@ -359,8 +353,6 @@ class _PersonalScreenState extends State<PersonalScreen>
             ],
           ),
           const SizedBox(height: 20),
-
-          // Indicadores de niveles
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -553,6 +545,7 @@ class _PersonalScreenState extends State<PersonalScreen>
       ],
     );
   }
+
   Widget _buildMenuTile({
     required IconData icon,
     required String title,
@@ -603,7 +596,7 @@ class _PersonalScreenState extends State<PersonalScreen>
   void _mostrarDialogoCerrarSesion(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
@@ -612,15 +605,69 @@ class _PersonalScreenState extends State<PersonalScreen>
           content: const Text('¿Estás seguro que deseas cerrar sesión?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: Text(
                 'Cancelar',
                 style: TextStyle(color: AppColors.textMedium),
               ),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext loadingContext) {
+                    return Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(
+                              color: AppColors.primaryGreen,
+                            ),
+                            const SizedBox(height: 16),
+                            const Text('Cerrando sesión...'),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+
+                try {
+                  await context.read<PersonalProvider>().cerrarSesion();
+
+                  final authProvider =
+                      Provider.of<AuthProvider>(context, listen: false);
+                  authProvider.logout();
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const Login()),
+                      (route) => false,
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    Navigator.pop(context);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error al cerrar sesión: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               },
               child: const Text(
                 'Cerrar Sesión',

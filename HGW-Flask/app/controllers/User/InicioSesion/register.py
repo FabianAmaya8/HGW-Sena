@@ -1,4 +1,5 @@
 from flask import Blueprint, request,current_app,jsonify,render_template
+from app.controllers.db import get_db
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
 from sqlalchemy import text
@@ -30,10 +31,11 @@ def api_ubicacion_paises():
 @register_bp.route('/api/ubicacion/ciudades', methods=['GET'])
 @swag_from('../../Doc/InicioSesion/Registro/ubicacion_ciudades.yml')
 def api_ubicacion_ciudades():
-    connection = current_app.config['MYSQL_CONNECTION']
     pais_id = request.args.get('paisId')
 
     try:
+        connection = get_db()
+
         with connection.cursor() as cursor:
             if pais_id:
                 query = """
@@ -58,10 +60,9 @@ def api_ubicacion_ciudades():
 @register_bp.route('/api/register', methods=['POST'])
 @swag_from('../../Doc/InicioSesion/Registro/register.yml')
 def register():
-    connection = current_app.config['MYSQL_CONNECTION']
-
     try:
-        # Campos desde el formulario de react
+        connection = get_db()
+
         nombre = request.form.get('nombres')
         apellido = request.form.get('apellido')
         patrocinador = request.form.get('patrocinador')
@@ -106,7 +107,6 @@ def register():
             ruta_foto = rel_path.replace('\\', '/')
 
         with connection.cursor() as cursor:
-            # Insertar usuario (rol 3 = Usuario)
             cursor.execute(
                 """
                 INSERT INTO usuarios 
@@ -119,7 +119,6 @@ def register():
             )
             id_usuario = cursor.lastrowid
 
-            # Insertar dirección (usa ciudad como id_ubicacion)
             cursor.execute(
                 """
                 INSERT INTO direcciones 
