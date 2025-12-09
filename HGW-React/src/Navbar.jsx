@@ -338,7 +338,7 @@ const App = memo(({objeto}) => {
 
 function Navbar({ alerta, setAlerta, imagenes, objeto }) {
   const anchoAlert = useMemo(() => {
-    if (alerta.valor.content.length > 0) {
+    if (alerta?.valor?.content?.length > 0) {
       return `-${9 * alerta.valor.content.length}px`;
     }
     return '-180px';

@@ -13,3 +13,25 @@
     right: 0vw;
   }
 }
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-surface:focus,
+.recharts-surface:focus-visible,
+.recharts-wrapper svg:focus,
+.recharts-wrapper svg:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+body{
+  &::-webkit-scrollbar {
+    width: 3.5px;
+    height: 9px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #29293D;
+    border-radius: 5px;
+  }
+}
+

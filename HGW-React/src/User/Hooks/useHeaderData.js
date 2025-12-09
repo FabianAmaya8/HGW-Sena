@@ -36,7 +36,7 @@ export function useHeaderData(user) {
                 const urlFetch = await urlDB(endpoint);
                 const res = await fetch(urlFetch);
                 const data = await res.json();
-
+                    
                 if (data.success) {
                     setCartCount(data.user.total_carrito ?? 0);
                 }
