@@ -1,9 +1,48 @@
-.educacion .educacion-card {
-    transition: transform 0.3s, box-shadow 0.3s;
+.temaContenido{
+    background-color: #ddd;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    justify-items: center;
+    align-items: center;
+    padding: 15px;
+    border-radius: 10px;
+    gap: 15px;
+}
+.temaContenido .Texto{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: var(--botones);
+    transition: 0.5s;
+}
+.temaContenido .Texto:hover{
+    color: var(--enlaces);
+    transition: 0.5s;
 }
 
-.educacion .educacion-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background-color: #f8f9fa;
+.contenidoTexto-icon{
+    font-size: 100px;
+    gap: 15px;
+}
+.video-wrapper{
+    width: 50%;
+    height: 100%;
+}
+.video-wrapper article{
+    width: 100%;
+    height: 100%;
+}
+
+.accordion-button{
+    text-transform: capitalize;
+}
+
+/* ----- media queries ----- */
+@media screen and (max-width: 768px) {
+    .video-wrapper{
+        width: 100%;
+        height: 100%;
+    }
 }

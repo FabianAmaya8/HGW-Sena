@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { findWorkingBaseUrl } from '../../urlDB';
 
 export function useImageUrl(path) {
     const [url, setUrl] = useState(null);
@@ -8,10 +7,11 @@ export function useImageUrl(path) {
         if (!path) return;
         (async () => {
             try {
-                const base = await findWorkingBaseUrl(); 
-                // elimina slash final de base y slash inicial de path
-                const full = `${base.replace(/\/$/, '')}/images/${path.replace(/^\//, '')}`;
-                setUrl(full);
+                if (path.startsWith('http')) {
+                    setUrl(path);
+                    return;
+                }
+                setUrl(path);
             } catch (e) {
                 console.error('Error construyendo URL de imagen:', e);
             }
@@ -29,9 +29,9 @@ export function useImageUrls(paths) {
 
         (async () => {
             try {
-                const base = await findWorkingBaseUrl();
-                const cleanBase = base.replace(/\/$/, '');
-                const result = paths.map(path => `${cleanBase}/images/${path.replace(/^\//, '')}`);
+                const result = paths.map(path => 
+                    path.startsWith('http') ? path : path
+                );
                 setUrls(result);
             } catch (e) {
                 console.error('Error construyendo URLs:', e);

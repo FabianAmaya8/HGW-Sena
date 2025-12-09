@@ -1,0 +1,32 @@
+summary: Obtener una fila específica de una tabla
+description: |
+  Devuelve un solo registro (serializado con lookup de FKs) por ID.
+tags:
+  - Tablas
+consumes:
+  - application/json
+parameters:
+  - in: body
+    name: datos
+    schema:
+      type: object
+      required:
+        - table
+        - id
+      properties:
+        table:
+          type: string
+        id:
+          type: integer
+responses:
+  200:
+    description: Fila encontrada
+    schema:
+      type: object
+      additionalProperties: true
+  404:
+    description: Registro no encontrado
+    schema:
+      type: object
+  200:
+    description: Respuesta OPTIONS válida

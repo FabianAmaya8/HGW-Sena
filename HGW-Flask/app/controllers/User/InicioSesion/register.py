@@ -1,7 +1,10 @@
 from flask import Blueprint, request,current_app,jsonify,render_template
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
+from sqlalchemy import text
+from flasgger import swag_from
 import os
+from app import db
 
 # Crear blueprint
 register_bp = Blueprint('register_bp', __name__)
@@ -11,18 +14,21 @@ bcrypt = Bcrypt()
 def status():
     return render_template('index.html'), 200  
 
-@register_bp.route('/api/ubicacion/paises', methods=['GET', 'POST'])
+@register_bp.route('/api/ubicacion/paises', methods=['GET'])
+@swag_from('../../Doc/InicioSesion/Registro/ubicacion_paises.yml')
 def api_ubicacion_paises():
-    connection = current_app.config['MYSQL_CONNECTION']
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT id_ubicacion, nombre FROM ubicaciones WHERE tipo = 'pais'")
-            paises = cursor.fetchall()
-            return jsonify(paises)
+        result = db.session.execute(
+            text("SELECT id_ubicacion, nombre FROM ubicaciones WHERE tipo = 'pais'")
+        )
+        paises = [dict(row._mapping) for row in result]
+        return jsonify(paises), 200
     except Exception as e:
-        return str(e)
+        current_app.logger.error(f"Error en /api/ubicacion/paises: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @register_bp.route('/api/ubicacion/ciudades', methods=['GET'])
+@swag_from('../../Doc/InicioSesion/Registro/ubicacion_ciudades.yml')
 def api_ubicacion_ciudades():
     connection = current_app.config['MYSQL_CONNECTION']
     pais_id = request.args.get('paisId')
@@ -50,6 +56,7 @@ def api_ubicacion_ciudades():
         return jsonify({'error': str(e)}), 500
 
 @register_bp.route('/api/register', methods=['POST'])
+@swag_from('../../Doc/InicioSesion/Registro/register.yml')
 def register():
     connection = current_app.config['MYSQL_CONNECTION']
 

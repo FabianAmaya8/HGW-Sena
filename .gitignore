@@ -13,7 +13,6 @@ dist-ssr
 *.local
 venv/
 __pycache__/
-.env
 
 uploads/
 

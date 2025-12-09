@@ -1,0 +1,84 @@
+tags:
+  - Direcciones
+summary: Crear nueva dirección
+description: Crea una nueva dirección para un usuario específico
+consumes:
+  - application/json
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    description: Datos de la nueva dirección
+    required: true
+    schema:
+      type: object
+      required:
+        - id_usuario
+        - lugar_entrega
+        - direccion
+        - ciudad
+        - pais
+        - codigo_postal
+      properties:
+        id_usuario:
+          type: integer
+          description: ID del usuario
+          example: 5
+        lugar_entrega:
+          type: string
+          description: Tipo de lugar
+          example: Casa
+        direccion:
+          type: string
+          description: Dirección completa
+          example: Calle 123 #45-67 Apto 301
+        ciudad:
+          type: string
+          description: Nombre de la ciudad
+          example: Bogotá
+        pais:
+          type: string
+          description: Nombre del país
+          example: Colombia
+        codigo_postal:
+          type: string
+          description: Código postal
+          example: "110111"
+responses:
+  201:
+    description: Dirección creada exitosamente
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Dirección creada exitosamente
+        id_direccion:
+          type: integer
+          example: 42
+  400:
+    description: Datos incompletos o inválidos
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Campo direccion es requerido
+  500:
+    description: Error interno del servidor
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Error en la base de datos

@@ -19,7 +19,7 @@ export const SelectMemo = React.memo(({ value, change, indiceP, idx }) => {
 })
 
 const SubAcordeon = React.memo(({indiceP, idx, valueI, valueS, change, submodulo})=>{
-    console.log(valueI + " : " + valueS)
+
     return (
         <Box key={"box" + indiceP + idx}>
             {"label" in submodulo &&

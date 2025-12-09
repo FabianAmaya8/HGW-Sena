@@ -1,0 +1,108 @@
+summary: Registrar nuevo usuario
+description: |
+  Crea un usuario con datos personales, dirección, foto de perfil opcional
+  y genera su carrito de compras inicial.
+tags:
+  - Registro
+consumes:
+  - multipart/form-data
+parameters:
+  - name: nombres
+    in: formData
+    type: string
+    required: true
+    description: Nombres del usuario
+  - name: apellido
+    in: formData
+    type: string
+    required: true
+    description: Apellidos del usuario
+  - name: patrocinador
+    in: formData
+    type: string
+    required: false
+    description: Nombre de usuario que patrocina (opcional)
+  - name: usuario
+    in: formData
+    type: string
+    required: true
+    description: Nombre de usuario
+  - name: contrasena
+    in: formData
+    type: string
+    required: true
+    description: Contraseña
+  - name: confirmar_contrasena
+    in: formData
+    type: string
+    required: true
+    description: Confirmación de contraseña
+  - name: correo
+    in: formData
+    type: string
+    required: true
+    description: Correo electrónico
+  - name: telefono
+    in: formData
+    type: string
+    required: true
+    description: Número de teléfono
+  - name: direccion
+    in: formData
+    type: string
+    required: true
+    description: Dirección física
+  - name: codigo_postal
+    in: formData
+    type: string
+    required: true
+    description: Código postal
+  - name: lugar_entrega
+    in: formData
+    type: string
+    required: true
+    description: Punto de entrega
+  - name: ciudad
+    in: formData
+    type: integer
+    required: true
+    description: ID de la ciudad (ubicación)
+  - name: foto_perfil
+    in: formData
+    type: file
+    required: false
+    description: Imagen de perfil (opcional)
+responses:
+  201:
+    description: Registro exitoso
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Registro exitoso"
+  400:
+    description: Faltan campos o contraseñas no coinciden
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Faltan campos obligatorios"
+  500:
+    description: Error interno durante el registro
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Error durante el registro: descripción"
