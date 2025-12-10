@@ -16,6 +16,7 @@ export default function PersonalInfo() {
         error,
         editing,
         formData,
+        setFormData,
         handleChange,
         handleEdit,
         handleCancel,
@@ -29,20 +30,20 @@ export default function PersonalInfo() {
         loading: loadingUbic,
         error: errorUbic
     } = useUbicaciones();
-    const { cambiarContrasena, loading: loadingCambio, feedback: feedbackCambio, setFeedback: setFeedbackCambio } = useCambiarContrasena(personal?.id_usuario);
-    const [selectedPais, setSelectedPais] = useState('');
+
+    const { cambiarContrasena, loading: loadingCambio, feedback: feedbackCambio, setFeedback: setFeedbackCambio } =
+        useCambiarContrasena(personal?.id_usuario);
+
     const [showModal, setShowModal] = useState(false);
     const [feedback, setFeedback] = useState(null);
     const [fotoPreview, setFotoPreview] = useState(null);
 
-    // Cargar ciudades al iniciar edición (solo una vez)
+    // Cuando comienza edición — cargar ciudades del país actual
     useEffect(() => {
-        if (editing && personal?.direcciones?.[0]?.pais_id) {
-            const pid = personal.direcciones[0].pais_id;
-            setSelectedPais(pid);
-            fetchCiudades(pid);
+        if (editing && formData.pais) {
+            fetchCiudades(formData.pais);
         }
-    }, [editing, personal]);
+    }, [editing, formData.pais]);
 
     // Limpiar preview al cancelar edición
     useEffect(() => {
@@ -52,14 +53,7 @@ export default function PersonalInfo() {
     if (loading) {
         return (
             <div className="cargando">
-                <Infinity
-                    size="150"
-                    stroke="10"
-                    strokeLength="0.15"
-                    bgOpacity="0.3"
-                    speed="1.3"
-                    color="#47BF26"
-                />
+                <Infinity size="150" stroke="10" color="#47BF26" />
             </div>
         );
     }
@@ -75,7 +69,8 @@ export default function PersonalInfo() {
 
     if (!personal) return null;
 
-    // Validación antes de submit
+
+    // VALIDAR Y GUARDAR
     const handleGuardar = async () => {
         if (!formData.pais || !formData.ciudad || !formData.lugar_entrega) {
             setFeedback({ type: 'danger', msg: 'País, ciudad y lugar de entrega son obligatorios.' });
@@ -85,23 +80,24 @@ export default function PersonalInfo() {
         await handleSubmit(personal.id_usuario);
     };
 
-    // Cambiar foto y vista previa
+    // Subir foto
     const handleFotoChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
+        if (e.target.files?.[0]) {
             const file = e.target.files[0];
-            handleChange({ target: { name: 'foto_perfil', value: file } });
+            setFormData(prev => ({ ...prev, foto_perfil: file }));
             setFotoPreview(URL.createObjectURL(file));
         }
     };
 
-    // Eliminar foto de perfil
+    // Eliminar foto
     const handleEliminarFoto = async () => {
         try {
             const result = await eliminarFotoPerfil(personal.id_usuario);
-            if (result.cancelled) return;
-            setFotoPreview(null);
-            setFeedback({ type: 'success', msg: 'Foto de perfil eliminada.' });
-            setTimeout(() => window.location.reload(), 1000);
+            if (!result.cancelled) {
+                setFotoPreview(null);
+                setFeedback({ type: 'success', msg: 'Foto eliminada.' });
+                setTimeout(() => window.location.reload(), 900);
+            }
         } catch (err) {
             setFeedback({ type: 'danger', msg: err.message });
         }
@@ -110,69 +106,44 @@ export default function PersonalInfo() {
     return (
         <main className="contenido container">
             <div className="volver">
-                <button type="button" className="btn btn-secondary" onClick={() => window.history.back()}>
+                <button className="btn btn-secondary" onClick={() => window.history.back()}>
                     <i className='bx bx-left-arrow-alt'></i> Volver
                 </button>
             </div>
+            {/* PERFIL */}
             <div className="perfil d-flex align-items-center mb-4">
                 <div className="img-perfil me-4">
-                    {personal.url_foto_perfil ? (
-                        <img src={imgUrl} alt="Foto de perfil" />
+                    {fotoPreview ? (
+                        <img src={fotoPreview} alt="Preview" />
+                    ) : personal.url_foto_perfil ? (
+                        <img src={imgUrl} alt="Foto" />
                     ) : (
                         <i className='bx bx-user'></i>
                     )}
                 </div>
-                <div className="info-perfil">
-                    <h3 className="mb-1">{personal.nombre_usuario}</h3>
-                    <p className="mb-0">Membresía: {personal.membresia?.nombre_membresia}</p>
+                <div>
+                    <h3>{personal.nombre_usuario}</h3>
+                    <p>Membresía: {personal.membresia?.nombre_membresia}</p>
                 </div>
             </div>
-
-            {/* Contenedor de datos personales sin onSubmit */}
+            {/* DATOS PERSONALES */}
             <div className="conten-item datos-personales p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h4 className="mb-0">Datos personales</h4>
-                    <div className="btns">
-                        {!editing ? (
-                            <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={handleEdit}
-                            >
-                                Editar
-                            </button>
-                        ) : (
-                            <>
-                                <button
-                                    type="button"
-                                    className="btn btn-success me-2"
-                                    onClick={handleGuardar}
-                                >
-                                    Guardar
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    onClick={handleCancel}
-                                >
-                                    Cancelar
-                                </button>
-                            </>
-                        )}
-                    </div>
+                    <h4>Datos personales</h4>
+                    {!editing ? (
+                        <button className="btn btn-primary" onClick={handleEdit}>Editar</button>
+                    ) : (
+                        <>
+                            <button className="btn btn-success me-2" onClick={handleGuardar}>Guardar</button>
+                            <button className="btn btn-secondary" onClick={handleCancel}>Cancelar</button>
+                        </>
+                    )}
                 </div>
-
-                <div className="card-body row g-3">
+                <div className="row g-3">
+                    {/* Campos automáticos */}
                     {Object.entries(formData).map(([key, value]) => {
-                        if (key === 'pais' || 
-                            key === 'ciudad' || 
-                            key === 'lugar_entrega' ||
-                            key === 'foto_perfil'
-                        ) return null;
-                        const label = key
-                            .split('_')
-                            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                            .join(' ');
+                        if (['pais', 'ciudad', 'lugar_entrega', 'foto_perfil'].includes(key)) return null;
+                        const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                         return (
                             <div className="col-md-6" key={key}>
                                 <label className="form-label">{label}</label>
@@ -187,31 +158,31 @@ export default function PersonalInfo() {
                             </div>
                         );
                     })}
-
+                    {/* PAÍS */}
                     <div className="col-md-6">
                         <label className="form-label">País</label>
                         <select
                             className="form-control"
                             name="pais"
-                            value={selectedPais}
+                            value={formData.pais}
+                            disabled={!editing}
                             onChange={(e) => {
                                 const pid = e.target.value;
-                                setSelectedPais(pid);
+                                handleChange(e);
+                                setFormData(prev => ({ ...prev, ciudad: '' }));
                                 fetchCiudades(pid);
-                                handleChange({ target: { name: 'ciudad', value: '' } });
                             }}
-                            disabled={!editing}
                         >
                             <option value="">Seleccione un país</option>
-                            {paises.map((pais) => (
-                                <option key={pais.id_ubicacion} value={pais.id_ubicacion}>
-                                    {pais.nombre}
+                            {paises.map(p => (
+                                <option key={p.id_ubicacion} value={p.id_ubicacion}>
+                                    {p.nombre}
                                 </option>
                             ))}
                         </select>
-                        {loadingUbic && editing && <Infinity size="50" stroke="6" strokeLength="0.2" />}
+                        {loadingUbic && editing && <Infinity size="40" stroke="5" />}
                     </div>
-
+                    {/* CIUDAD */}
                     <div className="col-md-6">
                         <label className="form-label">Ciudad</label>
                         <select
@@ -219,21 +190,20 @@ export default function PersonalInfo() {
                             name="ciudad"
                             value={formData.ciudad}
                             onChange={handleChange}
-                            disabled={!editing || !selectedPais || loadingUbic}
+                            disabled={!editing || !formData.pais || loadingUbic}
                         >
                             <option value="">Seleccione una ciudad</option>
-                            {ciudades.map((ciudad) => (
-                                <option key={ciudad.id_ubicacion} value={ciudad.id_ubicacion}>
-                                    {ciudad.nombre}
+                            {ciudades.map(c => (
+                                <option key={c.id_ubicacion} value={c.id_ubicacion}>
+                                    {c.nombre}
                                 </option>
                             ))}
                         </select>
-                        {loadingUbic && editing && <Infinity size="50" stroke="6" strokeLength="0.2" />}
+                        {loadingUbic && editing && <Infinity size="40" stroke="5" />}
                     </div>
-
-                    {/* Select Lugar de Entrega */}
+                    {/* LUGAR DE ENTREGA */}
                     <div className="col-md-6">
-                        <label className="form-label">Lugar de Entrega</label>
+                        <label className="form-label">Lugar de entrega</label>
                         <select
                             className="form-control"
                             name="lugar_entrega"
@@ -251,11 +221,16 @@ export default function PersonalInfo() {
                     </div>
                 </div>
             </div>
-            <div className="conten-item datos-personales p-4">
-                {/* Cambiar foto de perfil */}
-                <div className="d-flex flex-column align-items-center justify-content-center ">
-                    <h4 style={{width: '100%', textAlign: 'left'}} >Otros datos</h4>
-                    <label htmlFor="profile-pic" className="profile-pic-container d-block mb-3" style={{cursor: editing ? 'pointer' : 'not-allowed'}}>
+
+            {/* FOTO / CONTRASEÑA */}
+            <div className="conten-item datos-personales p-4 text-center">
+                <h4 className="text-start">Otros datos</h4>
+                <div className="d-flex flex-column align-items-center justify-content-center">
+                    <label
+                        htmlFor="profile-pic"
+                        className="profile-pic-container d-block mb-3"
+                        style={{ cursor: editing ? "pointer" : "not-allowed" }}
+                    >
                         {fotoPreview ? (
                             <img
                                 id="preview-profile-pic"
@@ -271,28 +246,45 @@ export default function PersonalInfo() {
                             />
                         ) : (
                             <div className="texto-preview rounded-circle border d-flex align-items-center justify-content-center">
-                                <i className='bx bx-user' style={{fontSize: '150px'}}></i>
+                                <i className="bx bx-user" style={{ fontSize: "150px" }}></i>
                             </div>
                         )}
                     </label>
-                    <div className="bts">
-                        <input
-                            type="file"
-                            className="btn"
-                            id="profile-pic"
-                            accept="image/*"
-                            disabled={!editing}
-                            onChange={handleFotoChange}
-                        />
+
+                    {/* Input real (oculto visualmente) */}
+                    <input
+                        type="file"
+                        id="profile-pic"
+                        className="d-none"
+                        accept="image/*"
+                        disabled={!editing}
+                        onChange={handleFotoChange}
+                    />
+
+                    <div className="bts d-flex flex-column align-items-center gap-2">
+
                         {personal.url_foto_perfil && !editing && (
-                            <button className="btn btn-danger" onClick={handleEliminarFoto} type="button">
+                            <button
+                                className="btn btn-danger"
+                                type="button"
+                                onClick={handleEliminarFoto}
+                            >
                                 Eliminar foto de perfil
                             </button>
                         )}
-                        {/* Modal para cambiar contraseña */}
-                        {feedback && <div className={`alert alert-${feedback.type}`}>{feedback.msg}</div>}
-                        {feedbackCambio && <div className={`alert alert-${feedbackCambio.type}`}>{feedbackCambio.msg}</div>}
-                        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+
+                        {feedback && (
+                            <div className={`alert alert-${feedback.type}`}>{feedback.msg}</div>
+                        )}
+
+                        {feedbackCambio && (
+                            <div className={`alert alert-${feedbackCambio.type}`}>{feedbackCambio.msg}</div>
+                        )}
+
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => setShowModal(true)}
+                        >
                             Cambiar contraseña
                         </button>
                     </div>
@@ -306,7 +298,6 @@ export default function PersonalInfo() {
                     loading={loadingCambio}
                 />
             </div>
-        
         </main>
     );
 }
