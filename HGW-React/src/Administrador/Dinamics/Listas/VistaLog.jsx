@@ -28,9 +28,10 @@ const Transicion = React.forwardRef((props, ref)=>{
 
 
 const VistaLog = ({EstadoLog, setEstadoLog, idFila})=>{
+    const orden = ["id_usuario", "nombre", "apellido", "accion", "fecha_registro"];
     const { medidas } = useContext(AppContext);
     const [datos, setDatos] = useState([]);
-    const tamaño = medidas == "movil" ? ["25%", "20%", "45%", "25%", "25%"] : ["10%", "20%", "40%", "10%", "20%"];
+    const tamaño = medidas == "movil" ? ["25%", "35%", "35%", "25%", "45%"] : ["20%", "20%", "20%", "20%", "40%"];
     useEffect(()=>{
         if(idFila){
             let id = Object.entries(idFila).find((par)=>par.some((data)=>data.startsWith("id")));
@@ -43,6 +44,7 @@ const VistaLog = ({EstadoLog, setEstadoLog, idFila})=>{
             }).then((res)=>res.json()).then((res)=>setDatos(res));
         }
     }, [idFila]);
+    
     return (
         <BootstrapDialog
                 disableRestoreFocus
@@ -76,7 +78,7 @@ const VistaLog = ({EstadoLog, setEstadoLog, idFila})=>{
                     <Box sx={{width: medidas == "movil" ? "max-content" : "100%", overflowX: "auto", px: "1vw"}}>
                         <Box sx={{display: "flex", alignItems: "center", flex: 1, width: "100%"}}>
                             {
-                                datos[0] && Object.keys(datos[0]).map((nom, index)=>{
+                                datos[0] && orden.map((nom, index)=>{
                                     return <Box key={index+nom} sx={{textAlign: 'center', marginBottom: "2.5%", pb: "3.5%",  borderBottom: "solid 1px gray", height: "60px", width: tamaño[index],display: "flex", justifyContent: "center", alignItems: "center"}}>{(nom.replace(/\b\w/g, (l)=>l.toUpperCase())).replace(/_/g, " ")}</Box>
                                 })
                             }
@@ -86,9 +88,9 @@ const VistaLog = ({EstadoLog, setEstadoLog, idFila})=>{
                                 datos && datos.map((fila, index)=>{
                                     return <Box key={"fila"+index} sx={{py: "2.5vh",display: "flex", alignItems: "center", flex: 1, width: "100%"}}>
                                         {
-                                            Object.values(fila).map((val, index)=>{
+                                            orden.map((val, index)=>{
                                                 return <Box key={val+index} sx={{textAlign: 'center', width: tamaño[index], display: "flex", justifyContent: "center", alignItems: "center"}}>
-                                                    {val}
+                                                    {fila[val]}
                                                 </Box>
                                             })
                                         }
