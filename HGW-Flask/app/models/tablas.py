@@ -169,7 +169,7 @@ def consultaTabla():
             objetos = query_base.filter(*nombreColumna).offset(page * limit).limit(limit).all()
             total_count = query_base.filter(*nombreColumna).count()
         else:
-            columnas = [objColumna.ilike(f"%{busqueda}%") for objColumna in tabla.__table__.columns]
+            columnas = [objColumna.ilike(f"{busqueda}%") for objColumna in tabla.__table__.columns]
             objetos = query_base.filter(or_(*columnas)).offset(page * limit).limit(limit).all()
             total_count = query_base.filter(or_(*columnas)).count()
     filas = serializar_con_fk_lookup(objetos)

@@ -34,6 +34,7 @@ const VistaLog = ({EstadoLog, setEstadoLog, idFila})=>{
     useEffect(()=>{
         if(idFila){
             let id = Object.entries(idFila).find((par)=>par.some((data)=>data.startsWith("id")));
+            id = typeof id[1] == "object" && "id" in id[1] ? [id[0], id[1]["id"]] : id;
             let envio = {id: id[1], table: "registro_logs", table_log: idFila.table};
             fetch(BACKEND+"/consultaLog", {
                 method: "POST",
@@ -41,7 +42,7 @@ const VistaLog = ({EstadoLog, setEstadoLog, idFila})=>{
                 body: JSON.stringify(envio)
             }).then((res)=>res.json()).then((res)=>setDatos(res));
         }
-    }, [idFila])
+    }, [idFila]);
     return (
         <BootstrapDialog
                 disableRestoreFocus
