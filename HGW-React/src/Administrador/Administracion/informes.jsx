@@ -1,5 +1,5 @@
 import { Box, Button, styled, Typography } from '@mui/material'
-import Style from "./informes.module.scss"
+import Style from "./Informes.module.scss"
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { AppContext } from '../../controlador';
 import { findWorkingBaseUrl } from "../../urlDB";

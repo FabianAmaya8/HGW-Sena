@@ -318,7 +318,7 @@ const App = memo(({objeto}) => {
             </Box>
           )}
         </Button>
-        <Box sx={{display: "flex", alignItems: "space-between", gap: 1, alignItems: "center", height: "100%"}}>
+        <Box sx={{display: "flex", gap: 1, alignItems: "center", height: "100%"}}>
           { dispositivo != "movil" && <DespliegeNavbar datos = {objectSpeedDial} navegar = {navigate} /> }
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', padding: 0, margin: 0 }}>
             <Typography variant="h4" sx={{fontWeight: 600, padding: 0, margin: 0}}>HGW|</Typography>
