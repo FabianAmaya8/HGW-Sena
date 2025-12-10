@@ -14,7 +14,7 @@ import { findWorkingBaseUrl } from '../../../urlDB'
 import { datosToken } from '../../../auth'
 
 const BACKEND = findWorkingBaseUrl().replace(/\/$/, "");
-const usuarioActual = datosToken().id;
+const usuarioActual = (datosToken()?.id);
 const token = datosToken();
 
 import { Visibility, VisibilityOff } from '@mui/icons-material'

@@ -25,7 +25,7 @@ import titulos from '../Funciones/Titulos';
 
 const DinamicForm = lazy(() => import('../formularios/Dinamics'));
 const BACKEND = (findWorkingBaseUrl() || "").replace(/\/$/, "");
-const usuarioActual = datosToken().id;
+const usuarioActual = (datosToken()?.id);
 
 
 
@@ -241,7 +241,7 @@ const MyTable = memo(({ datos, editar, table, padre, imagenes }) => {
       body: JSON.stringify({ table: tbl, id: fila[cols[0]], log: {id: usuarioActual, accion: "eliminar" }})
     });
     padre.setRender(r => !r);
-  }, [padre.setRender]);
+  }, [padre.setRender, usuarioActual]);
 
   const createImageHandler = useCallback((file) => {
     let f = file;
