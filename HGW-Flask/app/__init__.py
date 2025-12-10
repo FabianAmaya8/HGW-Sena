@@ -13,6 +13,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    # SWAGGER
     swagger_template = {
         "info": {
             "title": "HGW API",
@@ -33,11 +34,32 @@ def create_app():
         "favicon": "./static/hgw_logo.jpeg"
     }
     Swagger(app, template=swagger_template, config=swagger_config)
+
     @app.route("/scalar")
     def scalar_ui():
         return render_template('scalar.html')
+
     db.init_app(app)
     CORS(app)
+
+    # ======================
+    # MODO TESTING
+    # ======================
+    if app.config.get("TESTING"):
+        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://"
+        app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+        db.init_app(app)
+
+        # SOLO importar lo necesario para el test
+        from .controllers.User.Carrito.carrito_routes import carrito_bp
+        app.register_blueprint(carrito_bp)
+
+        return app
+
+    # ======================
+    # MODO NORMAL
+    # ======================
     connection = pymysql.connect(
         host=app.config['MYSQL_HOST'],
         user=app.config['MYSQL_USER'],
@@ -49,6 +71,7 @@ def create_app():
     )
     app.config['MYSQL_CONNECTION'] = connection
 
+    # Rutas archivos
     @app.route('/uploads/profile_pictures/<path:filename>')
     def uploaded_profile_picture(filename):
         upload_path = os.path.join(app.root_path, 'uploads', 'profile_pictures')
@@ -64,7 +87,8 @@ def create_app():
         static_path = os.path.join(app.root_path, 'static', 'uploads')
         return send_from_directory(static_path, filename)
 
-    from .controllers.User.user import header_bp
+    # BLUEPRINTS (solo en modo normal)
+    from .controllers.User.Personal.Info_Header import header_bp
     from .controllers.User.InicioSesion.login import login_bp
     from .controllers.User.InicioSesion.register import register_bp
     from .controllers.User.Catalogo.catalogo import catalogo_bp
@@ -74,8 +98,8 @@ def create_app():
     from .controllers.User.Personal.personal import personal_bp
     from .controllers.User.Carrito.carrito_routes import carrito_bp
     from .controllers.User.Educacion.educacion import educacion_bp
-    
     from .controllers.User.Personal.red_multinivel import red_bp
+
     app.register_blueprint(header_bp)
     app.register_blueprint(login_bp)
     app.register_blueprint(register_bp)
@@ -86,8 +110,10 @@ def create_app():
     app.register_blueprint(carrito_bp)
     app.register_blueprint(educacion_bp)
     app.register_blueprint(red_bp)
+
+    # AUTO MAP + create_all (solo en modo normal)
+    from app.models.tablas import tablas, bp_tablas
     with app.app_context():
-        from app.models.tablas import tablas, bp_tablas
         tablas.prepare(
             db.engine,
             reflect=True,
@@ -98,4 +124,5 @@ def create_app():
         )
         app.register_blueprint(bp_tablas)
         db.create_all()
+
     return app

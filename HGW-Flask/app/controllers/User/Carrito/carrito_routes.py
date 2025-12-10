@@ -22,7 +22,7 @@ def obtener_carrito():
                 FROM productos_carrito pc
                 JOIN productos p ON p.id_producto = pc.producto
                 JOIN carrito_compras cc ON pc.carrito = cc.id_carrito
-                WHERE cc.id_usuario = %s AND p.activo = 0 OR p.stock = 0
+                WHERE cc.id_usuario = %s AND (p.activo = 0 OR p.stock = 0)
             """, (id_usuario,))
             productos_eliminados = cursor.fetchall()
             nombres_eliminados = [p["nombre_producto"] for p in productos_eliminados]
@@ -32,7 +32,7 @@ def obtener_carrito():
                 DELETE pc FROM productos_carrito pc
                 JOIN productos p ON p.id_producto = pc.producto
                 JOIN carrito_compras cc ON pc.carrito = cc.id_carrito
-                WHERE cc.id_usuario = %s AND p.activo = 0 OR p.stock = 0
+                WHERE cc.id_usuario = %s AND (p.activo = 0 OR p.stock = 0)
             """, (id_usuario,))
             connection.commit()
 
@@ -79,6 +79,19 @@ def agregar_producto_carrito():
 
     try:
         with connection.cursor() as cursor:
+
+            # 1. Verificar stock del producto
+            cursor.execute("""
+                SELECT stock FROM productos WHERE id_producto = %s AND activo = 1
+            """, (id_producto,))
+            producto = cursor.fetchone()
+
+            if not producto:
+                return jsonify({"error": "Producto no encontrado o inactivo"}), 404
+
+            stock = producto["stock"]
+
+            # 2. Obtener carrito del usuario
             cursor.execute("SELECT id_carrito FROM carrito_compras WHERE id_usuario = %s", (id_usuario,))
             carrito = cursor.fetchone()
 
@@ -91,13 +104,26 @@ def agregar_producto_carrito():
             id_carrito = carrito["id_carrito"]
 
             cursor.execute("""
-                SELECT cantidad_producto FROM productos_carrito
+                SELECT cantidad_producto 
+                FROM productos_carrito
                 WHERE producto = %s AND carrito = %s
             """, (id_producto, id_carrito))
             existente = cursor.fetchone()
 
             if existente:
                 nueva_cantidad = existente["cantidad_producto"] + cantidad
+            else:
+                nueva_cantidad = cantidad
+
+            # 4. VALIDACIÓN DE STOCK
+            if nueva_cantidad > stock:
+                return jsonify({
+                    "error": "No hay suficiente stock",
+                    "stock_disponible": stock
+                }), 400
+
+            # 5. Insertar o actualizar
+            if existente:
                 cursor.execute("""
                     UPDATE productos_carrito
                     SET cantidad_producto = %s
@@ -110,12 +136,13 @@ def agregar_producto_carrito():
                 """, (id_producto, cantidad, id_carrito))
 
             connection.commit()
-        return jsonify({"mensaje": "Producto agregado al carrito en la base de datos"}), 200
+
+        return jsonify({"mensaje": "Producto agregado al carrito"}), 200
 
     except Exception as e:
         current_app.logger.error(str(e))
         return jsonify({"error": "Error interno al guardar en el carrito"}), 500
-    
+
 @carrito_bp.route("/api/carrito/eliminar", methods=["DELETE"])
 @swag_from("../../Doc/Carrito/eliminar_producto_carrito.yml")
 def eliminar_producto_carrito():
@@ -152,7 +179,7 @@ def actualizar_cantidad_carrito():
     id_producto = datos.get("id_producto")
     nueva_cantidad = datos.get("nueva_cantidad")
 
-    if not all([id_usuario, id_producto, nueva_cantidad]):
+    if id_usuario is None or id_producto is None or nueva_cantidad is None:
         return jsonify({"error": "Faltan datos obligatorios"}), 400
 
     if nueva_cantidad <= 0:
@@ -160,6 +187,28 @@ def actualizar_cantidad_carrito():
 
     try:
         with connection.cursor() as cursor:
+
+            # 1. Verificar stock del producto
+            cursor.execute("""
+                SELECT stock
+                FROM productos
+                WHERE id_producto = %s AND activo = 1
+            """, (id_producto,))
+            producto = cursor.fetchone()
+
+            if not producto:
+                return jsonify({"error": "Producto no encontrado o inactivo"}), 404
+
+            stock = producto["stock"]
+
+            # 2. Validar contra el stock
+            if nueva_cantidad > stock:
+                return jsonify({
+                    "error": "No hay suficiente stock",
+                    "stock_disponible": stock
+                }), 400
+
+            # 3. Actualizar cantidad
             cursor.execute("""
                 UPDATE productos_carrito pc
                 JOIN carrito_compras cc ON pc.carrito = cc.id_carrito
@@ -206,76 +255,102 @@ def crear_orden():
     if not data:
         return jsonify({"error": "No se recibieron datos"}), 400
 
-    # Validar campos obligatorios
     required_fields = ["id_usuario", "id_direccion", "id_medio_pago", "total", "items"]
     missing_fields = [field for field in required_fields if field not in data]
     
     if missing_fields:
         return jsonify({
             "error": "Datos incompletos",
-            "faltan": missing_fields,
-            "recibido": data
+            "faltan": missing_fields
         }), 400
 
     try:
-        # Extraer datos del payload
         id_usuario = int(data["id_usuario"])
         id_direccion = int(data["id_direccion"])
         id_medio_pago = int(data["id_medio_pago"])
         total = float(data["total"])
         items = data["items"]
 
-        # Validar items
         if not isinstance(items, list) or len(items) == 0:
             return jsonify({"error": "Items debe ser una lista no vacía"}), 400
 
         with connection.cursor() as cursor:
-            # Insertar orden principal
-            cursor.execute(
-                "INSERT INTO ordenes (id_usuario, id_direccion, id_medio_pago, total) VALUES (%s, %s, %s, %s)",
-                (id_usuario, id_direccion, id_medio_pago, total)
-            )
+
+            # 1. Validar stock de CADA producto antes de crear la orden
+            for item in items:
+                cursor.execute("""
+                    SELECT stock, nombre_producto 
+                    FROM productos 
+                    WHERE id_producto = %s AND activo = 1
+                """, (item["id_producto"],))
+
+                producto = cursor.fetchone()
+
+                if not producto:
+                    return jsonify({
+                        "error": f"El producto {item['id_producto']} no existe o no está activo"
+                    }), 404
+
+                stock_actual = producto["stock"]
+                cantidad_solicitada = item["cantidad"]
+
+                if cantidad_solicitada > stock_actual:
+                    return jsonify({
+                        "error": "Stock insuficiente",
+                        "id_producto": item["id_producto"],
+                        "producto": producto["nombre_producto"],
+                        "stock_disponible": stock_actual,
+                        "solicitado": cantidad_solicitada
+                    }), 400
+
+            # 2. Crear la orden principal
+            cursor.execute("""
+                INSERT INTO ordenes (id_usuario, id_direccion, id_medio_pago, total)
+                VALUES (%s, %s, %s, %s)
+            """, (id_usuario, id_direccion, id_medio_pago, total))
             connection.commit()
-            
-            # Obtener ID de la orden creada
+
             cursor.execute("SELECT LAST_INSERT_ID() AS id_orden")
             id_orden = cursor.fetchone()["id_orden"]
 
-            # Insertar productos de la orden
-            sql = """
-                INSERT INTO ordenes_productos 
-                (id_orden, id_producto, cantidad, precio_unitario) 
+            # 3. Insertar productos de la orden
+            sql_insert = """
+                INSERT INTO ordenes_productos
+                (id_orden, id_producto, cantidad, precio_unitario)
                 VALUES (%s, %s, %s, %s)
             """
             for item in items:
-                cursor.execute(sql, (
-                    id_orden, 
-                    int(item["id_producto"]), 
-                    int(item["cantidad"]), 
+                cursor.execute(sql_insert, (
+                    id_orden,
+                    int(item["id_producto"]),
+                    int(item["cantidad"]),
                     float(item["precio_unitario"])
                 ))
-            
+
             connection.commit()
 
-            #Disminuir cantidad de productos
+            # 4. Descontar el stock
             for item in items:
-                cursor.execute("UPDATE productos SET stock = stock - %s WHERE id_producto = %s", (item["cantidad"], item["id_producto"]))
-                connection.commit()
+                cursor.execute("""
+                    UPDATE productos 
+                    SET stock = stock - %s 
+                    WHERE id_producto = %s
+                """, (item["cantidad"], item["id_producto"]))
+            connection.commit()
 
-            # Eliminar carrito
+            # 5. Reiniciar el carrito
             cursor.execute("DELETE FROM carrito_compras WHERE id_usuario = %s", (id_usuario,))
             connection.commit()
 
-            # Crear carrito vacio
             cursor.execute("INSERT INTO carrito_compras (id_usuario) VALUES (%s)", (id_usuario,))
             connection.commit()
 
         return jsonify({"id_orden": id_orden}), 201
-        
+
     except Exception as e:
         current_app.logger.error(f"Error al crear orden: {str(e)}")
         return jsonify({"error": "Error interno al procesar la orden"}), 500
-    
+
 @carrito_bp.route("/api/medios-pago", methods=["GET"])
 @swag_from("../../Doc/Carrito/listar_medios_pago.yml")
 def listar_medios_pago():

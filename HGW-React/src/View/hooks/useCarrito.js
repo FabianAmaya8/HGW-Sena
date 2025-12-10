@@ -1,6 +1,8 @@
+import Swal from "sweetalert2";
 import { useState } from "react";
 import { urlDB } from "../../urlDB";
 import { useAuth } from "../../pages/Context/AuthContext";
+import { useHeader } from "../../pages/Context/HeaderContext";
 
 export function useCarrito() {
     const [carrito, setCarrito] = useState([]);
@@ -10,6 +12,7 @@ export function useCarrito() {
     const [error, setError] = useState(null);
 
     const { user,token } = useAuth();
+    const { refreshHeader } = useHeader();
     
     const id_usuario = user?.id;
 
@@ -27,9 +30,23 @@ export function useCarrito() {
                     cantidad,
                 }),
             });
-            if (!res.ok) throw new Error("Error al agregar producto");
 
-            await obtenerCarritoDesdeAPI(); // recargar para asegurar sincronización
+            const data = await res.json();
+
+            // 🟥 Si supera el stock
+            if (!res.ok) {
+                if (data.error === "No hay suficiente stock") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Stock insuficiente",
+                        text: `Solo quedan ${data.stock_disponible} unidades disponibles.`,
+                    });
+                }
+                return { exito: false, mensaje: data.error };
+            }
+
+            await obtenerCarritoDesdeAPI(); 
+            refreshHeader();
             return { exito: true };
         } catch (err) {
             console.error(err);
@@ -77,13 +94,28 @@ export function useCarrito() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id_usuario, id_producto, nueva_cantidad }),
             });
-            if (!res.ok) throw new Error("Error al actualizar cantidad");
 
+            const data = await res.json();
+
+            // 🟥 Validación de stock desde el backend
+            if (!res.ok) {
+                if (data.error === "No hay suficiente stock") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Stock insuficiente",
+                        text: `Solo quedan ${data.stock_disponible} unidades disponibles.`,
+                    });
+                }
+                return;
+            }
+
+            // 🟩 Si todo bien, actualiza el carrito
             setCarrito(prev =>
                 prev.map(p =>
                     p.id_producto === id_producto ? { ...p, cantidad: nueva_cantidad } : p
                 )
             );
+            refreshHeader();
         } catch (err) {
             console.error("Error actualizando cantidad:", err);
         }
@@ -118,6 +150,7 @@ export function useCarrito() {
             if (!res.ok) throw new Error("Error al eliminar producto");
 
             setCarrito(prev => prev.filter(p => p.id_producto !== id_producto));
+            refreshHeader();
         } catch (err) {
             console.error("Error quitando producto:", err);
         }
@@ -166,9 +199,14 @@ export function useCarrito() {
         obtenerCarritoDesdeAPI,
         obtenerDirecciones,
         obtenerMediosPago,
+        actualizarCantidad,
         aumentarCantidad,
         disminuirCantidad,
         quitarDelCarrito,
         clearCart
     };
+}
+
+export function formatPrice(price) {
+    return `$${price.toLocaleString()}`;
 }

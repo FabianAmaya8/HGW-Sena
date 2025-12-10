@@ -14,9 +14,9 @@ Este repositorio incluye:
 
 | Plataforma             | Descripción                                      | Enlace                                   |
 | ---------------------- | ------------------------------------------------ | ---------------------------------------- |
-| 🌍 **Web (React)**     | Interfaz principal accesible desde navegador.    | [🔗 Enlace al despliegue web](https://hgw.up.railway.app/)         |
-| 🧠 **Backend (Flask)** | API REST que gestiona la lógica y base de datos. | [🔗 Enlace al backend](hgwflask.up.railway.app/scalar)                |
-| 📱 **Móvil (Flutter)** | Versión móvil multiplataforma.                   | [🔗 Enlace al despliegue móvil / APK](#) |
+| 🌍 **Web (React)**     | Interfaz principal accesible desde navegador.    | <a href="https://hgw.up.railway.app/" target="_blank">🔗 Enlace al despliegue web</a>         |
+| 🧠 **Backend (Flask)** | API REST que gestiona la lógica y base de datos. | <a href="https://hgwflask.up.railway.app/scalar" target="_blank">🔗 Enlace al backend</a>                |
+| 📱 **Móvil (Flutter)** | Versión móvil multiplataforma.                   | <a href="#" target="_blank">🔗 Enlace al despliegue móvil / APK</a> |
 
 ---
 
@@ -112,7 +112,14 @@ flutter clean
 flutter pub get
 flutter run
 ```
+### 5️⃣ Manuales y Planes
 
+* **Carpeta Manuales:** <a href="https://drive.google.com/drive/folders/1oTv51_fMH1VFfVMJmD1VviQPiGzvi771?usp=drive_link" target="_blank">📄 Ver Documento</a>
+* **Carpeta Planes:** <a href="https://drive.google.com/drive/folders/1zVDS-PnH8t8U3ibSs9mrZjhDeUaTfFVZ?usp=drive_link" target="_blank">📄 Ver Documento</a>
+
+### 6️⃣ Trello
+
+<a href="https://trello.com/b/wP68pcVI" target="_blank">📊 Ver Tablero De Trello 🤖</a>
 
 ---
 

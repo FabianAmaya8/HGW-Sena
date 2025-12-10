@@ -32,7 +32,7 @@ const CategoriaCard = ({ category }) => {
 
 const Catalogo = () => {
     const { categories, subcategories, loading, error } = useCatalogo();
-    const productos = useProducts();
+    const { products } = useProducts();
 
     if (loading) {
         return <div className="cargando"> 
@@ -116,7 +116,7 @@ const Catalogo = () => {
                 key={cat.id}
                 category={cat}
                 subcategories={subsDeEstaCategoria}
-                productos={productos}
+                productos={products}
             />
             );
         })}

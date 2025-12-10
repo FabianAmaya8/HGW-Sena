@@ -4,7 +4,8 @@ import '../models/producto.dart';
 import '../services/api_service.dart';
 
 class ProductosProvider extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;ProductosProvider({ApiService? apiService})
+  : _apiService = apiService ?? ApiService();
 
   List<Producto> _productos = [];
   List<Categoria> _categorias = [];
@@ -12,24 +13,31 @@ class ProductosProvider extends ChangeNotifier {
   String? _error;
   String? _selectedCategoria;
   String? _selectedSubcategoria;
+  String _searchQuery = '';
 
-  // Getters
   List<Producto> get productos {
-    if (_selectedCategoria == null) {
+    if (_selectedCategoria == null && _searchQuery.isEmpty) {
       return _productos;
     }
 
     return _productos.where((producto) {
-      bool matchCategoria =
-          producto.categoria.toLowerCase() == _selectedCategoria!.toLowerCase();
-
-      if (_selectedSubcategoria != null) {
-        bool matchSubcategoria = producto.subcategoria.toLowerCase() ==
-            _selectedSubcategoria!.toLowerCase();
-        return matchCategoria && matchSubcategoria;
+      bool matchCategoria = true;
+      if (_selectedCategoria != null) {
+        matchCategoria = producto.categoria.toLowerCase() ==
+            _selectedCategoria!.toLowerCase();
       }
-
-      return matchCategoria;
+      bool matchSubcategoria = true;
+      if (_selectedSubcategoria != null) {
+        matchSubcategoria = producto.subcategoria.toLowerCase() ==
+            _selectedSubcategoria!.toLowerCase();
+      }
+      bool matchSearch = true;
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        final nombre = producto.nombre.toLowerCase();
+        matchSearch = nombre.contains(query);
+      }
+      return matchCategoria && matchSubcategoria && matchSearch;
     }).toList();
   }
 
@@ -57,7 +65,6 @@ class ProductosProvider extends ChangeNotifier {
         .toSet();
   }
 
-  // Métodos
   Future<void> cargarProductos() async {
     _isLoading = true;
     _error = null;
@@ -66,7 +73,6 @@ class ProductosProvider extends ChangeNotifier {
     try {
       print('ProductosProvider: Iniciando carga de productos...');
 
-      // Cargar productos y categorías en paralelo
       final results = await Future.wait([
         _apiService.obtenerProductos(),
         _apiService.obtenerCatalogo(),
@@ -74,9 +80,6 @@ class ProductosProvider extends ChangeNotifier {
 
       _productos = results[0] as List<Producto>;
       _categorias = results[1] as List<Categoria>;
-
-      print('ProductosProvider: Productos cargados: ${_productos.length}');
-      print('ProductosProvider: Categorías cargadas: ${_categorias.length}');
 
       _error = null;
     } catch (e) {
@@ -89,10 +92,14 @@ class ProductosProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+  void onSearchChanged(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
 
   void seleccionarCategoria(String? categoria) {
     _selectedCategoria = categoria;
-    _selectedSubcategoria = null; // Reset subcategoría al cambiar categoría
+    _selectedSubcategoria = null;
     notifyListeners();
   }
 
@@ -104,6 +111,7 @@ class ProductosProvider extends ChangeNotifier {
   void limpiarFiltros() {
     _selectedCategoria = null;
     _selectedSubcategoria = null;
+    _searchQuery = '';
     notifyListeners();
   }
 

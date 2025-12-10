@@ -5,17 +5,19 @@ import '../../models/carrito/medio_pago.dart';
 import '../../services/carrito/carrito_service.dart';
 
 class CarritoProvider extends ChangeNotifier {
-  final CarritoService _service = CarritoService();
+  final CarritoService _service;
+
+  CarritoProvider({CarritoService? service})
+      : _service = service ?? CarritoService();
 
   List<CarritoItem> _items = [];
   List<Direccion> _direcciones = [];
   List<MedioPago> _mediosPago = [];
   Direccion? _direccionSeleccionada;
   MedioPago? _medioPagoSeleccionado;
+
   bool _isLoading = false;
   String? _mensaje;
-
-  // userId ahora es nullable y se configura dinámicamente
   int? _userId;
 
   List<CarritoItem> get items => _items;
@@ -42,6 +44,11 @@ class CarritoProvider extends ChangeNotifier {
     _direccionSeleccionada = null;
     _medioPagoSeleccionado = null;
     _mensaje = null;
+    notifyListeners();
+  }
+
+  void limpiarCarrito() {
+    _items = [];
     notifyListeners();
   }
 

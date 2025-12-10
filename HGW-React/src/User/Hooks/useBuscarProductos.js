@@ -1,37 +1,28 @@
-import { useEffect, useState } from 'react';
-import { urlDB } from '../../urlDB';
+import { useEffect, useState } from "react";
+import { useProductsContext } from "../../pages/Context/ProductsContext.jsx";
 
 export function useBuscarProductos(q) {
-    const [loading, setLoading] = useState(true);
+    const { products } = useProductsContext();
     const [productosFiltrados, setProductosFiltrados] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!q) return;
+        if (!q || !products) return;
 
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const res = await fetch(await urlDB('api/productos'));
-                const data = await res.json();
+        setLoading(true);
+        
+        const qLower = q.toLowerCase();
 
-                const qLower = q.toLowerCase();
-                const filtrados = data.filter((p) =>
-                    p.nombre.toLowerCase().includes(qLower) ||
-                    (p.categoria?.toLowerCase() || '').includes(qLower) ||
-                    (p.subcategoria?.toLowerCase() || '').includes(qLower)
-                );
+        const filtrados = products.filter((p) =>
+            p.nombre.toLowerCase().includes(qLower) ||
+            (p.categoria?.toLowerCase() || "").includes(qLower) ||
+            (p.subcategoria?.toLowerCase() || "").includes(qLower)
+        );
 
-                setProductosFiltrados(filtrados);
-            } catch (error) {
-                console.error('Error al buscar productos:', error);
-                setProductosFiltrados([]);
-            } finally {
-                setLoading(false);
-            }
-        };
+        setProductosFiltrados(filtrados);
+        setLoading(false);
 
-        fetchData();
-    }, [q]);
+    }, [q, products]);
 
     return { loading, productosFiltrados };
 }

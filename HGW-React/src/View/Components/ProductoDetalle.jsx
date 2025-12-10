@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
-import { mostrarAlerta } from "../hooks/alerta-añadir";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAlertasCarrito  } from "../hooks/alerta-añadir";
 import { urlDB } from "../../urlDB";
 import { useImageUrls } from "../../User/Hooks/useImgUrl";
 import { useCarrito } from "../hooks/useCarrito";
@@ -10,6 +10,8 @@ import "../../assets/css/ProductoDetalle.css";
 export default function ProductoDetalle() {
     const { id } = useParams();
     const { agregarProductoAlCarrito, cargando } = useCarrito();
+    const { mostrarAlerta } = useAlertasCarrito();
+    const navigation = useNavigate();
 
     const [detalle, setDetalle] = useState(null);
     const [imagenActual, setImagenActual] = useState(null);
@@ -88,7 +90,7 @@ export default function ProductoDetalle() {
         if (res.exito) {
             mostrarAlerta(
                 `${nombre} x${cantidad} agregado`,
-                () => setTimeout(() => window.location.href = "/carrito", 100)
+                () => setTimeout(() => navigation("/carrito"), 100)
             );
         } else {
             console.error("Error al agregar:", res.mensaje);

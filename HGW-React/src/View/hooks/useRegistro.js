@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { urlDB } from '../../urlDB';
 
 
 export const useRegistro = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     nombres: '',
@@ -174,7 +176,7 @@ export const useRegistro = () => {
         confirmButtonText: "Ingresar"
       })
       .then(() => {
-        window.location.href = result.redirect || "/login";
+        navigate(result.redirect || "/login");
       });
     } catch (err) {
       //alerta de error

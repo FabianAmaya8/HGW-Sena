@@ -1,0 +1,8 @@
+test_registros.py
+test_consultas.py
+test_consultaTabla.py
+test_orden_detalle.py
+test_eliminar.py
+test_consultaFilas.py
+test_editar.py
+test_consultasInformes.py

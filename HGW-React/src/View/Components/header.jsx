@@ -53,7 +53,15 @@ const HeaderView = () => {
                             </div>
                         </summary>
                         <ul>
-                            <li><a href="#" id="loginModal">Login</a></li>
+                            <li>
+                                <button 
+                                    className="login-btn"
+                                    type="button"
+                                    onClick={showLoginModal}
+                                >
+                                    Login
+                                </button>
+                            </li>
                             <li><a href="#">Descargar APP</a></li>
                         </ul>
                         </details>

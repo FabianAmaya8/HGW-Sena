@@ -1,15 +1,16 @@
 import { Link } from 'react-router-dom';
 import { useImageUrl } from '../../User/Hooks/useImgUrl';
-import { alertaView, mostrarAlerta } from '../hooks/alerta-añadir';
+import { useAlertasCarrito } from '../hooks/alerta-añadir';
 import { isLoggedIn } from '../../auth';
 import { useCarrito } from '../hooks/useCarrito';
 
 function formatPrice(price) {
-  return `$${price.toLocaleString()}`;
+    return `$${price.toLocaleString()}`;
 }
 
 export function ProductCard({ product }) {
     const { agregarProductoAlCarrito } = useCarrito();
+    const { mostrarAlerta, alertaView } = useAlertasCarrito();
     const {
         id_producto,
         nombre,

@@ -14,6 +14,7 @@ from app.controllers.User.utils.upload_image import upload_image_to_supabase
 import datetime
 
 tablas = automap_base()
+classes = tablas.classes
 bcrypt = Bcrypt()
 MESES = [
     "", "Enero", "Febrero", "Marzo", "Abril",
@@ -52,7 +53,6 @@ def serializar_con_fk_lookup(objetos):
         data = {}
         for col in o.__table__.columns:
             valor = getattr(o, col.name)
-            
             if col.name in fk_tablas and valor is not None:
                 try:
                     clase_fk = getattr(tablas.classes, fk_tablas[col.name])
@@ -65,7 +65,6 @@ def serializar_con_fk_lookup(objetos):
                         continue
                 except Exception:
                     pass
-            
             if(col.name != "creador" and col.name != "editor" and col.name != "activo"):
                 data[col.name] = valor
         lista.append(data)
@@ -157,7 +156,6 @@ def consultaTabla():
     tabla = get_tabla(tabla_nombre)
     if not tabla:
         return jsonify({"error": f"Tabla '{tabla_nombre}' no encontrada"}), 400
-
     query_base = db.session.query(tabla)
     total_count = 0
     if(not busqueda):
@@ -187,7 +185,6 @@ def consultaTabla():
 def orden_detalle(id_orden):
     if request.method == "OPTIONS":
         return Response(status=200)
-    
     from sqlalchemy import text
     try:
         query_orden = text("""
@@ -214,10 +211,8 @@ def orden_detalle(id_orden):
         """)
         result_orden = db.session.execute(query_orden, {"id_orden": id_orden})
         orden = dict(result_orden.fetchone()._mapping) if result_orden.rowcount > 0 else None
-        
         if not orden:
             return jsonify({"error": "Orden no encontrada"}), 404
-        
         query_productos = text("""
             SELECT 
                 p.nombre_producto,
@@ -233,14 +228,11 @@ def orden_detalle(id_orden):
         """)
         result_productos = db.session.execute(query_productos, {"id_orden": id_orden})
         productos = [dict(row._mapping) for row in result_productos]
-        
         return jsonify({
             "orden": orden,
             "productos": productos
         }), 200
-        
-    except Exception as e:
-        print(f"Error en orden_detalle: {e}")
+    except Exception:
         return jsonify({"error": "Error al obtener detalle de orden"}), 500
 
 @bp_tablas.route("/eliminar", methods=["POST","OPTIONS"])
@@ -253,7 +245,6 @@ def eliminar():
     tabla = get_tabla(datos["table"])
     if not tabla:
         return jsonify({"error": f"Tabla '{datos['table']}' no encontrada"}), 400
-
     elemento = db.session.get(tabla, datos["id"])
     if not elemento:
         return jsonify({"error": "Registro no encontrado"}), 404
@@ -287,7 +278,6 @@ def consultaFilas():
     tabla = get_tabla(datos["table"])
     if not tabla:
         return jsonify({"error": f"Tabla '{datos['table']}' no encontrada"}), 400
-
     print(datos)
     elemento = db.session.get(tabla, datos[llave_id] if isinstance(datos[llave_id], (int, float) or isinstance(datos[llave_id], str)) else datos[llave_id]["id"])
     if not elemento:
@@ -304,7 +294,6 @@ def editar():
     tablaActual = get_tabla(request.form["table"])
     if not tablaActual:
         return jsonify({"error": f"Tabla '{request.form['table']}' no encontrada"}), 400
-
     id = request.form.get('id')
     elementoG = db.session.get(tablaActual, id)
     if not elementoG:
@@ -336,27 +325,21 @@ def editar():
                 lista = json.loads(valor)
             except (json.JSONDecodeError, TypeError):
                 lista = valor
-
             if clave == "id_usuario":
                 id_usuario = lista if not isinstance(lista, dict) else lista.get("text", "")
-
             if isinstance(lista, dict) and "password" in lista:
                 nuevo_val = _extract_text_from_maybe_json(lista)
                 hash_actual = getattr(elementoG, "pss", None)
-
                 if isinstance(nuevo_val, str) and nuevo_val == hash_actual:
                     valor_a_guardar = hash_actual
                 elif isinstance(nuevo_val, str):
                     valor_a_guardar = bcrypt.generate_password_hash(nuevo_val).decode("utf-8")
                 else:
                     valor_a_guardar = hash_actual
-
                 setattr(elementoG, clave, valor_a_guardar)
-
             elif isinstance(lista, dict) and "text" in lista:
                 valor_a_guardar = _extract_text_from_maybe_json(lista)
                 setattr(elementoG, clave, valor_a_guardar)
-
             else:
                 if clave not in ("table", "id", "req"):
 
@@ -366,7 +349,6 @@ def editar():
 
                     if isinstance(lista, str) and lista == "":
                         lista = None
-
                     setattr(elementoG, clave, lista)
         except Exception as e:
             if clave not in ("table", "id", "req"):

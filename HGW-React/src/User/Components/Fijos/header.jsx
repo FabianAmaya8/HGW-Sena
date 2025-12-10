@@ -1,15 +1,14 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../pages/Context/AuthContext";
 import logo from "../../../assets/img/logo.png";
 import Buscador from "./Buscador";
-import { useHeaderData } from "../../Hooks/useHeaderData";
-import { useEffect } from "react";
+import { useHeader } from "../../../pages/Context/HeaderContext.jsx";
 import { useImageUrl } from "../../Hooks/useImgUrl";
 
 export default function Header() {
     const { user, logout } = useAuth();
-    const { cartCount, profileUrl } = useHeaderData(user);
-
+    const { cartCount, profileUrl, } = useHeader();
+    const navigate = useNavigate();
     const imgUrlcompleta = useImageUrl(profileUrl);
 
     const links = [
@@ -42,9 +41,9 @@ export default function Header() {
             <h2>HGW</h2>
             <div className="header-content">
                 {/* Logo */}
-                <a href="/" className="logo">
+                <NavLink to="/" className="logo">
                     <img src={logo} alt="logo" />
-                </a>
+                </NavLink>
 
                 {/* Buscador */}
                 <Buscador />
@@ -93,7 +92,10 @@ export default function Header() {
                                     <li key={opt.text}>
                                         {opt.action ? (
                                             <button
-                                                onClick={opt.action}
+                                                onClick={() => {
+                                                    localStorage.removeItem("token")
+                                                    navigate("/educacion");
+                                                }}
                                                 id={opt.text.replace(/\s+/g, "")}
                                             >
                                                 {opt.text}

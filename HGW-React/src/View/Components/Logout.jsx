@@ -3,6 +3,6 @@ import { useAuth } from "../../pages/Context/AuthContext";
 
 export default function LogoutWrapper() {
     const { logout } = useAuth();
-    logout(); // limpia token / sesión
+    logout();
     return <Navigate to="/" replace />;
 }

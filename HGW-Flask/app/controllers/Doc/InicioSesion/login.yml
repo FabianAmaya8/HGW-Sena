@@ -1,3 +1,5 @@
+summary: Endpoint para iniciar sesión de usuario
+description: Este endpoint permite a los usuarios iniciar sesión proporcionando sus credenciales (usuario y contraseña).
 tags:
   - Registro
 consumes:

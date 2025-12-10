@@ -1,10 +1,35 @@
 import 'package:flutter/material.dart';
+import '../../models/carrito/carrito_item.dart';
+import '../../models/carrito/direccion.dart';
 import '../../utils/constants.dart';
+import 'recibo_screen.dart'; 
 
 class ConfirmacionScreen extends StatelessWidget {
-  final int idOrden;
+  final String idOrden;
+  final List<CarritoItem> itemsCompra;
+  final double totalCompra;
+  final Direccion? direccionCompra;
 
-  const ConfirmacionScreen({Key? key, required this.idOrden}) : super(key: key);
+  const ConfirmacionScreen({
+    Key? key,
+    required this.idOrden,
+    required this.itemsCompra,
+    required this.totalCompra,
+    required this.direccionCompra,
+  }) : super(key: key);
+  void _verDetallesPedido(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReciboScreen(
+          idOrden: idOrden,
+          items: itemsCompra,
+          total: totalCompra,
+          direccion: direccionCompra,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,26 +57,21 @@ class ConfirmacionScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Icon(
-                    Icons.check,
-                    size: isSmallScreen ? 60 : 80,
-                    color: Colors.white,
-                  ),
+                  child: Icon(Icons.check,
+                      size: isSmallScreen ? 60 : 80, color: Colors.white),
                 ),
                 const SizedBox(height: 32),
+
                 Text(
                   '¡Compra Finalizada!',
-                  style: AppStyles.heading2.copyWith(
-                    fontSize: isSmallScreen ? 28 : 32,
-                  ),
+                  style: AppStyles.heading2
+                      .copyWith(fontSize: isSmallScreen ? 28 : 32),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   decoration: BoxDecoration(
                     color: AppColors.primaryGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -59,29 +79,19 @@ class ConfirmacionScreen extends StatelessWidget {
                   child: Text(
                     'Orden #$idOrden',
                     style: TextStyle(
-                      fontSize: isSmallScreen ? 18 : 20,
-                      color: AppColors.primaryGreen,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        fontSize: isSmallScreen ? 18 : 20,
+                        color: AppColors.primaryGreen,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 16),
+
                 Text(
                   'Tu pedido ha sido procesado exitosamente',
                   textAlign: TextAlign.center,
                   style: AppStyles.body.copyWith(
-                    color: AppColors.textMedium,
-                    fontSize: isSmallScreen ? 14 : 16,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Recibirás un correo con los detalles de tu compra',
-                  textAlign: TextAlign.center,
-                  style: AppStyles.caption.copyWith(
-                    color: AppColors.textMedium,
-                    fontSize: isSmallScreen ? 13 : 14,
-                  ),
+                      color: AppColors.textMedium,
+                      fontSize: isSmallScreen ? 14 : 16),
                 ),
                 const SizedBox(height: 40),
                 Container(
@@ -91,36 +101,30 @@ class ConfirmacionScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primaryGreen.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
+                          color: AppColors.primaryGreen.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10)),
                     ],
                   ),
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(15),
-                      onTap: () {
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                      },
+                      onTap: () =>
+                          Navigator.popUntil(context, (route) => route.isFirst),
                       child: Padding(
                         padding: EdgeInsets.symmetric(
-                          vertical: isSmallScreen ? 16 : 18,
-                        ),
+                            vertical: isSmallScreen ? 16 : 18),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Icon(Icons.store, color: Colors.white),
                             const SizedBox(width: 12),
-                            Text(
-                              'Volver al Catálogo',
-                              style: TextStyle(
-                                fontSize: isSmallScreen ? 15 : 17,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
+                            Text('Volver al Catálogo',
+                                style: TextStyle(
+                                    fontSize: isSmallScreen ? 15 : 17,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white)),
                           ],
                         ),
                       ),
@@ -128,20 +132,16 @@ class ConfirmacionScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
+
                 TextButton.icon(
-                  onPressed: () {
-                    // Funcionalidad para ver detalles del pedido
-                  },
+                  onPressed: () => _verDetallesPedido(context),
                   icon: Icon(Icons.receipt_long,
                       size: 18, color: AppColors.primaryGreen),
-                  label: Text(
-                    'Ver detalles del pedido',
-                    style: TextStyle(
-                      color: AppColors.primaryGreen,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
+                  label: Text('Ver detalles del pedido (PDF)',
+                      style: TextStyle(
+                          color: AppColors.primaryGreen,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14)),
                 ),
               ],
             ),
