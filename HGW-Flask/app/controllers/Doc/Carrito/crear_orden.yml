@@ -1,14 +1,15 @@
 summary: Crear una nueva orden
 description: |
-  Crea una orden con los productos indicados, disminuye stock,
-  vacía el carrito antiguo y genera uno nuevo.
+  Crea una orden con los productos indicados, valida el stock por cada ítem,
+  inserta la orden y sus productos, descuenta el stock, y reinicia el carrito del usuario.
 tags:
-  - Carrito
+  - 🛒 Carrito
 consumes:
   - application/json
 parameters:
   - in: body
     name: payload
+    required: true
     schema:
       type: object
       required:
@@ -20,14 +21,20 @@ parameters:
       properties:
         id_usuario:
           type: integer
+          example: 1
         id_direccion:
           type: integer
+          example: 5
         id_medio_pago:
           type: integer
+          example: 2
         total:
           type: number
+          format: float
+          example: 125000.50
         items:
           type: array
+          minItems: 1
           items:
             type: object
             required:
@@ -37,10 +44,14 @@ parameters:
             properties:
               id_producto:
                 type: integer
+                example: 10
               cantidad:
                 type: integer
+                example: 2
               precio_unitario:
                 type: number
+                format: float
+                example: 40000.25
 responses:
   201:
     description: Orden creada con éxito
@@ -49,17 +60,39 @@ responses:
       properties:
         id_orden:
           type: integer
+          example: 123
   400:
-    description: Datos incompletos o inválidos
+    description: Datos incompletos o inválidos (incluye stock insuficiente)
     schema:
       type: object
       properties:
         error:
           type: string
+          example: "Stock insuficiente"
+        id_producto:
+          type: integer
+          example: 10
+        producto:
+          type: string
+          example: "Nombre Producto"
+        stock_disponible:
+          type: integer
+          example: 1
+        solicitado:
+          type: integer
+          example: 2
         faltan:
           type: array
           items:
             type: string
+  404:
+    description: Algún producto no existe o no está activo
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "El producto 999 no existe o no está activo"
   500:
     description: Error interno al procesar la orden
     schema:
@@ -67,3 +100,4 @@ responses:
       properties:
         error:
           type: string
+          example: "Error interno al procesar la orden"

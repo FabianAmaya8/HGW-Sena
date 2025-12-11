@@ -1,0 +1,41 @@
+summary: Eliminar una dirección del usuario
+description: |
+  Elimina una dirección asociada al usuario si la dirección pertenece a él.
+tags:
+  - 👤 Usuario
+consumes:
+  - application/json
+parameters:
+  - in: body
+    name: payload
+    required: true
+    schema:
+      type: object
+      required:
+        - id_direccion
+        - id_usuario
+      properties:
+        id_direccion:
+          type: integer
+          example: 15
+        id_usuario:
+          type: integer
+          example: 7
+responses:
+  200:
+    description: Dirección eliminada correctamente
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Dirección eliminada"
+  400:
+    description: Datos incompletos
+  404:
+    description: Dirección no encontrada o no pertenece al usuario
+  500:
+    description: Error interno del servidor

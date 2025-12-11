@@ -144,6 +144,7 @@ def consultas():
 
 @bp_tablas.route("/consultaTabla", methods=["POST","OPTIONS"])
 @cross_origin()
+@swag_from('../controllers/Doc/Tablas/consultaTabla.yml')
 def consultaTabla():
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -182,6 +183,7 @@ def consultaTabla():
 
 @bp_tablas.route("/ordenDetalle/<int:id_orden>", methods=["GET","OPTIONS"])
 @cross_origin()
+@swag_from('../controllers/Doc/Tablas/ordenDetalle.yml')
 def orden_detalle(id_orden):
     if request.method == "OPTIONS":
         return Response(status=200)
@@ -256,6 +258,7 @@ def eliminar():
     return jsonify({"respuesta": "Se ha eliminado el registro"})
 
 @bp_tablas.route("/consultaLog", methods=["POST"])
+@swag_from('../controllers/Doc/Tablas/consultaLog.yml')
 def consultaLog():
     diccionario = request.get_json()
     tabla_logs = get_tabla("registro_logs")
@@ -380,6 +383,7 @@ def restaDias(fecha, dias):
     return (fecha - datetime.timedelta(days=dias))
 
 @bp_tablas.route("/consultasInformes", methods = ["POST"])
+@swag_from('../controllers/Doc/Tablas/consultasInformes.yml')
 def consultasInformes():
     sesion = db.session
     hoy = datetime.date.today()
@@ -419,6 +423,7 @@ def consultasInformes():
     return jsonify({"ventas_hoy" : consulta[0] or 0, "ventas_mes": consulta[1] or 0, "total_clientes": consulta[2] or 0, "ingresos_hoy": consulta[3] or 0, "ingresos_mes": consulta[4] or 0, "productos_destacados": consulta[5] or [], "Ingresos Mes": consulta[6] or [], "categorias_destacadas": consulta[7] or []})
 
 @bp_tablas.route("/ChatBot", methods = ["POST"])
+@swag_from('../controllers/Doc/Tablas/ChatBot.yml')
 def ChatBot():
     respuesta = ""
     solicitud = quitarTildes(request.json.get("el")).lower()

@@ -1,28 +1,32 @@
-summary: Obtener datos de perfil del usuario
+summary: Obtener datos completos del usuario
 description: |
-  Recupera la información personal, direcciones y membresía de un usuario.
+  Retorna toda la información del usuario, incluyendo:
+    - Datos personales
+    - Direcciones asociadas
+    - 🏅 Membresía actual y próxima
+    - Historial de BV (últimas 10 transacciones)
 tags:
-  - Usuario
+  - 👤 Usuario
 parameters:
   - name: id
     in: query
-    type: integer
     required: true
+    type: integer
     description: ID del usuario
 responses:
   200:
-    description: Datos de usuario obtenidos con éxito
+    description: Datos obtenidos exitosamente
     schema:
       type: object
       properties:
         success:
           type: boolean
-          example: true
         usuario:
           type: object
           properties:
             id_usuario:
               type: integer
+              example: 15
             nombre:
               type: string
             apellido:
@@ -35,10 +39,13 @@ responses:
               type: string
             url_foto_perfil:
               type: string
+              nullable: true
             patrocinador:
               type: string
+              nullable: true
             nombre_medio:
               type: string
+              example: "Efectivo"
             direcciones:
               type: array
               items:
@@ -63,10 +70,30 @@ responses:
             membresia:
               type: object
               properties:
-                id_membresia:
+                membresia:
                   type: integer
                 nombre_membresia:
                   type: string
+                bv_requeridos:
+                  type: integer
+                precio_membresia:
+                  type: number
+                bv_acumulados:
+                  type: integer
+                proxima_membresia:
+                  type: string
+                  nullable: true
+            historial_bv:
+              type: array
+              items:
+                type: object
+                properties:
+                  bv_ganados:
+                    type: integer
+                  fecha_transaccion:
+                    type: string
+                  descripcion:
+                    type: string
   400:
     description: ID no proporcionado
   404:

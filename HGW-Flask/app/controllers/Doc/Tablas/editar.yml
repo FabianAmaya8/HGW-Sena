@@ -1,31 +1,50 @@
-summary: Editar un registro genérico
+summary: Editar un registro existente
 description: |
-  Actualiza campos y archivos de un registro existente en la tabla indicada.
+  Modifica un registro dinámicamente.  
+  Soporta texto y archivos mediante multipart/form-data.
+  Las contraseñas se rehashean automáticamente si son modificadas.
+
 tags:
-  - Tablas
+  - 👁️‍🗨️ Tablas
+
 consumes:
   - multipart/form-data
+
 parameters:
   - in: formData
     name: table
     type: string
     required: true
+
   - in: formData
     name: id
     type: integer
     required: true
+
   - in: formData
-    name: <campo>
-    type: string|file
+    name: <campo dinámico>
+    type: string
     required: false
+
+  - in: formData
+    name: <archivo>
+    type: file
+    required: false
+
 responses:
   200:
-    description: Registro actualizado con éxito
+    description: Registro actualizado exitosamente
     schema:
       type: object
       properties:
         respuesta:
           type: string
-          example: "Se actualizo el registro"
+          example: "Se actualizó el registro"
+
+  404:
+    description: Registro no encontrado
+    schema:
+      type: object
+
   200:
     description: Respuesta OPTIONS válida

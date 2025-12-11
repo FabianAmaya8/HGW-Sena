@@ -1,8 +1,7 @@
 summary: Listar medios de pago disponibles
-description: |
-  Devuelve el catálogo de medios de pago para finalizar compra.
+description: Devuelve el catálogo de medios de pago para finalizar compra.
 tags:
-  - Carrito
+  - 🛒 Carrito
 responses:
   200:
     description: Medios de pago obtenidos con éxito
@@ -13,8 +12,10 @@ responses:
         properties:
           id_medio:
             type: integer
+            example: 1
           nombre_medio:
             type: string
+            example: "Transferencia"
   500:
     description: Error interno al listar medios
     schema:
@@ -22,3 +23,4 @@ responses:
       properties:
         error:
           type: string
+          example: "No se pudieron cargar los medios"

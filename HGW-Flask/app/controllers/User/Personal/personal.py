@@ -229,6 +229,7 @@ def delete_foto_perfil():
     
     # -------------------- Crear nueva dirección --------------------
 @personal_bp.route('/api/direcciones/crear', methods=['POST'])
+@swag_from('../../Doc/Personal/ControllerPersonal/crear_direccion.yml')
 def crear_direccion():
     data = request.json
     required = ['id_usuario', 'lugar_entrega', 'direccion', 'ciudad', 'pais', 'codigo_postal']
@@ -280,6 +281,7 @@ def crear_direccion():
 
 # -------------------- Obtener solo direcciones --------------------
 @personal_bp.route('/api/direcciones', methods=['GET'])
+@swag_from('../../Doc/Personal/ControllerPersonal/get_direcciones.yml')
 def get_direcciones():
     user_id = request.args.get("id", type=int)
     if not user_id:
@@ -305,6 +307,7 @@ def get_direcciones():
 
 # -------------------- Obtener ubicaciones disponibles --------------------
 @personal_bp.route('/api/ubicaciones', methods=['GET'])
+@swag_from('../../Doc/Personal/ControllerPersonal/get_ubicaciones.yml')
 def get_ubicaciones():
     try:
         connection = get_db()
@@ -328,8 +331,10 @@ def get_ubicaciones():
 
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
-    # -------------------- Eliminar dirección --------------------
+
+# -------------------- Eliminar dirección --------------------
 @personal_bp.route('/api/direcciones/eliminar', methods=['DELETE'])
+@swag_from('../../Doc/Personal/ControllerPersonal/eliminar_direccion.yml')
 def eliminar_direccion():
     data = request.json
     direccion_id = data.get('id_direccion')

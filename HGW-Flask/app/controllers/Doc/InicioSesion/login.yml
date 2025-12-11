@@ -1,24 +1,30 @@
-summary: Endpoint para iniciar sesión de usuario
-description: Este endpoint permite a los usuarios iniciar sesión proporcionando sus credenciales (usuario y contraseña).
+summary: Iniciar sesión de usuario
+description: |
+  Permite iniciar sesión utilizando correo electrónico o nombre de usuario junto con una contraseña.
+  Valida credenciales, genera un token JWT y retorna información básica del usuario junto
+  con la ruta a la que debe ser redirigido según su rol.
 tags:
-  - Registro
+  - 📝 Registro
 consumes:
   - application/json
 parameters:
   - in: body
     name: credentials
+    required: true
     schema:
       type: object
       required:
-        - usuario
+        - 👤 Usuario
         - contrasena
       properties:
         usuario:
           type: string
-          description: Email o nombre de usuario
+          description: Email o nombre de usuario registrado
+          example: "usuario@example.com"
         contrasena:
           type: string
           description: Contraseña en texto plano
+          example: "MiClave123"
 responses:
   200:
     description: Login exitoso
@@ -27,13 +33,75 @@ responses:
       properties:
         success:
           type: boolean
+          example: true
         token:
           type: string
+          description: Token JWT válido por 180 días
+          example: "eyJhbGciOiJIUzI1..."
         redirect:
           type: string
+          description: Ruta de destino según el rol del usuario
+          example: "/inicio"
+        usuario:
+          type: object
+          properties:
+            id_usuario:
+              type: integer
+              example: 15
+            nombre:
+              type: string
+              example: "Fabian"
+            apellido:
+              type: string
+              example: "Amaya"
+            nombre_usuario:
+              type: string
+              example: "Fabian_Amaya8"
+            correo_electronico:
+              type: string
+              example: "fabian@example.com"
+            numero_telefono:
+              type: string
+              example: "3101234567"
+            url_foto_perfil:
+              type: string
+              example: "https://miservidor.com/uploads/perfil.jpg"
+            patrocinador:
+              type: integer
+              example: 5
+            nombre_medio:
+              type: string
+              example: "Transferencia"
   400:
-    description: JSON inválido o faltan campos
+    description: Formato inválido o faltan datos
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Debes enviar usuario y contraseña."
   401:
     description: Credenciales incorrectas
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Usuario o contraseña incorrectos."
   500:
-    description: Error de servidor
+    description: Error interno del servidor
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Error de servidor: descripción del error"

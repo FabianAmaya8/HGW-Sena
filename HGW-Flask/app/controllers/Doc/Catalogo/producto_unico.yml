@@ -1,16 +1,16 @@
-# app/docs/producto_unico.yml
 summary: Obtener detalle de un producto
 description: |
-  Recupera la información completa de un producto específico por su ID,
-  incluyendo imágenes, descripción, categoría y subcategoría.
+  Recupera toda la información de un producto por su ID.
+  Incluye precio, puntos BV, imágenes, descripción, stock, categoría y subcategoría.
 tags:
-  - Catálogo
+  - 🛍️ Catálogo
 parameters:
   - name: id
     in: query
     type: integer
     required: true
     description: ID del producto
+    example: 12
 responses:
   200:
     description: Producto encontrado
@@ -19,33 +19,38 @@ responses:
       properties:
         id_producto:
           type: integer
-          example: 123
+          example: 12
         nombre:
           type: string
-          example: "Teléfono Modelo X"
+          example: "Smartwatch Modelo Z"
         precio:
           type: number
-          example: 499.99
+          example: 199.99
+        puntos_bv:
+          type: integer
+          example: 15
         imagen:
           type: string
-          example: "https://.../imagen.jpg"
+          example: "https://dominio.com/uploads/productos/principal.jpg"
         imagenes:
           type: array
           items:
             type: string
-          example: ["https://.../img1.jpg", "https://.../img2.jpg"]
+          example:
+            - "https://dominio.com/uploads/productos/1.jpg"
+            - "https://dominio.com/uploads/productos/2.jpg"
         descripcion:
           type: string
-          example: "Descripción detallada del producto."
+          example: "Reloj inteligente con múltiples funciones."
         stock:
           type: integer
-          example: 25
+          example: 30
         categoria:
           type: string
-          example: "Electrónica"
+          example: "Tecnología"
         subcategoria:
           type: string
-          example: "Smartphones"
+          example: "Wearables"
   404:
     description: Producto no encontrado
     schema:
@@ -61,4 +66,4 @@ responses:
       properties:
         error:
           type: string
-          example: "Descripción del error"
+          example: "Error al procesar la solicitud"

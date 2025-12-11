@@ -1,0 +1,70 @@
+summary: Obtener el detalle completo de una orden
+description: |
+  Retorna toda la información de una orden y sus productos asociados.
+
+  Incluye:
+    - Datos del usuario que realizó la compra
+    - Medio de pago
+    - Dirección y ubicación (ciudad / país)
+    - Lista de productos con cantidades, precio, subtotal y puntos BV
+
+tags:
+  - 👁️‍🗨️ Tablas
+
+parameters:
+  - name: id_orden
+    in: path
+    required: true
+    type: integer
+    description: ID de la orden a consultar
+    example: 125
+
+responses:
+  200:
+    description: Detalle de la orden obtenido exitosamente
+    schema:
+      type: object
+      properties:
+        orden:
+          type: object
+          properties:
+            id_orden: { type: integer, example: 125 }
+            usuario: { type: string, example: "Carlos López" }
+            correo_electronico: { type: string, example: "carlos@example.com" }
+            numero_telefono: { type: string, example: "3004567890" }
+            total: { type: number, example: 158000 }
+            fecha_creacion: { type: string, example: "2025-02-01 14:22:11" }
+            medio_pago: { type: string, example: "Tarjeta de crédito" }
+            direccion: { type: string, example: "Calle 45 # 12-88" }
+            codigo_postal: { type: string, example: "110231" }
+            ubicacion: { type: string, example: "Bogotá, Colombia" }
+        productos:
+          type: array
+          items:
+            type: object
+            properties:
+              nombre_producto: { type: string, example: "Proteína Sabor Chocolate" }
+              imagen_producto: { type: string, example: "https://supabase.io/productos/proteina.jpg" }
+              cantidad: { type: integer, example: 2 }
+              precio_unitario: { type: number, example: 45000 }
+              subtotal: { type: number, example: 90000 }
+              bv_puntos: { type: integer, example: 20 }
+              bv_total: { type: integer, example: 40 }
+
+  404:
+    description: Orden no encontrada
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Orden no encontrada"
+
+  500:
+    description: Error al consultar detalle de la orden
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Error al obtener detalle de orden"

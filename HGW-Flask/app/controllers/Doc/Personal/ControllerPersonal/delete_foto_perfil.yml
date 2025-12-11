@@ -1,13 +1,13 @@
 summary: Eliminar foto de perfil del usuario
 description: |
-  Borra la imagen de perfil y actualiza la ruta a NULL en la base de datos.
+  Elimina físicamente la foto de perfil del servidor y actualiza la BD colocando url_foto_perfil en NULL.
 tags:
-  - Usuario
+  - 👤 Usuario
 parameters:
   - name: id
     in: query
-    type: integer
     required: true
+    type: integer
     description: ID del usuario
 responses:
   200:
@@ -20,10 +20,10 @@ responses:
           example: true
         message:
           type: string
-          example: "Foto de perfil eliminada"
+          example: "Foto eliminada"
   400:
     description: ID no proporcionado
   404:
     description: No hay foto para borrar
   500:
-    description: Error interno del servidor
+    description: Error interno

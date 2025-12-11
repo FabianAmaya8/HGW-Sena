@@ -1,30 +1,55 @@
 summary: Registrar un nuevo registro genérico
 description: |
-  Inserta un registro en la tabla indicada. Acepta campos JSON
-  y archivos en multipart/form-data.
+  Inserta un registro en la tabla indicada mediante `multipart/form-data`.
+  Acepta campos dinámicos para cada tabla generada mediante SQLAlchemy Automap.
+  También permite subir archivos (imágenes) que serán almacenados mediante Supabase.
+
 tags:
-  - Tablas
+  - 👁️‍🗨️ Tablas
+
 consumes:
   - multipart/form-data
+
 parameters:
   - in: formData
     name: table
     type: string
     required: true
-    description: Nombre de la tabla automapeada
+    description: Nombre de la tabla en la que se registrará el nuevo registro
+
   - in: formData
-    name: <campo>
-    type: string|file
+    name: <campo dinámico>
+    type: string
     required: false
-    description: Campos dinámicos según la tabla (texto o archivos)
+    description: Campos dinámicos según la tabla objetivo
+
+  - in: formData
+    name: <archivo>
+    type: file
+    required: false
+    description: Archivos asociados (ej. imágenes, documentos)
+
 responses:
   200:
-    description: Registro creado con éxito
+    description: Registro creado exitosamente
     schema:
       type: object
       properties:
-        respuesta:
+        success:
+          type: boolean
+          example: true
+        message:
           type: string
-          example: "Se registro correctamente"
+          example: "Registro creado correctamente"
+
+  400:
+    description: Tabla no encontrada o datos inválidos
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Tabla 'clientes' no encontrada"
+
   200:
     description: Respuesta OPTIONS válida

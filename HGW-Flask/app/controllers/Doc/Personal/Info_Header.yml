@@ -1,18 +1,21 @@
-summary: Obtener información del usuario y total del carrito
+summary: Obtener información del usuario para el header
 description: |
-  Recupera la URL de la foto de perfil del usuario, comprueba si está activo
-  y devuelve el total de productos en su carrito de compras.
+  Devuelve la información necesaria para el encabezado (header) del sitio,
+  incluyendo la foto de perfil y el total de productos en el carrito.
+  
+  También valida si el usuario existe o si su cuenta está desactivada.
 tags:
-  - Usuario
+  - 👤 Usuario
 parameters:
   - name: id
     in: query
-    type: integer
     required: true
+    type: integer
     description: ID del usuario
+    example: 12
 responses:
   200:
-    description: Usuario encontrado
+    description: Información del usuario obtenida exitosamente
     schema:
       type: object
       properties:
@@ -24,12 +27,20 @@ responses:
           properties:
             url_foto_perfil:
               type: string
-              example: "https://.../foto.jpg"
+              example: "https://mi-servidor.com/uploads/profile_pictures/user123.jpg"
             total_carrito:
               type: integer
-              example: 3
+              description: Total de productos acumulados en el carrito
+              example: 4
+    examples:
+      application/json:
+        success: true
+        user:
+          url_foto_perfil: "https://mi-servidor.com/uploads/profile_pictures/fabian.jpg"
+          total_carrito: 2
+
   400:
-    description: ID de usuario no proporcionado
+    description: ID no proporcionado
     schema:
       type: object
       properties:
@@ -39,6 +50,7 @@ responses:
         message:
           type: string
           example: "ID de usuario no proporcionado"
+
   404:
     description: Usuario no encontrado
     schema:
@@ -50,6 +62,7 @@ responses:
         message:
           type: string
           example: "Usuario no encontrado"
+
   403:
     description: Cuenta desactivada
     schema:
@@ -61,6 +74,7 @@ responses:
         message:
           type: string
           example: "Tu cuenta ha sido desactivada. Contacta al administrador."
+
   500:
     description: Error interno del servidor
     schema:
@@ -71,4 +85,4 @@ responses:
           example: false
         message:
           type: string
-          example: "Descripción del error"
+          example: "Error interno del servidor: detalle"

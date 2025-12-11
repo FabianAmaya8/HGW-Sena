@@ -1,27 +1,46 @@
-summary: Consultas genéricas con o sin filtro FK
+summary: Consultas genéricas para tablas automapeadas
 description: |
-  Si el payload JSON incluye `foreign`, filtra por columna dependiente.
-  Si no, devuelve todos los registros de cada tabla listada.
+  Este endpoint permite realizar consultas dinámicas de tablas:
+  
+  ▸ Si el JSON contiene `foreign`, se filtra por una columna dependiente.  
+  ▸ Si no lo contiene, devuelve todos los registros de cada tabla listada.  
+  ▸ Todas las respuestas incluyen valores con lookup automático de llaves foráneas.
+
 tags:
-  - Tablas
+  - 👁️‍🗨️ Tablas
+
 consumes:
   - application/json
+
 parameters:
   - in: body
     name: objeto
+    required: true
     schema:
-      type: object or array
+      type: object
       description: |
-        — Con `foreign`: `{ "table": "...", "columnDependency": "...", "foreign": valor }`  
-        — Sin `foreign`: lista de `{ "table": "..." }`
+        Dos modos posibles:
+          1. Consulta filtrada:
+             {
+               "table": "subcategorias",
+               "columnDependency": "categoria",
+               "foreign": 3
+             }
+          2. Consulta general:
+             [
+               { "table": "categorias" },
+               { "table": "roles" }
+             ]
+
 responses:
   200:
-    description: Resultados de consulta
+    description: Resultados obtenidos exitosamente
     schema:
       type: object
       additionalProperties:
         type: array
         items:
           type: object
+
   200:
     description: Respuesta OPTIONS válida

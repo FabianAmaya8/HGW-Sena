@@ -1,52 +1,59 @@
 tags:
-  - Educacion
-summary: Obtener todos los contenidos
-description: Devuelve la lista de contenidos con relación a sus temas
+  - 🎓 Educación
+summary: Obtener contenidos educativos
+description: |
+  Devuelve los contenidos registrados en `contenido_tema`.
+  Si se envía `id_tema` como parámetro, devuelve solo los contenidos
+  asociados a ese tema.  
+parameters:
+  - name: id_tema
+    in: query
+    required: false
+    type: integer
+    description: Filtrar por el ID del tema
+    example: 1
 responses:
   200:
     description: Lista de contenidos obtenida exitosamente
-    content:
+    schema:
+      type: array
+      items:
+        type: object
+        properties:
+          id_contenido:
+            type: integer
+            example: 1
+          tema:
+            type: integer
+            example: 1
+          temaName:
+            type: string
+            example: "Matemáticas"
+          url_documentos:
+            type: string
+            format: uri
+            example: "https://docs.matematicas.com/algebra.pdf"
+          url_videos:
+            type: string
+            format: uri
+            example: "https://youtu.be/abcd123"
+    examples:
       application/json:
-        schema:
-          type: array
-          items:
-            type: object
-            properties:
-              id_contenido:
-                type: integer
-                example: 1
-              tema:
-                type: integer
-                example: 1
-              temaName:
-                type: string
-                example: "Matemáticas"
-              url_documentos:
-                type: string
-                format: uri
-                example: "https://docs.matematicas.com/algebra.pdf"
-              url_videos:
-                type: string
-                format: uri
-                example: "https://youtu.be/efSKI1VijGA?si=sXkz-N9LRucWWXKj"
-        example:
-          - id_contenido: 1
-            tema: 1
-            temaName: "Matemáticas"
-            url_documentos: "https://docs.matematicas.com/algebra.pdf"
-            url_videos: "https://youtu.be/efSKI1VijGA?si=sXkz-N9LRucWWXKj"
-          - id_contenido: 2
-            tema: 2
-            temaName: "Historia"
-            url_documentos: "https://docs.historia.com/edad_media.pdf"
-            url_videos: "https://youtu.be/HZsvJ7D97Gc?si=BivigW_qg1ILHdcU"
+        - id_contenido: 1
+          tema: 1
+          temaName: "Matemáticas"
+          url_documentos: "https://docs.matematicas.com/algebra.pdf"
+          url_videos: "https://youtu.be/xyz123"
+        - id_contenido: 2
+          tema: 2
+          temaName: "Historia"
+          url_documentos: "https://docs.historia.com/edad_media.pdf"
+          url_videos: "https://youtu.be/HZsvJ7D97Gc"
   500:
     description: Error interno al obtener contenidos
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            error:
-              type: string
-              example: "Error interno al obtener contenidos"
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Error interno al obtener contenidos"
