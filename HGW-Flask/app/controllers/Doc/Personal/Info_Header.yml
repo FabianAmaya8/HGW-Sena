@@ -32,12 +32,17 @@ responses:
               type: integer
               description: Total de productos acumulados en el carrito
               example: 4
+            usuario:
+              type: string
+              description: Nombre de usuario
+              example: "HGWUser"
     examples:
       application/json:
         success: true
         user:
           url_foto_perfil: "https://mi-servidor.com/uploads/profile_pictures/fabian.jpg"
           total_carrito: 2
+          usuario: "HGWUser"
 
   400:
     description: ID no proporcionado

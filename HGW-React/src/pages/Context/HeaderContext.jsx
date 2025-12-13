@@ -6,6 +6,7 @@ const HeaderContext = createContext();
 export function HeaderProvider({ user, children }) {
     const [cartCount, setCartCount] = useState(0);
     const [profileUrl, setProfileUrl] = useState(null);
+    const [username, setUsername] = useState(null);
     const [loaded, setLoaded] = useState(false);
 
     // ---------------------------------------
@@ -19,6 +20,7 @@ export function HeaderProvider({ user, children }) {
             const parsed = JSON.parse(cache);
             setCartCount(parsed.cartCount);
             setProfileUrl(parsed.profileUrl);
+            setUsername(parsed.username);
             setLoaded(true);
         }
 
@@ -38,15 +40,23 @@ export function HeaderProvider({ user, children }) {
             const data = await res.json();
 
             if (data.success) {
-                const count = data.user.total_carrito ?? 0;
-                const img = data.user.url_foto_perfil ?? null;
+                const { total_carrito, url_foto_perfil, usuario } = data.user;
+
+                const count = total_carrito ?? 0;
+                const img = url_foto_perfil ?? null;
+                const name = usuario ?? null;
 
                 setCartCount(count);
                 setProfileUrl(img);
+                setUsername(name);
 
                 sessionStorage.setItem(
                     "headerData",
-                    JSON.stringify({ cartCount: count, profileUrl: img })
+                    JSON.stringify({
+                        cartCount: count,
+                        profileUrl: img,
+                        username: name
+                    })
                 );
             }
         } catch (err) {
@@ -57,7 +67,15 @@ export function HeaderProvider({ user, children }) {
     }
 
     return (
-        <HeaderContext.Provider value={{ cartCount, profileUrl, refreshHeader, loaded }}>
+        <HeaderContext.Provider
+            value={{
+                cartCount,
+                profileUrl,
+                username,
+                refreshHeader,
+                loaded
+            }}
+        >
             {children}
         </HeaderContext.Provider>
     );

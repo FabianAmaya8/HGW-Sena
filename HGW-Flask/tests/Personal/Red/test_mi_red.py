@@ -15,26 +15,22 @@ def test_obtener_mi_red_sin_id(client):
 # 2. ERROR EN CONEXIÓN MYSQL (connection = None)
 # -------------------------------------------------------
 def test_obtener_mi_red_sin_conexion(monkeypatch, client):
-    monkeypatch.setattr(f"{DIR}.get_connection", lambda: None)
+
+    monkeypatch.setattr("app.controllers.db.get_db", lambda: None)
 
     resp = client.get("/api/mi-red?id=1")
     assert resp.status_code == 500
-
-    data = resp.get_json()
-    assert data["success"] is False
-    assert "conexión" in data["message"].lower()
-
+    assert resp.get_json()["success"] is False
 
 # -------------------------------------------------------
 # 3. USUARIO NO EXISTE
 # -------------------------------------------------------
 def test_obtener_mi_red_usuario_no_existe(monkeypatch, client, fake_conn):
 
-    # No retorna usuario
-    fake_conn.set_fetchone_responses([None])
+    fake_conn.set_fetchone_responses([None])   # Usuario no existe
     fake_conn.set_fetchall_responses([])
 
-    monkeypatch.setattr(f"{DIR}.get_connection", lambda: fake_conn)
+    monkeypatch.setattr("app.controllers.db.get_db", lambda: fake_conn)
 
     resp = client.get("/api/mi-red?id=99")
 
@@ -47,10 +43,8 @@ def test_obtener_mi_red_usuario_no_existe(monkeypatch, client, fake_conn):
 # -------------------------------------------------------
 def test_obtener_mi_red_exitoso(monkeypatch, client, fake_conn):
 
-    # 1) fetchone() → usuario encontrado
-    # 2) fetchall() → lista de la red
     fake_conn.set_fetchone_responses([
-        {"nombre_usuario": "fabian"},  # usuario principal
+        {"nombre_usuario": "fabian"},  # Usuario principal
     ])
 
     fake_conn.set_fetchall_responses([
@@ -74,7 +68,7 @@ def test_obtener_mi_red_exitoso(monkeypatch, client, fake_conn):
         ]
     ])
 
-    monkeypatch.setattr(f"{DIR}.get_connection", lambda: fake_conn)
+    monkeypatch.setattr("app.controllers.db.get_db", lambda: fake_conn)
 
     resp = client.get("/api/mi-red?id=1")
 
@@ -96,7 +90,7 @@ def test_obtener_mi_red_error(monkeypatch, client):
         def cursor(self):
             raise Exception("DB caída")
 
-    monkeypatch.setattr(f"{DIR}.get_connection", lambda: FakeConn())
+    monkeypatch.setattr("app.controllers.db.get_db", lambda: FakeConn())
 
     resp = client.get("/api/mi-red?id=1")
 

@@ -3,7 +3,7 @@ description: |
   Recupera todas las ubicaciones cuyo tipo es **'pais'**.
   Se utiliza en el formulario de registro para seleccionar país.
 tags:
-  - 📝 Registro
+  - 🚩 Direcciones
 responses:
   200:
     description: Lista de países obtenida exitosamente

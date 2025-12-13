@@ -1,7 +1,7 @@
 summary: Obtener direcciones del usuario
 description: Devuelve las direcciones registradas para un usuario dado, junto con ciudad y país cuando estén disponibles.
 tags:
-  - 🛒 Carrito
+  - 🚩 Direcciones
 parameters:
   - name: id
     in: query

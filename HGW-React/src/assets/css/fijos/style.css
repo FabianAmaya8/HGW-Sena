@@ -100,13 +100,17 @@ body, #root{
 }
 
 /*-------- HEADER ---------*/
-#btn-header{
-    display: none;
-}
 .btn-header{
     font-size: 50px;
     cursor: pointer;
     display: none;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+.btn-header:checked ~ .header-content {
+    display: flex;
 }
 header{
     width: 95%;
@@ -610,6 +614,115 @@ footer{
     transform: none;
 }
 
+/*----- Referidos -----*/
+.ref-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.ref-modal-box {
+    background: #ffffff;
+    width: 420px;
+    max-width: 95%;
+    padding: 20px;
+    border-radius: 12px;
+    animation: ref-fadeIn 0.25s ease-out;
+}
+
+.ref-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ref-modal-title {
+    margin: 0;
+}
+
+.ref-close-btn {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.ref-modal-body {
+    margin-top: 15px;
+}
+
+.ref-text {
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.ref-input-copy {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.ref-copy-input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.ref-btn-copy {
+    background: var(--botones);
+    color: #ffffff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.ref-qr-section {
+    text-align: center;
+}
+
+.ref-qr-section canvas {
+    border-radius: 8px;
+}
+
+.ref-qr-text {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.ref-modal-footer {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.ref-btn-close-modal {
+    background: var(--botones);
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+@keyframes ref-fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 /*----- media query -----*/
 
 @media (max-width: 768px){
@@ -632,7 +745,7 @@ footer{
     .header-content {
         display: none;
     }
-    #btn-header:checked ~ .header-content{
+    .header-content.open {
         display: flex;
         flex-direction: column;
         justify-content: flex-start;

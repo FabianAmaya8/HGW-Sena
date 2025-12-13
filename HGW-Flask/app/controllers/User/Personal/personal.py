@@ -5,6 +5,8 @@ from werkzeug.utils import secure_filename
 from flasgger import swag_from
 import os, json
 from decimal import Decimal
+from app.controllers.User.utils.upload_image import upload_image_to_supabase , delete_image_from_supabase
+
 
 bcrypt = Bcrypt()
 personal_bp = Blueprint('personal_bp', __name__)
@@ -47,12 +49,7 @@ def get_personal():
 
             # Membresía
             cursor.execute("""
-                SELECT u.membresia, m.nombre_membresia, m.bv AS bv_requeridos, m.precio_membresia,
-                       u.bv_acumulados,
-                       (SELECT nombre_membresia 
-                        FROM membresias 
-                        WHERE bv > u.bv_acumulados 
-                        ORDER BY bv ASC LIMIT 1) AS proxima_membresia
+                SELECT u.membresia, m.nombre_membresia, m.bv AS bv_requeridos, u.bv_acumulados
                 FROM usuarios u
                 LEFT JOIN membresias m ON u.membresia = m.id_membresia
                 WHERE u.id_usuario = %s
@@ -107,34 +104,51 @@ def update_personal():
                 return jsonify({'success': False, 'message': 'Usuario no encontrado'}), 404
 
             # ---------------------------------------------
-            # Subir foto
+            # 📌 MANEJO DE FOTO CON SUPABASE
             # ---------------------------------------------
             if foto and foto.filename:
-                cursor.execute("SELECT nombre_usuario, url_foto_perfil FROM usuarios WHERE id_usuario = %s", (user_id,))
-                row = cursor.fetchone()
 
+                # Obtener info del usuario
+                cursor.execute("""
+                    SELECT nombre_usuario, url_foto_perfil
+                    FROM usuarios
+                    WHERE id_usuario = %s
+                """, (user_id,))
+                
+                row = cursor.fetchone()
                 if row is None:
                     return jsonify({'success': False, 'message': 'Usuario no encontrado'}), 404
 
-                nombre_usuario = row.get('nombre_usuario')
-                ruta_anterior = row.get('url_foto_perfil')
-                ext = os.path.splitext(foto.filename)[1]
-                filename = secure_filename(f"{nombre_usuario}{ext}")
-                rel_path = os.path.join('uploads/profile_pictures', filename)
-                abs_path = os.path.join(current_app.root_path, 'static', rel_path)
+                ruta_anterior = row.get("url_foto_perfil")
 
-                # Borrar foto anterior
-                if ruta_anterior:
-                    ruta_abs_anterior = os.path.join(current_app.root_path, *ruta_anterior.split('/')[1:])
-                    if os.path.exists(ruta_abs_anterior):
-                        os.remove(ruta_abs_anterior)
+                try:
+                    # SUBIR A SUPABASE
+                    nueva_url, filename, storage_path = upload_image_to_supabase(
+                        foto,
+                        folder="usuarios"
+                    )
 
-                os.makedirs(os.path.dirname(abs_path), exist_ok=True)
-                foto.save(abs_path)
+                    # ELIMINAR FOTO ANTERIOR DEL BUCKET
+                    if ruta_anterior:
+                        try:
+                            old_path = ruta_anterior.split("/public/")[1]
+                            delete_image_from_supabase(old_path)
+                        except Exception as e:
+                            current_app.logger.warning(f"No se pudo borrar la imagen anterior: {e}")
 
-                nueva_ruta = "static/" + rel_path.replace('\\', '/')
-                cursor.execute("UPDATE usuarios SET url_foto_perfil = %s WHERE id_usuario = %s",
-                               (nueva_ruta, user_id))
+                    # ACTUALIZAR BD CON LA NUEVA URL
+                    cursor.execute("""
+                        UPDATE usuarios
+                        SET url_foto_perfil = %s
+                        WHERE id_usuario = %s
+                    """, (nueva_url, user_id))
+
+                except ValueError as e:
+                    return jsonify({'success': False, 'message': str(e)}), 400
+
+                except Exception as e:
+                    current_app.logger.error(f"Error subiendo imagen a Supabase: {e}")
+                    return jsonify({'success': False, 'message': 'Error subiendo la foto de perfil'}), 500
 
             # Datos usuario
             campos_usuario = [k for k in data.keys() if k not in ['direcciones', 'foto_perfil']]
@@ -193,6 +207,8 @@ def cambiar_contrasena():
             connection.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500
 
+from app.controllers.User.utils.upload_image import delete_image_from_supabase
+
 # -------------------- Personal DELETE --------------------
 @personal_bp.route('/api/personal/delete', methods=['DELETE'])
 @swag_from('../../Doc/Personal/ControllerPersonal/delete_foto_perfil.yml')
@@ -205,29 +221,49 @@ def delete_foto_perfil():
     try:
         connection = get_db()
         with connection.cursor() as cursor:
-            cursor.execute("SELECT url_foto_perfil FROM usuarios WHERE id_usuario = %s", (user_id,))
+
+            # Obtener la URL de Supabase
+            cursor.execute("""
+                SELECT url_foto_perfil 
+                FROM usuarios 
+                WHERE id_usuario = %s
+            """, (user_id,))
             row = cursor.fetchone()
 
             if not row or not row['url_foto_perfil']:
                 return jsonify({'success': False, 'message': 'No hay foto para borrar'}), 404
 
-            ruta = row['url_foto_perfil']
-            ruta_abs = os.path.join(current_app.root_path, *ruta.split('/')[1:])
-            if os.path.exists(ruta_abs):
-                os.remove(ruta_abs)
+            url = row['url_foto_perfil']
 
-            cursor.execute("UPDATE usuarios SET url_foto_perfil = NULL WHERE id_usuario = %s",
-                           (user_id,))
+            try:
+                ruta_storage = url.split("/public/")[1]
+            except:
+                ruta_storage = None
+
+            # Borrar de Supabase
+            if ruta_storage:
+                try:
+                    delete_image_from_supabase(ruta_storage)
+                except Exception as e:
+                    current_app.logger.warning(f"No se pudo eliminar en Supabase: {e}")
+
+            # Borrar referencia en BD
+            cursor.execute("""
+                UPDATE usuarios 
+                SET url_foto_perfil = NULL 
+                WHERE id_usuario = %s
+            """, (user_id,))
+
             connection.commit()
 
-        return jsonify({'success': True, 'message': 'Foto eliminada'})
+        return jsonify({'success': True, 'message': 'Foto eliminada correctamente'})
 
     except Exception as e:
         if 'connection' in locals():
             connection.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500
-    
-    # -------------------- Crear nueva dirección --------------------
+
+# -------------------- Crear nueva dirección --------------------
 @personal_bp.route('/api/direcciones/crear', methods=['POST'])
 @swag_from('../../Doc/Personal/ControllerPersonal/crear_direccion.yml')
 def crear_direccion():
@@ -277,59 +313,6 @@ def crear_direccion():
     except Exception as e:
         if 'connection' in locals():
             connection.rollback()
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-# -------------------- Obtener solo direcciones --------------------
-@personal_bp.route('/api/direcciones', methods=['GET'])
-@swag_from('../../Doc/Personal/ControllerPersonal/get_direcciones.yml')
-def get_direcciones():
-    user_id = request.args.get("id", type=int)
-    if not user_id:
-        return jsonify({"success": False, "message": "ID de usuario no proporcionado"}), 400
-
-    try:
-        connection = get_db()
-        with connection.cursor() as cursor:
-
-            cursor.execute("""
-                SELECT d.id_direccion AS id, d.direccion, d.codigo_postal, d.lugar_entrega,
-                       ciudad.nombre AS ciudad, pais.nombre AS pais
-                FROM direcciones d
-                LEFT JOIN ubicaciones ciudad ON d.id_ubicacion = ciudad.id_ubicacion
-                LEFT JOIN ubicaciones pais ON ciudad.ubicacion_padre = pais.id_ubicacion
-                WHERE d.id_usuario = %s
-            """, (user_id,))
-
-            return jsonify({'success': True, 'direcciones': cursor.fetchall()})
-
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-# -------------------- Obtener ubicaciones disponibles --------------------
-@personal_bp.route('/api/ubicaciones', methods=['GET'])
-@swag_from('../../Doc/Personal/ControllerPersonal/get_ubicaciones.yml')
-def get_ubicaciones():
-    try:
-        connection = get_db()
-        with connection.cursor() as cursor:
-
-            cursor.execute("SELECT id_ubicacion, nombre FROM ubicaciones WHERE tipo = 'pais'")
-            paises = cursor.fetchall()
-
-            ubicaciones = {}
-            for pais in paises:
-                cursor.execute("""
-                    SELECT id_ubicacion, nombre 
-                    FROM ubicaciones 
-                    WHERE tipo = 'ciudad' AND ubicacion_padre = %s
-                """, (pais['id_ubicacion'],))
-                ciudades = cursor.fetchall()
-                ubicaciones[pais['nombre']] = [c['nombre'] for c in ciudades]
-            
-
-            return jsonify({'success': True, 'ubicaciones': ubicaciones})
-
-    except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
 # -------------------- Eliminar dirección --------------------

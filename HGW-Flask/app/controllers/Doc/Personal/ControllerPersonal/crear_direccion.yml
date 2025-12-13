@@ -3,7 +3,7 @@ description: |
   Valida ciudad y país antes de registrar.  
   Inserta la dirección asociada al usuario y retorna el ID creado.
 tags:
-  - 👤 Usuario
+  - 🚩 Direcciones
 consumes:
   - application/json
 parameters:

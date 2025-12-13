@@ -2,7 +2,7 @@ summary: Eliminar una dirección del usuario
 description: |
   Elimina una dirección asociada al usuario si la dirección pertenece a él.
 tags:
-  - 👤 Usuario
+  - 🚩 Direcciones
 consumes:
   - application/json
 parameters:

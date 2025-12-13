@@ -6,6 +6,17 @@ import { urlDB } from '../../urlDB';
 
 export const useRegistro = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+
+    setFormData(prev => ({
+      ...prev,
+      patrocinador: ref ? ref : "HGW"
+    }));
+  }, []);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     nombres: '',

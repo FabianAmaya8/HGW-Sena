@@ -192,7 +192,7 @@ def orden_detalle(id_orden):
         query_orden = text("""
             SELECT 
                 o.id_orden,
-                CONCAT(u.nombre, ' ', u.apellido) AS usuario,
+                UPPER(CONCAT(u.nombre, ' ', u.apellido)) AS usuario,
                 u.correo_electronico,
                 u.numero_telefono,
                 o.total,

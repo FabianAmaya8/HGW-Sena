@@ -13,13 +13,16 @@ import './assets/css/fijos/style.css';
 import { AuthProvider, useAuth } from './pages/Context/AuthContext.jsx';
 import { HeaderProvider } from './pages/Context/HeaderContext.jsx';
 import { ProductsProvider } from './pages/Context/ProductsContext.jsx';
+import { ModalProvider } from './pages/Context/ModalContext.jsx';
 
 function ProvidersWrapper() {
   const { user } = useAuth();
   return (
     <HeaderProvider user={user}>
       <ProductsProvider>
-        <RouterProvider router={router} />
+        <ModalProvider>
+          <RouterProvider router={router} />
+        </ModalProvider>
       </ProductsProvider>
     </HeaderProvider>
   );

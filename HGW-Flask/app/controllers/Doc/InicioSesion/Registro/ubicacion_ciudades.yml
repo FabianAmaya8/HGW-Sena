@@ -3,7 +3,7 @@ description: |
   Recupera todas las ciudades registradas.
   Si se proporciona el parámetro `paisId`, solo devuelve las ciudades pertenecientes a ese país.
 tags:
-  - 📝 Registro
+  - 🚩 Direcciones
 parameters:
   - in: query
     name: paisId

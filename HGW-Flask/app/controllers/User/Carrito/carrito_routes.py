@@ -231,7 +231,7 @@ def obtener_direcciones():
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT 
-                    d.id_usuario,d.id_direccion, d.direccion, d.codigo_postal, d.lugar_entrega,
+                    d.id_usuario,d.id_direccion as id, d.direccion, d.codigo_postal, d.lugar_entrega,
                     ciudad.id_ubicacion AS ciudad_id, pais.id_ubicacion AS pais_id,
                     ciudad.nombre AS ciudad, pais.nombre AS pais
                 FROM direcciones d
