@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import './utils/constants.dart';
 import './providers/productos_provider.dart';
 import './providers/carrito/carrito_provider.dart';
 import './providers/personal/personal_provider.dart';
@@ -17,6 +18,7 @@ class AuthProvider extends ChangeNotifier {
     _isLoggedIn = true;
     notifyListeners();
   }
+
   void logout() {
     _isLoggedIn = false;
     notifyListeners();
@@ -43,6 +45,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.theme,
       home: const AuthGate(),
     );
   }
@@ -58,8 +61,6 @@ class AuthGate extends StatelessWidget {
         return const Menu(
           headers: [
             {"value": "Inicio"},
-            {"value": "Registro"},
-            {"value": "Login"},
           ],
         );
       },
@@ -76,7 +77,6 @@ class Menu extends StatefulWidget {
 
 class _ManejadorMenu extends State<Menu> {
   int currentPage = 0;
-  final Color primaryGreen = Colors.green.shade600;
 
   void navigateTo(int index) {
     setState(() {
@@ -98,43 +98,7 @@ class _ManejadorMenu extends State<Menu> {
 
   List<Widget> _quickNav(bool visible) {
     if (!visible) return [];
-    return [
-      _elegantButton("Registro", 1, icon: Icons.person_add),
-      _elegantButton("Login", 2, icon: Icons.login),
-    ];
-  }
-
-  Widget _elegantButton(String label, int index, {IconData? icon}) {
-    bool isActive = currentPage == index;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: GestureDetector(
-        onTap: () => navigateTo(index),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isActive ? Colors.white.withOpacity(0.2) : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) Icon(icon, size: 18, color: Colors.white),
-              if (icon != null) const SizedBox(width: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    return [];
   }
 
   Widget _cartIconWithBadge() {
@@ -155,15 +119,19 @@ class _ManejadorMenu extends State<Menu> {
                 child: Container(
                   padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: AppColors.errorColor,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white, width: 1.5),
                   ),
-                  constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+                  constraints:
+                      const BoxConstraints(minWidth: 20, minHeight: 20),
                   child: Center(
                     child: Text(
                       itemCount > 99 ? '99+' : itemCount.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -181,13 +149,19 @@ class _ManejadorMenu extends State<Menu> {
       children: [
         const Text(
           "HGW",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white, letterSpacing: 2),
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              color: Colors.white,
+              letterSpacing: 2),
         ),
         const SizedBox(width: 8),
         Container(
           width: 28,
           height: 28,
-          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+          decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2)),
           child: const Icon(Icons.storefront, color: Colors.white, size: 20),
         ),
       ],
@@ -198,7 +172,7 @@ class _ManejadorMenu extends State<Menu> {
     return IconButton(
       icon: Icon(
         Icons.person,
-        color: currentPage == 6 ? primaryGreen : Colors.white,
+        color: currentPage == 6 ? AppColors.elegantGreenLight : Colors.white,
       ),
       onPressed: () => navigateTo(6),
     );
@@ -215,7 +189,11 @@ class _ManejadorMenu extends State<Menu> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(
               3,
-              (_) => Container(width: 5, height: 5, decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+              (_) => Container(
+                  width: 5,
+                  height: 5,
+                  decoration: const BoxDecoration(
+                      color: Colors.white, shape: BoxShape.circle)),
             ),
           );
         }),
@@ -235,14 +213,21 @@ class _ManejadorMenu extends State<Menu> {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [primaryGreen, Colors.green.shade400]),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4, offset: const Offset(0, 2))],
+            color: AppColors.elegantGreenDark,
+            boxShadow: [
+              BoxShadow(
+                  color: AppColors.elegantGreenDark.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4))
+            ],
           ),
           child: SafeArea(
             child: Row(
               children: [
                 Builder(
-                  builder: (context) => IconButton(icon: _drawerIcon(), onPressed: () => Scaffold.of(context).openDrawer()),
+                  builder: (context) => IconButton(
+                      icon: _drawerIcon(),
+                      onPressed: () => Scaffold.of(context).openDrawer()),
                 ),
                 const SizedBox(width: 12),
                 elegantLogo(),
@@ -261,22 +246,28 @@ class _ManejadorMenu extends State<Menu> {
           padding: EdgeInsets.zero,
           children: [
             UserAccountsDrawerHeader(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [primaryGreen, Colors.green.shade400], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              decoration: const BoxDecoration(
+                color: AppColors.elegantGreenDark,
               ),
               accountName: Consumer<PersonalProvider>(
                 builder: (context, personalProvider, child) {
                   final usuario = personalProvider.usuario;
                   return Text(
-                    usuario != null ? "${usuario.nombre} ${usuario.apellido}" : "HGW Tienda",
-                    style: const TextStyle(fontSize: 18),
+                    usuario != null
+                        ? "${usuario.nombre} ${usuario.apellido}"
+                        : "Usuario",
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   );
                 },
               ),
               accountEmail: Consumer<PersonalProvider>(
                 builder: (context, personalProvider, child) {
                   final usuario = personalProvider.usuario;
-                  return Text(usuario?.correoElectronico ?? "contact@hgw.com");
+                  return Text(
+                    usuario?.correoElectronico ?? "cargando...",
+                    style: TextStyle(color: Colors.white.withOpacity(0.9)),
+                  );
                 },
               ),
               currentAccountPicture: Consumer<PersonalProvider>(
@@ -286,19 +277,17 @@ class _ManejadorMenu extends State<Menu> {
                     return CircleAvatar(
                       backgroundImage: NetworkImage(usuario!.urlFotoPerfil!),
                       backgroundColor: Colors.white,
-                      onBackgroundImageError: (exception, stackTrace) {
-                        // Si hay error cargando la imagen, mostrar inicial
-                      },
-                      child: null,
                     );
                   }
-                  String inicial = usuario != null ? (usuario.nombre.isNotEmpty ? usuario.nombre[0] : 'H') : 'H';
+                  String inicial = usuario != null
+                      ? (usuario.nombre.isNotEmpty ? usuario.nombre[0] : 'H')
+                      : 'H';
                   return CircleAvatar(
                     backgroundColor: Colors.white,
                     child: Text(
                       inicial.toUpperCase(),
-                      style: TextStyle(
-                        color: primaryGreen,
+                      style: const TextStyle(
+                        color: AppColors.elegantGreenDark,
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
                       ),
@@ -308,41 +297,36 @@ class _ManejadorMenu extends State<Menu> {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.home, color: primaryGreen),
-              title: const Text("Inicio"),
+              leading: const Icon(Icons.home_outlined,
+                  color: AppColors.elegantGreenDark),
+              title: const Text("Inicio", style: AppStyles.body),
               onTap: () {
                 navigateTo(0);
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              leading: Icon(Icons.app_registration, color: primaryGreen),
-              title: const Text("Registro"),
+              leading: const Icon(Icons.logout, color: AppColors.errorColor),
+              title: const Text("Cerrar Sesión", style: AppStyles.body),
               onTap: () {
-                navigateTo(1);
+                Provider.of<AuthProvider>(context, listen: false).logout();
                 Navigator.pop(context);
               },
             ),
+            const Divider(indent: 20, endIndent: 20),
             ListTile(
-              leading: Icon(Icons.login, color: primaryGreen),
-              title: const Text("Login"),
-              onTap: () {
-                navigateTo(2);
-                Navigator.pop(context);
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: Icon(Icons.school, color: primaryGreen),
-              title: const Text("Educación"),
+              leading: const Icon(Icons.school_outlined,
+                  color: AppColors.elegantGreenDark),
+              title: const Text("Educación", style: AppStyles.body),
               onTap: () {
                 navigateTo(3);
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              leading: Icon(Icons.store, color: primaryGreen),
-              title: const Text("Catálogo"),
+              leading: const Icon(Icons.storefront_outlined,
+                  color: AppColors.elegantGreenDark),
+              title: const Text("Catálogo", style: AppStyles.body),
               onTap: () {
                 navigateTo(4);
                 Navigator.pop(context);
@@ -352,44 +336,62 @@ class _ManejadorMenu extends State<Menu> {
               leading: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Icon(Icons.shopping_cart, color: primaryGreen),
-                  Consumer<CarritoProvider>(builder: (context, carritoProvider, child) {
-                    int itemCount = carritoProvider.cantidadTotal;
-                    if (itemCount == 0) return const SizedBox();
-                    return Positioned(
-                      right: -8,
-                      top: -8,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                        child: Text(itemCount > 99 ? '99+' : itemCount.toString(), style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
-                      ),
-                    );
-                  }),
+                  const Icon(Icons.shopping_cart_outlined,
+                      color: AppColors.elegantGreenDark),
+                  Consumer<CarritoProvider>(
+                    builder: (context, carritoProvider, child) {
+                      int itemCount = carritoProvider.cantidadTotal;
+                      if (itemCount == 0) return const SizedBox();
+                      return Positioned(
+                        right: -5,
+                        top: -5,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                              color: AppColors.errorColor,
+                              shape: BoxShape.circle),
+                          child: Text(
+                            itemCount > 99 ? '99+' : itemCount.toString(),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
-              title: Consumer<CarritoProvider>(builder: (context, carritoProvider, child) {
+              title: Consumer<CarritoProvider>(
+                  builder: (context, carritoProvider, child) {
                 int itemCount = carritoProvider.cantidadTotal;
-                return Text(itemCount > 0 ? "Carrito ($itemCount)" : "Carrito");
+                return Text("Carrito ${itemCount > 0 ? '($itemCount)' : ''}",
+                    style: AppStyles.body);
               }),
-              subtitle: Consumer<CarritoProvider>(builder: (context, carritoProvider, child) {
+              subtitle: Consumer<CarritoProvider>(
+                  builder: (context, carritoProvider, child) {
                 double total = carritoProvider.total;
                 if (total == 0) return const SizedBox();
-                return Text("Total: \$${total.toStringAsFixed(2)}", style: TextStyle(color: primaryGreen, fontWeight: FontWeight.bold));
+                return Text("\$${total.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                        color: AppColors.elegantGreenDark,
+                        fontWeight: FontWeight.bold));
               }),
               onTap: () {
                 navigateTo(5);
                 Navigator.pop(context);
               },
             ),
-            const Divider(),
+            const Divider(indent: 20, endIndent: 20),
             ListTile(
-              leading: Icon(Icons.person, color: primaryGreen),
-              title: const Text("Mi Perfil"),
+              leading: const Icon(Icons.person_outline,
+                  color: AppColors.elegantGreenDark),
+              title: const Text("Mi Perfil", style: AppStyles.body),
               subtitle: Consumer<PersonalProvider>(
                 builder: (context, personalProvider, child) {
-                  return Text(personalProvider.nivelMembresia);
+                  return Text(personalProvider.nivelMembresia,
+                      style: AppStyles.caption);
                 },
               ),
               onTap: () {
@@ -398,20 +400,22 @@ class _ManejadorMenu extends State<Menu> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.group, color: primaryGreen),
-              title: const Text("Mi Red"),
+              leading: const Icon(Icons.group_outlined,
+                  color: AppColors.elegantGreenDark),
+              title: const Text("Mi Red", style: AppStyles.body),
               trailing: Consumer<PersonalProvider>(
                 builder: (context, personalProvider, child) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: primaryGreen.withOpacity(0.1),
+                      color: AppColors.elegantGreenLight.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       '${personalProvider.personasEnRed}',
-                      style: TextStyle(
-                        color: primaryGreen,
+                      style: const TextStyle(
+                        color: AppColors.elegantGreenDark,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -428,59 +432,73 @@ class _ManejadorMenu extends State<Menu> {
             Consumer<PersonalProvider>(
               builder: (context, personalProvider, child) {
                 return Container(
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        primaryGreen.withOpacity(0.1),
-                        Colors.green.shade400.withOpacity(0.1),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.borderColor),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        )
+                      ]),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          const Text(
                             'Membresía',
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: primaryGreen,
-                            ),
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.elegantGreenDark,
+                                fontSize: 16),
                           ),
-                          Text(
-                            personalProvider.nivelMembresia,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: primaryGreen,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                                color: AppColors.elegantGreenDark,
+                                borderRadius: BorderRadius.circular(4)),
+                            child: Text(
+                              personalProvider.nivelMembresia,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 12),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(
-                        value: personalProvider.progresoMembresia,
-                        backgroundColor: Colors.grey[300],
-                        valueColor: AlwaysStoppedAnimation<Color>(primaryGreen),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${personalProvider.puntosActuales} BV',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
+                      const SizedBox(height: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          minHeight: 6,
+                          value: personalProvider.progresoMembresia,
+                          backgroundColor: AppColors.backgroundLight,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                              AppColors.elegantGreenLight),
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${personalProvider.puntosActuales} BV Puntos',
+                        style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textLight,
+                            fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
                 );
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
           ],
         ),
       ),
@@ -497,9 +515,14 @@ class _ManejadorMenu extends State<Menu> {
                 if (carritoProvider.items.isEmpty) return const SizedBox();
                 return FloatingActionButton.extended(
                   onPressed: () => navigateTo(5),
-                  backgroundColor: primaryGreen,
-                  icon: const Icon(Icons.shopping_cart),
-                  label: Text("${carritoProvider.cantidadTotal} items", style: const TextStyle(fontWeight: FontWeight.bold)),
+                  backgroundColor: AppColors.elegantGreenDark,
+                  elevation: 4,
+                  icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                  label: Text(
+                    "${carritoProvider.cantidadTotal} items",
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
                 );
               },
             )
@@ -512,42 +535,41 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
   @override
   Widget build(BuildContext context) {
-    final Color primaryGreen = Colors.green.shade600;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.storefront, size: 90, color: primaryGreen),
-            const SizedBox(height: 20),
-            Text("Bienvenido a Tienda HGW", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.grey[800])),
-            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                  color: AppColors.backgroundLight,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: AppColors.elegantGreenLight.withOpacity(0.5),
+                      width: 2)),
+              child: const Icon(Icons.storefront_outlined,
+                  size: 80, color: AppColors.elegantGreenDark),
+            ),
+            const SizedBox(height: 32),
+            const Text("Bienvenido a Tienda HGW",
+                textAlign: TextAlign.center, style: AppStyles.heading2),
+            const SizedBox(height: 16),
+            const Text(
+              "Explora nuestra selección de productos premium pensados para ti.",
+              textAlign: TextAlign.center,
+              style: AppStyles.body,
+            ),
+            const SizedBox(height: 40),
             ElevatedButton.icon(
               onPressed: () {
                 final menu = context.findAncestorStateOfType<_ManejadorMenu>();
                 menu?.navigateTo(4);
               },
-              icon: const Icon(Icons.store, color: Colors.white),
-              label: const Text("Ver Catálogo", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryGreen,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
+              icon: const Icon(Icons.manage_search, color: Colors.white),
+              label: const Text("Explorar Catálogo"),
             ),
-            const SizedBox(height: 12),
-            Text(
-              "Productos destacados.",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-                height: 1.4,
-              ),
-            ),
-            
-            
           ],
         ),
       ),

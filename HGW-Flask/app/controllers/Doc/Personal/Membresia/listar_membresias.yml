@@ -1,8 +1,9 @@
-summary: Listar todas las membresías
+summary: Listar todas las membresías disponibles
 description: |
-  Recupera el catálogo completo de planes de membresía disponibles.
+  Devuelve el listado completo de planes de membresía registrados en la base de datos.
+  Cada membresía incluye su precio y los BV requeridos.
 tags:
-  - Membresía
+  - 🏅 Membresía
 responses:
   200:
     description: Membresías obtenidas exitosamente
@@ -19,10 +20,29 @@ responses:
             properties:
               id_membresia:
                 type: integer
+                example: 1
               nombre_membresia:
                 type: string
+                example: "Básica"
               precio_membresia:
                 type: number
+                example: 19.99
+              bv:
+                type: integer
+                example: 300
+    examples:
+      application/json:
+        success: true
+        membresias:
+          - id_membresia: 1
+            nombre_membresia: "Básica"
+            precio_membresia: 19.99
+            bv: 300
+          - id_membresia: 2
+            nombre_membresia: "Premium"
+            precio_membresia: 49.99
+            bv: 900
+
   500:
     description: Error interno del servidor
     schema:
@@ -33,4 +53,4 @@ responses:
           example: false
         message:
           type: string
-          example: "Descripción del error"
+          example: "Error al listar membresías: detalle"

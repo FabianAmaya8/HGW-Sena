@@ -1,18 +1,19 @@
 summary: Obtener carrito de compras
 description: |
-  Devuelve los productos activos en el carrito del usuario, eliminando primero
-  los inactivos (sin stock o desactivados) y notificando cuáles fueron “podados”.
+  Devuelve los productos activos en el carrito del usuario. Antes elimina productos
+  que estén inactivos o con stock 0 y notifica los eliminados.
 tags:
-  - Carrito
+  - 🛒 Carrito
 parameters:
   - name: id
     in: query
     type: integer
     required: true
     description: ID del usuario
+    example: 1
 responses:
   200:
-    description: Carrito obtenido con éxito
+    description: Carrito obtenido con éxito (podría incluir notificación de productos eliminados)
     schema:
       type: object
       properties:
@@ -26,24 +27,33 @@ responses:
             properties:
               id_producto:
                 type: integer
+                example: 10
               nombre_producto:
                 type: string
+                example: "Manzana"
               imagen_producto:
                 type: string
+                example: "/uploads/product_images/manzana.jpg"
               precio_producto:
                 type: number
+                format: float
+                example: 4500.5
               cantidad_producto:
                 type: integer
+                example: 3
               stock:
                 type: integer
+                example: 10
         eliminados:
           type: array
           items:
             type: string
           description: Productos eliminados (opcional)
+          example: ["Producto A", "Producto B"]
         mensaje:
           type: string
-          description: Mensaje informativo
+          description: Mensaje informativo (ej. carrito vacío o aviso de eliminación)
+          example: "Algunos productos ya no están disponibles y fueron eliminados del carrito. El carrito está vacío."
   400:
     description: Falta ID de usuario
     schema:

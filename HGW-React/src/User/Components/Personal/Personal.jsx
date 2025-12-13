@@ -33,7 +33,7 @@ export default function Personal() {
 
     const opcionesInformacion = [
     { icon: 'bx bx-user-circle', label: 'Información Personal', to: '/informacion-personal' },
-    { icon: 'bx bx-credit-card', label: 'Información Financiera', to: '#' },
+    { icon: 'bx bx-list-ul', label: 'Ordenes', to: '/Mis-Ordenes' },
     ...(level === 5 ? [{ icon: 'bx bx-trophy', label: 'Rango Honor', to: '/usuario/personal/rangohonor' }] : [])
   ];
 
@@ -44,9 +44,9 @@ export default function Personal() {
   ];
 
   const opcionesRed = [
-    { icon: 'bx bxs-user-badge', label: 'Consulta Venta Personal de la Red', to: '#' },
-    { icon: 'bx bxs-user-plus', label: 'Genealogía', to: '/usuario/personal/arbol' },
-    { icon: 'bx bxs-user-account', label: 'Líneas Directas', to: '#' }
+    { icon: 'bx bxs-user-badge', label: 'Consulta Venta Personal de la Red', to: '/Mi-Red' },
+    { icon: 'bx bxs-user-plus', label: 'Genealogía', to: '/Mi-Red' },
+    { icon: 'bx bxs-user-account', label: 'Líneas Directas', to: '/Mi-Red' }
   ];
 
   const opcionesAyuda = [

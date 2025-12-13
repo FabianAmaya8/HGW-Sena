@@ -122,7 +122,7 @@ const Controlador = () => {
               <Route path="*" element={<Nofound />} />
               <Route index element={<Navigate to="Home" replace />} />
               {rutas}
-              
+              <Route path='Administracion/Informes' element={<Secure><Informes /></Secure>} />
               <Route path="GestionVistas/Crear" element={<Secure><CreacionVistas /></Secure>} />
               <Route path="GestionVistas/Editar" element={<Secure><EditarModulo vistas={menu} /></Secure>} />
               <Route path="Home" element={<Secure><Home /></Secure>} />

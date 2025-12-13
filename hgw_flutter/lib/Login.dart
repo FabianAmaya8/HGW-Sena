@@ -9,10 +9,10 @@ import 'services/auth/auth_service.dart';
 import 'models/personal/usuario.dart';
 import 'config/api_config.dart';
 import 'providers/carrito/carrito_provider.dart';
+import './utils/constants.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
-
   @override
   State<Login> createState() => _ManejadorLogin();
 }
@@ -29,39 +29,57 @@ class _ManejadorLogin extends State<Login> {
   List<Widget> inputsLogin(List<Map<String, dynamic>> values) {
     return values.map((value) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0),
-        child: TextFormField(
-          obscureText: value["value"] == "contrasena",
-          cursorColor: Colors.green.shade700,
-          onChanged: (val) {
-            setState(() {
-              valores[value["value"]] = val;
-            });
-          },
-          style: TextStyle(color: Colors.black87),
-          decoration: InputDecoration(
-            labelText: value["label"],
-            labelStyle: TextStyle(color: Colors.grey.shade700),
-            floatingLabelStyle: TextStyle(color: Colors.green.shade700),
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 4),
+              child: Text(
+                value["label"],
+                style: const TextStyle(
+                    color: AppColors.textMedium,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14),
+              ),
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.green.shade700, width: 2),
+            TextFormField(
+              obscureText: value["value"] == "contrasena",
+              cursorColor: AppColors.elegantGreenDark,
+              onChanged: (val) => setState(() => valores[value["value"]] = val),
+              style: const TextStyle(color: AppColors.textDark),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: AppColors.backgroundLight,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none),
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                        color: AppColors.elegantGreenDark, width: 1.5)),
+                prefixIcon: Icon(
+                    value["value"] == "usuario"
+                        ? Icons.email_outlined
+                        : Icons.lock_outline,
+                    color: AppColors.textLight.withOpacity(0.7),
+                    size: 20),
+              ),
             ),
-          ),
+          ],
         ),
       );
     }).toList();
   }
 
   Future<void> _tryLogin(BuildContext context) async {
-    String usuario = (valores["usuario"] ?? '').toString().trim();
-    String contrasena = (valores["contrasena"] ?? '').toString().trim();
+    final usuario = (valores["usuario"] ?? '').toString().trim();
+    final contrasena = (valores["contrasena"] ?? '').toString().trim();
 
     if (usuario.isEmpty || contrasena.isEmpty) {
       showGlobalAlert(context, "Ingresa usuario y contraseña");
@@ -72,49 +90,45 @@ class _ManejadorLogin extends State<Login> {
 
     try {
       final response = await http.post(
-        Uri.parse(ApiConfig.baseUrl + "/api/login"),
+        Uri.parse("${ApiConfig.baseUrl}/api/login"),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'usuario': usuario, 'contrasena': contrasena}),
       );
 
       final responseData = jsonDecode(response.body);
 
-      if (response.statusCode == 200 && responseData['success'] == true) {
-        if (responseData['usuario'] != null) {
-          final usuarioData = responseData['usuario'];
-          final int userId = usuarioData['id_usuario'] ?? 0;
+      if (response.statusCode == 200 &&
+          responseData['success'] == true &&
+          responseData['usuario'] != null) {
+        final uData = responseData['usuario'];
+        final int userId = uData['id_usuario'] ?? 0;
 
-          final usuarioObj = Usuario(
+        await AuthService.saveSession(
+          usuario: Usuario(
             idUsuario: userId,
-            nombre: usuarioData['nombre'] ?? '',
-            apellido: usuarioData['apellido'] ?? '',
-            nombreUsuario: usuarioData['nombre_usuario'] ?? usuario,
-            correoElectronico: usuarioData['correo_electronico'] ?? '',
-            numeroTelefono: usuarioData['numero_telefono'],
-            urlFotoPerfil: usuarioData['url_foto_perfil'],
-            patrocinador: usuarioData['patrocinador'],
-            nombreMedio: usuarioData['nombre_medio'],
+            nombre: uData['nombre'] ?? '',
+            apellido: uData['apellido'] ?? '',
+            nombreUsuario: uData['nombre_usuario'] ?? usuario,
+            correoElectronico: uData['correo_electronico'] ?? '',
+            numeroTelefono: uData['numero_telefono'],
+            urlFotoPerfil: uData['url_foto_perfil'],
+            patrocinador: uData['patrocinador'],
+            nombreMedio: uData['nombre_medio'],
             direcciones: [],
             membresia: null,
+          ),
+          token: responseData['token'],
+        );
+
+        if (mounted) {
+          Provider.of<AuthProvider>(context, listen: false).login();
+          Provider.of<CarritoProvider>(context, listen: false)
+              .setUserId(userId);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text("✅ Login exitoso"),
+                backgroundColor: AppColors.elegantGreenDark),
           );
-
-          await AuthService.saveSession(
-            usuario: usuarioObj,
-            token: responseData['token'],
-          );
-
-          if (mounted) {
-            final auth = Provider.of<AuthProvider>(context, listen: false);
-            final carrito =
-                Provider.of<CarritoProvider>(context, listen: false);
-
-            auth.login();
-            carrito.setUserId(userId);
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("✅ Login exitoso")),
-            );
-          }
         }
       } else {
         showGlobalAlert(context,
@@ -127,109 +141,116 @@ class _ManejadorLogin extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    double anchoPantalla = MediaQuery.of(context).size.width;
-
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.grey.shade100, Colors.grey.shade300],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Center(
-          child: Container(
-            width: anchoPantalla * 0.85,
-            constraints: BoxConstraints(maxWidth: 400),
-            padding: EdgeInsets.symmetric(vertical: 40, horizontal: 30),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 25,
-                  offset: Offset(0, 12),
+      backgroundColor: AppColors.elegantGreenLight.withOpacity(0.4),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                constraints: const BoxConstraints(maxWidth: 400),
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                        color: AppColors.elegantGreenDark.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10)),
+                  ],
                 ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Iniciar Sesión",
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontSize: 26,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: 30),
-                ...inputsLogin([
-                  {"label": "Nombre de usuario", "value": "usuario"},
-                  {"label": "Contraseña", "value": "contrasena"},
-                ]),
-                SizedBox(height: 25),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () => _tryLogin(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green.shade700,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                child: Column(
+                  children: [
+                    const Text("Iniciar sesión",
+                        style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.elegantGreenDark)),
+                    const SizedBox(height: 8),
+                    Text("Bienvenido a HGW",
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                            fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 32),
+                    ...inputsLogin([
+                      {"label": "Email o Usuario", "value": "usuario"},
+                      {"label": "Contraseña", "value": "contrasena"}
+                    ]),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        child: Text("¿Olvidaste tu contraseña?",
+                            style: TextStyle(
+                                color: Colors.grey.shade600, fontSize: 12)),
                       ),
                     ),
-                    child: Text(
-                      "Ingresar",
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () => _tryLogin(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.elegantGreenDark,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25)),
+                        ),
+                        child: const Text("Iniciar sesión",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => Registro())),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                              color: AppColors.elegantGreenDark),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25)),
+                        ),
+                        child: const Text("Crear cuenta",
+                            style: TextStyle(
+                                color: AppColors.elegantGreenDark,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.eco,
+                      color: AppColors.elegantGreenDark.withOpacity(0.8)),
+                  const SizedBox(width: 8),
+                  Text("HGW ",
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (_) => Registro()));
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      side:
-                          BorderSide(color: Colors.green.shade700, width: 1.5),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text(
-                      "Registrarme",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.green.shade700,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 12),
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    "¿Olvidaste tu contraseña?",
-                    style: TextStyle(color: Colors.grey.shade700),
-                  ),
-                ),
-              ],
-            ),
+                          fontFamily: 'Cursive',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.elegantGreenDark.withOpacity(0.8))),
+                ],
+              ),
+            ],
           ),
         ),
       ),

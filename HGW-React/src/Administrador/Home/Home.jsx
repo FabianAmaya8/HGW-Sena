@@ -3,8 +3,12 @@ import {
   Box, Typography, Avatar, keyframes, Paper, Fade, Grow
 } from '@mui/material';
 import HandshakeIcon from '@mui/icons-material/Handshake';
+import { findWorkingBaseUrl } from '../../urlDB';
 import { AppContext } from '../../controlador';
 import Style from './Home.module.scss';
+import { datosToken } from '../../auth';
+
+const BACKEND = (findWorkingBaseUrl() || "").replace(/\/$/, "");
 
 const wave = keyframes`
   0% { transform: rotate(0deg); }
@@ -31,9 +35,18 @@ const frases = [
 export default function Home() {
   const { medidas, anchoDrawer } = useContext(AppContext);
   const [show, setShow] = useState(false);
+  const [usuario, setUsuario] = useState({});
   const [fraseIndex, setFraseIndex] = useState(0);
   const [terminoCarga, setTerminoCarga] = useState(false);
-
+  const token = datosToken()
+  useEffect(()=>{
+    fetch(BACKEND+"/consultaFilas", {
+      method: "POST",
+      headers: {"content-type": "application/json"},
+      body: JSON.stringify({id_usuario: token.id, table: "usuarios"}),
+    }).then((stream)=>stream.json()).then((res)=>setUsuario(res));
+  }, []);
+  console.log(usuario);
   useEffect(() => {
     setShow(true);
 
@@ -107,7 +120,7 @@ export default function Home() {
             </Grow>
 
             <Typography variant="h3" sx={{ fontWeight: 700, fontSize: medidas === 'movil' ? '2rem' : '3rem' }}>
-              Bienvenido, admin
+              Bienvenido, {usuario.nombre?.replace(/\b\w/g, (l)=> l.toUpperCase())}
             </Typography>
 
             <Typography
@@ -121,7 +134,7 @@ export default function Home() {
                 fontSize: medidas === 'movil' ? '1rem' : '1.25rem'
               }}
             >
-              {!terminoCarga ? frases[fraseIndex] : "¡Bienvenido!"}
+              {!terminoCarga ? frases[fraseIndex] : `Bienvenido ${!usuario.ultimo_acceso ? "por primera vez" : "de nuevo"}!`}
             </Typography>
           </Paper>
         </Fade>

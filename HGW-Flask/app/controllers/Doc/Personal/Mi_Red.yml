@@ -1,0 +1,130 @@
+summary: Obtener la red multinivel completa del usuario
+description: |
+  Retorna la red multinivel (hasta 10 niveles) del usuario especificado.  
+  La red se genera mediante una consulta recursiva (CTE) que identifica todos los usuarios patrocinados
+  directa e indirectamente por el código del usuario.
+
+  La respuesta incluye:
+    - Información básica de cada usuario en la red
+    - Nivel dentro de la estructura multinivel
+    - Fecha de registro
+    - Estado de actividad
+    - Cantidad de patrocinados directos
+    - 🏅 Membresía y puntos BV
+    - Código del patrocinador principal
+
+tags:
+  - 👤 Usuario
+
+parameters:
+  - name: id
+    in: query
+    required: true
+    type: integer
+    description: ID del usuario del cual se desea obtener la red
+    example: 10
+
+responses:
+  200:
+    description: Red obtenida exitosamente
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+
+        codigo_patrocinador:
+          type: string
+          example: "Fabian_Amaya8"
+
+        total:
+          type: integer
+          description: Cantidad total de usuarios encontrados en la red
+          example: 7
+
+        red:
+          type: array
+          description: Lista de usuarios dentro de la red multinivel
+          items:
+            type: object
+            properties:
+              id_usuario:
+                type: integer
+                example: 25
+              nombre:
+                type: string
+                example: "Laura"
+              apellido:
+                type: string
+                example: "Rozo"
+              nombre_usuario:
+                type: string
+                example: "LauraR"
+              correo_electronico:
+                type: string
+                example: "laura@example.com"
+              url_foto_perfil:
+                type: string
+                nullable: true
+                example: "static/uploads/profile_pictures/laura.jpg"
+              patrocinador:
+                type: string
+                example: "Fabian_Amaya8"
+              nombre_membresia:
+                type: string
+                example: "Oro"
+              fecha_registro:
+                type: string
+                example: "2025-02-12 15:34:22"
+              nivel:
+                type: integer
+                example: 2
+              activo:
+                type: integer
+                example: 1
+              numero_telefono:
+                type: string
+                example: "3001234567"
+              total_red:
+                type: integer
+                example: 3
+              puntos_bv:
+                type: integer
+                example: 120
+
+  400:
+    description: ID no proporcionado
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "ID de usuario no proporcionado"
+
+  404:
+    description: Usuario no encontrado
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Usuario no encontrado"
+
+  500:
+    description: Error interno del servidor
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Error del servidor: detalle del error"

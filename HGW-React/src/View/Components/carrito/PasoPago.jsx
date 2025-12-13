@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { urlDB } from "../../../urlDB";
 import Resumen from "./Resumen";
+import { generarPDFOrden } from "../../hooks/generarPDF";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../pages/Context/AuthContext";
@@ -124,12 +125,50 @@ export default function PasoPago({ carrito, direccionSeleccionada, actualizarCan
             }
 
             // 🟩 SI TODO ESTÁ BIEN
+            const idOrden = data.id_orden;
             clearCart();
+
+
+            // Mostrar modal con 2 botones
             Swal.fire({
-                title: "Pago realizado",
-                text: "Tu orden ha sido procesada exitosamente.",
-                icon: "success"
-            }).then(() => navigate("/"));
+                title: "Pago exitoso",
+                html: `
+                    <p>Tu orden ha sido generada correctamente.</p>
+                    <p><strong>ID de la orden:</strong> ${idOrden}</p>
+                `,
+                icon: "success",
+                showCancelButton: true,
+                confirmButtonText: "Ver reporte (PDF)",
+                cancelButtonText: "Regresar al inicio",
+                reverseButtons: true
+            })
+            .then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const endpointDetalle = await urlDB(`ordenDetalle/${idOrden}`);
+                        const resDetalle = await fetch(endpointDetalle);
+                        const detalleData = await resDetalle.json();
+
+                        if (!resDetalle.ok) {
+                            throw new Error("No se pudo obtener el detalle de la orden");
+                        }
+                        generarPDFOrden(detalleData);
+                        setTimeout(() => {
+                            navigate("/");
+                        }, 500);
+                    } catch (error) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error al generar PDF",
+                            text: error.message
+                        });
+                    }
+
+                } else {
+                    // Regresar al inicio
+                    navigate("/");
+                }
+            });
 
         } catch (err) {
             Swal.fire({

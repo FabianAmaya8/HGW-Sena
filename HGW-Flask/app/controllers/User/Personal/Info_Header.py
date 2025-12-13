@@ -17,7 +17,7 @@ def obtener_usuario():
         connection = get_db()
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT url_foto_perfil FROM usuarios
+                SELECT url_foto_perfil, nombre_usuario as usuario FROM usuarios
                 WHERE id_usuario = %s
             """, (user_id,))
             user = cursor.fetchone()

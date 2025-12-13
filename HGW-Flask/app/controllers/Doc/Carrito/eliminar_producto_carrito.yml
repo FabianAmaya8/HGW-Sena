@@ -1,13 +1,14 @@
 summary: Eliminar producto del carrito
 description: |
-  Elimina un producto específico del carrito del usuario.
+  Elimina un producto específico del carrito del usuario si existe.
 tags:
-  - Carrito
+  - 🛒 Carrito
 consumes:
   - application/json
 parameters:
   - in: body
     name: datos
+    required: true
     schema:
       type: object
       required:
@@ -17,9 +18,11 @@ parameters:
         id_usuario:
           type: integer
           description: ID del usuario
+          example: 1
         id_producto:
           type: integer
           description: ID del producto a eliminar
+          example: 10
 responses:
   200:
     description: Producto eliminado con éxito

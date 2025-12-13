@@ -1,16 +1,16 @@
+summary: Crear una nueva dirección para el usuario
+description: |
+  Valida ciudad y país antes de registrar.  
+  Inserta la dirección asociada al usuario y retorna el ID creado.
 tags:
-  - Direcciones
-summary: Crear nueva dirección
-description: Crea una nueva dirección para un usuario específico
+  - 🚩 Direcciones
 consumes:
-  - application/json
-produces:
   - application/json
 parameters:
   - in: body
     name: body
-    description: Datos de la nueva dirección
     required: true
+    description: Datos de la dirección
     schema:
       type: object
       required:
@@ -23,27 +23,21 @@ parameters:
       properties:
         id_usuario:
           type: integer
-          description: ID del usuario
-          example: 5
+          example: 8
         lugar_entrega:
           type: string
-          description: Tipo de lugar
-          example: Casa
+          example: "Casa"
         direccion:
           type: string
-          description: Dirección completa
-          example: Calle 123 #45-67 Apto 301
+          example: "Calle 12 #45-66"
         ciudad:
           type: string
-          description: Nombre de la ciudad
-          example: Bogotá
+          example: "Bogotá"
         pais:
           type: string
-          description: Nombre del país
-          example: Colombia
+          example: "Colombia"
         codigo_postal:
           type: string
-          description: Código postal
           example: "110111"
 responses:
   201:
@@ -53,32 +47,12 @@ responses:
       properties:
         success:
           type: boolean
-          example: true
         message:
           type: string
-          example: Dirección creada exitosamente
         id_direccion:
           type: integer
-          example: 42
+          example: 55
   400:
-    description: Datos incompletos o inválidos
-    schema:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        message:
-          type: string
-          example: Campo direccion es requerido
+    description: Datos incompletos o ciudad/pais inválidos
   500:
-    description: Error interno del servidor
-    schema:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        message:
-          type: string
-          example: Error en la base de datos
+    description: Error interno

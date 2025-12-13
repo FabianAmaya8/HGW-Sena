@@ -1,9 +1,10 @@
 summary: Registrar nuevo usuario
 description: |
-  Crea un usuario con datos personales, dirección, foto de perfil opcional
-  y genera su carrito de compras inicial.
+  Registra un nuevo usuario en la plataforma.
+  Guarda datos personales, dirección de envío, una foto de perfil opcional
+  y crea automáticamente su carrito de compras.
 tags:
-  - Registro
+  - 📝 Registro
 consumes:
   - multipart/form-data
 parameters:
@@ -12,11 +13,13 @@ parameters:
     type: string
     required: true
     description: Nombres del usuario
+    example: "Fabian"
   - name: apellido
     in: formData
     type: string
     required: true
     description: Apellidos del usuario
+    example: "Amaya"
   - name: patrocinador
     in: formData
     type: string
@@ -26,12 +29,13 @@ parameters:
     in: formData
     type: string
     required: true
-    description: Nombre de usuario
+    description: Nombre de usuario único
+    example: "Fabian_Amaya8"
   - name: contrasena
     in: formData
     type: string
     required: true
-    description: Contraseña
+    description: Contraseña del usuario
   - name: confirmar_contrasena
     in: formData
     type: string
@@ -42,36 +46,42 @@ parameters:
     type: string
     required: true
     description: Correo electrónico
+    example: "fabian@example.com"
   - name: telefono
     in: formData
     type: string
     required: true
-    description: Número de teléfono
+    description: Número telefónico
+    example: "3101234567"
   - name: direccion
     in: formData
     type: string
     required: true
     description: Dirección física
+    example: "Calle 123 #45-67"
   - name: codigo_postal
     in: formData
     type: string
     required: true
     description: Código postal
+    example: "110111"
   - name: lugar_entrega
     in: formData
     type: string
     required: true
     description: Punto de entrega
+    example: "Casa"
   - name: ciudad
     in: formData
     type: integer
     required: true
-    description: ID de la ciudad (ubicación)
+    description: ID de la ciudad seleccionada
+    example: 12
   - name: foto_perfil
     in: formData
     type: file
     required: false
-    description: Imagen de perfil (opcional)
+    description: Imagen de perfil del usuario
 responses:
   201:
     description: Registro exitoso
@@ -85,7 +95,7 @@ responses:
           type: string
           example: "Registro exitoso"
   400:
-    description: Faltan campos o contraseñas no coinciden
+    description: Faltan campos obligatorios o contraseñas no coinciden
     schema:
       type: object
       properties:

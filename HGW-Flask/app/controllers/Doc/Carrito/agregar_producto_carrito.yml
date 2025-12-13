@@ -1,13 +1,15 @@
 summary: Agregar producto al carrito
 description: |
-  Inserta o actualiza la cantidad de un producto en el carrito del usuario.
+  Inserta un producto en el carrito del usuario o actualiza su cantidad si ya existe.
+  Valida stock y crea el carrito del usuario si no existe.
 tags:
-  - Carrito
+  - 🛒 Carrito
 consumes:
   - application/json
 parameters:
   - in: body
     name: datos
+    required: true
     schema:
       type: object
       required:
@@ -17,29 +19,43 @@ parameters:
         id_usuario:
           type: integer
           description: ID del usuario
+          example: 1
         id_producto:
           type: integer
-          description: ID del producto
+          description: ID del producto a agregar
+          example: 10
         cantidad:
           type: integer
           description: Cantidad a agregar (por defecto 1)
+          example: 1
 responses:
   200:
-    description: Producto agregado con éxito
+    description: Producto agregado o actualizado con éxito
     schema:
       type: object
       properties:
         mensaje:
           type: string
-          example: "Producto agregado al carrito en la base de datos"
+          example: "Producto agregado al carrito"
   400:
-    description: Falta algún dato obligatorio
+    description: Falta algún dato obligatorio o stock insuficiente
     schema:
       type: object
       properties:
         error:
           type: string
           example: "Faltan datos obligatorios"
+        stock_disponible:
+          type: integer
+          example: 3
+  404:
+    description: Producto no encontrado o inactivo
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Producto no encontrado o inactivo"
   500:
     description: Error interno al guardar en el carrito
     schema:

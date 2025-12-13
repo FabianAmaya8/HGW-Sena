@@ -14,6 +14,7 @@ import { findWorkingBaseUrl } from '../../../urlDB'
 import { datosToken } from '../../../auth'
 
 const BACKEND = findWorkingBaseUrl().replace(/\/$/, "");
+const usuarioActual = (datosToken()?.id);
 const token = datosToken();
 
 import { Visibility, VisibilityOff } from '@mui/icons-material'
@@ -28,9 +29,7 @@ const PasswordField = memo(function PasswordField({
   sx
 }) {
   const [visible, setVisible] = useState(false)
-
   const handleMouseDown = useCallback(e => e.preventDefault(), [])
-
   return (
     <TextField
       id={id}
@@ -126,11 +125,191 @@ const asignarValores = (state, action) => {
   return state
 }
 
+const FieldInput = memo(function FieldInput({ el, campo, valObj, medidas, handle }) {
+  return (
+    <TextField
+      key={el.id}
+      id={el.id}
+      label={el.label}
+      variant="standard"
+      fullWidth
+      margin="normal"
+      sx={{ maxWidth: medidas === 'movil' ? '90%' : '40%' }}
+      type={el.typeOf || 'string'}
+      value={typeof valObj === 'object' ? (valObj.text ?? '') : (valObj ?? '')}
+      error={Boolean(campo.error)}
+      helperText={campo.helperText ?? ''}
+      onChange={e => handle({ text: e.target.value }, 'input', el.id)}
+      InputLabelProps={{
+        shrink: Boolean(typeof valObj === 'object' ? valObj.text : valObj)
+      }}
+      autoComplete="off"
+    />
+  )
+})
+
+const FieldPassword = memo(function FieldPassword({ el, campo, valObj, medidas, handle }) {
+  return (
+    <PasswordField
+      key={el.id}
+      id={el.id}
+      label={el.label}
+      value={valObj}
+      error={campo.error}
+      helperText={campo.helperText}
+      onChange={e => handle({ text: e.target.value, password: true }, 'input', el.id)}
+      sx={{ maxWidth: medidas === 'movil' ? '90%' : '40%' }}
+    />
+  )
+})
+
+const FieldSelect = memo(function FieldSelect({ el, campo, opciones, editara, datosEdit, setValuesChilds, handle, medidas }) {
+  const keyTabla = el.childs?.table
+  const opts = opciones[keyTabla] || []
+  if (opts.length >= 4) {
+    let val = campo.value ?? ''
+    if (editara && !val) {
+      const dv = datosEdit[el.id]?.id ?? ''
+      if (dv) val = dv
+    }
+    if (!opts.some(o => String(o.id) === String(val))) val = ''
+    return (
+      <Autocomplete
+        options={opts}
+        getOptionLabel={(opt) => opt.nombre}
+        value={opts.find(o => String(o.id) === String(val)) || null}
+        onChange={(e, newValue) => {
+          const nuevoId = newValue?.id ?? ''
+          if (el.changeTable) {
+            handle('', 'select', el.changeTable.table)
+            setValuesChilds(el, nuevoId)
+          }
+          handle(nuevoId, 'select', el.id)
+        }}
+        renderInput={(params) => (
+          <TextField {...params} label={el.label} variant="filled" />
+        )}
+        key={el.id}
+        fullWidth
+        margin="normal"
+        size="small"
+        sx={{ position: 'relative', maxWidth: medidas === 'movil' ? '90%' : '40%' }}
+      />
+    )
+  }
+  let val = campo.value ?? ''
+  if (editara && !val) {
+    const dv = datosEdit[el.id]?.id ?? ''
+    if (dv) val = dv
+  }
+  if (!opts.some(o => String(o.id) === String(val))) val = ''
+  return (
+    <FormControl
+      key={el.id}
+      fullWidth
+      margin="normal"
+      size="small"
+      sx={{ position: 'relative', maxWidth: medidas === 'movil' ? '90%' : '40%' }}
+    >
+      <InputLabel id={`${el.id}-label`}>{el.label}</InputLabel>
+      <Select
+        labelId={`${el.id}-label`}
+        label={el.label}
+        value={val}
+        variant="filled"
+        MenuProps={{ disablePortal: true }}
+        onChange={e => {
+          if (el.changeTable) {
+            handle('', 'select', el.changeTable.table)
+            setValuesChilds(el, e.target.value)
+          }
+          handle(e.target.value, 'select', el.id)
+        }}
+      >
+        {opts.map((o, index) => (
+          <MenuItem key={o.id + index} value={o.id}>
+            {o.nombre}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  )
+})
+
+const FieldImg = memo(function FieldImg({ el, campo, medidas, handle }) {
+  const previewUrl = campo.preview || campo.value || ''
+  return (
+    <Button
+      key={el.id}
+      component="label"
+      sx={{
+        background: 'rgb(232,248,230)',
+        maxWidth: medidas === 'movil' ? '90%' : '40%',
+        minWidth: medidas === 'movil' ? '90%' : '40%',
+        height: 90,
+        mt: 2,
+        position: 'relative',
+        overflow: 'hidden'
+      }}
+    >
+      <CloudUploadIcon />
+      <input type="file" accept="image/*" hidden onChange={e => handle(e.target.files?.[0], 'img', el.id)} />
+      {previewUrl && (
+        <Box
+          component="img"
+          src={previewUrl}
+          sx={{
+            pointerEvents: 'none',
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            objectFit: 'cover',
+            transition: 'opacity 0.2s'
+          }}
+          loading="lazy"
+        />
+      )}
+    </Button>
+  )
+})
+
+const FieldSubmit = memo(function FieldSubmit({ el, envio, medidas }) {
+  return (
+    <Button
+      key="submit"
+      variant={el.variant}
+      sx={{
+        mt: 2,
+        mr: medidas === 'movil' ? 'auto' : 0,
+        ml: 'auto',
+        borderRadius: 30,
+        height: 40,
+      }}
+      onClick={envio}
+    >
+      {el.label}
+    </Button>
+  )
+})
+
 const Form = memo(({ form, consultas, edit, padre, alerta }) => {
   const editara = !!edit?.estado
   const datosEdit = edit?.datos || {}
   const { medidas } = useContext(AppContext)
   const [consultasCargadas, setConsultasCargadas] = useConsultas({}, consultas)
+
+  const previewUrlsRef = useRef(new Set())
+
+  useEffect(() => {
+    return () => {
+      previewUrlsRef.current.forEach(u => {
+        try { URL.revokeObjectURL(u) } catch (e) { }
+      })
+      previewUrlsRef.current.clear()
+    }
+  }, [])
 
   const normalizaUrlImagen = useCallback(v => {
     if (!v) return ''
@@ -224,7 +403,9 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
     if (tipo === 'input') dispatch({ id, ...e, tipo: 'input' })
     else if (tipo === 'img') {
       if (!e) return
-      dispatch({ id, value: e, preview: URL.createObjectURL(e), tipo: 'img' })
+      const preview = URL.createObjectURL(e)
+      previewUrlsRef.current.add(preview)
+      dispatch({ id, value: e, preview, tipo: 'img' })
     } else dispatch({ id, value: e })
   }, [])
 
@@ -257,8 +438,8 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
     form.forEach(f => {
       if (f.id) h({ id: f.id, error: false, helperText: '' });
     });
-    form.forEach(f => {
-      if (!f.id) return;
+    for (const f of form) {
+      if (!f.id) continue;
       if (f.type === 'img') {
         const min = f.requirements?.minLength ?? 0;
         if (min > 0) {
@@ -274,7 +455,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
             });
           }
         }
-        return;
+        continue;
       }
       if (f.type === 'select') {
         const min = f.requirements?.minLength ?? 1;
@@ -290,7 +471,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
               : 'Seleccione una opción'
           });
         }
-        return;
+        continue;
       }
       let raw = datos[f.id]?.value;
       if (typeof raw === 'object') raw = raw.text ?? '';
@@ -304,7 +485,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
           error: true,
           helperText: `debe tener entre ${minLength} y ${maxLength} caracteres`
         });
-        return;
+        continue;
       }
 
       if (Array.isArray(mustInclude) && mustInclude.length) {
@@ -318,7 +499,7 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
           });
         }
       }
-    });
+    }
 
     return ok;
   }, [])
@@ -347,9 +528,15 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
     });
     payload.append('table', form[0].req.table);
     const idKey = Object.keys(datosEdit).find(k => /(^|_)id($|_)/i.test(k));
-    if (editara && idKey) payload.append('id', String(datosEdit[idKey]));
+    if (editara && idKey) {
+      const idValor = typeof datosEdit[idKey] === "object"
+        ? datosEdit[idKey].id
+        : datosEdit[idKey];
+      payload.append('id', String(idValor));
+    }
     dispatch({ type: 'RESET', objeto: valoresRef.current });
     const url = editara ? `${BACKEND}/editar` : `${BACKEND}/registro`;
+    payload.append("log", JSON.stringify({id: usuarioActual, accion: editara ? "editar" : "crear"}))
     try {
       const res = await fetch(url, { method: 'POST', body: payload });
       const json = await res.json();
@@ -371,198 +558,46 @@ const Form = memo(({ form, consultas, edit, padre, alerta }) => {
     if (edit.click) envio()
   }, [edit.click, envio])
 
-  const renderCampos = useMemo(() => form.map(el => {
-    const campo = valores[el.id] || {}
+  const opcionesMemo = useMemo(() => opcionesPorTabla, [opcionesPorTabla])
+  const formMemo = useMemo(() => form, [form])
+  const valoresMemo = useMemo(() => valores, [valores])
+  const datosEditMemo = useMemo(() => datosEdit, [datosEdit])
+
+  const renderCampos = useMemo(() => formMemo.map(el => {
+    const campo = valoresMemo[el.id] || {}
     const valObj = campo.value || {}
 
     if (el.type === 'input' && verDep(el.dependency)) {
       if (el.typeOf === 'password') {
-        return (
-          <PasswordField
-            key={el.id}
-            id={el.id}
-            label={el.label}
-            value={valObj}
-            error={campo.error}
-            helperText={campo.helperText}
-            onChange={e =>
-              handle(
-                { text: e.target.value, password: true },
-                'input',
-                el.id
-              )
-            }
-            sx={{ maxWidth: medidas === 'movil' ? '90%' : '40%' }}
-          />
-        )
+        return <FieldPassword key={el.id} el={el} campo={campo} valObj={valObj} medidas={medidas} handle={handle} />
       }
-      return (
-        <TextField
-          key={el.id}
-          id={el.id}
-          label={el.label}
-          variant="standard"
-          fullWidth
-          margin="normal"
-          sx={{ maxWidth: medidas === 'movil' ? '90%' : '40%' }}
-          type={el.typeOf || 'string'}
-          value={typeof valObj === 'object'
-            ? (valObj.text ?? '')
-            : (valObj ?? '')}
-          error={Boolean(campo.error)}
-          helperText={campo.helperText ?? ''}
-          onChange={e => handle({ text: e.target.value }, 'input', el.id)}
-          InputLabelProps={{
-            shrink: Boolean(typeof valObj === 'object'
-              ? valObj.text
-              : valObj)
-          }}
-          autoComplete="off"
-        />
-      )
+      return <FieldInput key={el.id} el={el} campo={campo} valObj={valObj} medidas={medidas} handle={handle} />
     }
 
-
     if (el.type === 'select' && verDep(el.dependency)) {
-      const keyTabla = el.childs?.table
-      const opts = opcionesPorTabla[keyTabla] || []
-      if (opts.length >= 8) {
-        let val = campo.value ?? ''
-        if (editara && !val) {
-          const dv = datosEdit[el.id]?.id ?? ''
-          if (dv) val = dv
-        }
-        if (!opts.some(o => String(o.id) === String(val))) {
-          val = ''
-        }
-        return (
-          <Autocomplete
-            options={opts}
-            getOptionLabel={(opt) => opt.nombre}
-            value={opts.find(o => String(o.id) === String(val)) || null}
-            onChange={(e, newValue) => {
-              const nuevoId = newValue?.id ?? ''
-              if (el.changeTable) {
-                handle('', 'select', el.changeTable.table)
-                setValuesChilds(el, nuevoId)
-              }
-              handle(nuevoId, 'select', el.id)
-            }}
-            renderInput={(params) => (
-              <TextField {...params} label={el.label} variant="filled" />
-            )}
-            key={el.id}
-            fullWidth
-            margin="normal"
-            size="small"
-            sx={{ position: 'relative', maxWidth: medidas === 'movil' ? '90%' : '40%' }}
-          >
-          </Autocomplete>
-        )
-      }
-      if (opts.length < 8) {
-        let val = campo.value ?? ''
-        if (editara && !val) {
-          const dv = datosEdit[el.id]?.id ?? ''
-          if (dv) val = dv
-        }
-        if (!opts.some(o => String(o.id) === String(val))) {
-          val = ''
-        }
-        return (
-          <FormControl
-            key={el.id}
-            fullWidth
-            margin="normal"
-            size="small"
-            sx={{ position: 'relative', maxWidth: medidas === 'movil' ? '90%' : '40%' }}
-          >
-            <InputLabel id={`${el.id}-label`}>{el.label}</InputLabel>
-            <Select
-              labelId={`${el.id}-label`}
-              label={el.label}
-              value={val}
-              variant="filled"
-              MenuProps={{ disablePortal: true }}
-              onChange={e => {
-                if (el.changeTable) {
-                  handle('', 'select', el.changeTable.table)
-                  setValuesChilds(el, e.target.value)
-                }
-                handle(e.target.value, 'select', el.id)
-              }}
-            >
-              {opts.map((o, index) => {
-                return  <MenuItem key={o.id + index} value={o.id}>
-                  {o.nombre}
-                </MenuItem>
-              })}
-            </Select>
-          </FormControl>
-        )
-      }
+      return <FieldSelect
+        key={el.id}
+        el={el}
+        campo={campo}
+        opciones={opcionesMemo}
+        editara={editara}
+        datosEdit={datosEditMemo}
+        setValuesChilds={setValuesChilds}
+        handle={handle}
+        medidas={medidas}
+      />
     }
 
     if (el.type === 'img') {
-      const previewUrl = campo.preview || campo.value || ''
-      return (
-        <Button
-          key={el.id}
-          component="label"
-          sx={{
-            background: 'rgb(232,248,230)',
-            maxWidth: medidas === 'movil' ? '90%' : '40%',
-            minWidth: medidas === 'movil' ? '90%' : '40%',
-            height: 90,
-            mt: 2,
-            position: 'relative',
-            overflow: 'hidden'
-          }}
-        >
-          <CloudUploadIcon />
-          <input type="file" accept="image/*" hidden onChange={e => handle(e.target.files?.[0], 'img', el.id)} />
-          {previewUrl && (
-            <Box
-              component="img"
-              src={previewUrl}
-              sx={{
-                pointerEvents: 'none',
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                objectFit: 'cover',
-                transition: 'opacity 0.2s'
-              }}
-              loading="lazy"
-            />
-          )}
-        </Button>
-      )
+      return <FieldImg key={el.id} el={el} campo={campo} medidas={medidas} handle={handle} />
     }
 
     if (el.type === 'submit' && !editara) {
-      return (
-        <Button
-          key="submit"
-          variant={el.variant}
-          sx={{
-            mt: 2,
-            mr: medidas === 'movil' ? 'auto' : 0,
-            ml: 'auto',
-            borderRadius: 30,
-            height: 40,
-          }}
-          onClick={envio}
-        >
-          {el.label}
-        </Button>
-      )
+      return <FieldSubmit key="submit" el={el} envio={envio} medidas={medidas} />
     }
 
     return null
-  }), [form, opcionesPorTabla, valores, handle, verDep, editara, medidas, setValuesChilds, datosEdit, envio])
+  }), [formMemo, opcionesMemo, valoresMemo, handle, verDep, editara, medidas, setValuesChilds, datosEditMemo, envio])
 
   return (
     <Slide in direction="left" timeout={400}>

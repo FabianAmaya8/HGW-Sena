@@ -1,0 +1,19 @@
+.boxChildren{
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    padding-top: 4%;
+}
+.boxGrfico{
+  width: 90%;
+  height: 350px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  gap: 4%;
+  padding: 2%;
+  border-radius: 20px;
+}

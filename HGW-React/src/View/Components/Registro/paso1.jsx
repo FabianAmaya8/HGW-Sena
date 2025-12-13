@@ -46,7 +46,7 @@ export const Paso1InformacionPersonal = ({ formData, errors, handleInputChange }
               id="patrocinador"
               name="patrocinador"
               value={formData.patrocinador}
-              onChange={handleInputChange}
+              readOnly
               className={`form-control ${errors.patrocinador ? 'is-invalid' : ''}`}
               placeholder="Ingresa tu patrocinador"
               required

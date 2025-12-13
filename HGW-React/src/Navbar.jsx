@@ -318,7 +318,7 @@ const App = memo(({objeto}) => {
             </Box>
           )}
         </Button>
-        <Box sx={{display: "flex", alignItems: "space-between", gap: 1, alignItems: "center", height: "100%"}}>
+        <Box sx={{display: "flex", gap: 1, alignItems: "center", height: "100%"}}>
           { dispositivo != "movil" && <DespliegeNavbar datos = {objectSpeedDial} navegar = {navigate} /> }
           <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', padding: 0, margin: 0 }}>
             <Typography variant="h4" sx={{fontWeight: 600, padding: 0, margin: 0}}>HGW|</Typography>
@@ -338,7 +338,7 @@ const App = memo(({objeto}) => {
 
 function Navbar({ alerta, setAlerta, imagenes, objeto }) {
   const anchoAlert = useMemo(() => {
-    if (alerta.valor.content.length > 0) {
+    if (alerta?.valor?.content?.length > 0) {
       return `-${9 * alerta.valor.content.length}px`;
     }
     return '-180px';

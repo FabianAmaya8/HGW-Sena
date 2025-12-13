@@ -1,0 +1,157 @@
+/* Fondo estilo modal Referidos */
+.md-crear-direc-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Caja modal */
+.md-crear-direc-modal {
+    background: #ffffff;
+    width: 450px;
+    max-width: 95%;
+    border-radius: 12px;
+    padding: 18px 22px;
+    animation: md-crear-direc-fadeIn 0.25s ease-out;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+}
+
+/* Header */
+.md-crear-direc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.md-crear-direc-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.md-crear-direc-close {
+    background: none;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+/* Formulario */
+.md-crear-direc-form {
+    margin-top: 16px;
+}
+
+.md-crear-direc-row {
+    margin-bottom: 15px;
+}
+
+.md-crear-direc-label {
+    font-size: 14px;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #444;
+}
+
+/* Inputs */
+.md-crear-direc-input,
+.md-crear-direc-select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.md-crear-direc-input:focus,
+.md-crear-direc-select:focus {
+    border-color: var(--botones);
+    outline: none;
+}
+
+/* Footer */
+.md-crear-direc-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Botón base */
+.md-crear-direc-btn {
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: opacity 0.2s;
+}
+
+.md-crear-direc-btn:hover {
+    opacity: 0.9;
+}
+
+/* Botón principal */
+.md-crear-direc-btn-primary {
+    background: var(--botones);
+    color: #fff;
+}
+
+/* Botón secundario */
+.md-crear-direc-btn-secondary {
+    background: #e9ecef;
+    color: #333;
+}
+
+/* Feedback */
+.md-crear-direc-feedback {
+    margin: -5px 0 12px 0;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.md-crear-direc-feedback-success {
+    background: #e6ffed;
+    color: #0f5132;
+}
+
+.md-crear-direc-feedback-danger {
+    background: #ffecec;
+    color: #842029;
+}
+
+.md-eliminar-btn{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    background: #842029;
+    color: #eee;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Animación fade */
+@keyframes md-crear-direc-fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.93);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

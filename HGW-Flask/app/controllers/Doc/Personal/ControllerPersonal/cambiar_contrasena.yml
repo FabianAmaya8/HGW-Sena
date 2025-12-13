@@ -1,13 +1,15 @@
-summary: Cambiar contraseña de usuario
+summary: Cambiar contraseña del usuario
 description: |
-  Valida la contraseña actual y la reemplaza por la nueva si es correcta.
+  Valida la contraseña actual.  
+  Si es correcta, la reemplaza por la nueva hashada con bcrypt.
 tags:
-  - Usuario
+  - 👤 Usuario
 consumes:
   - application/json
 parameters:
   - in: body
     name: payload
+    required: true
     schema:
       type: object
       required:
@@ -17,10 +19,13 @@ parameters:
       properties:
         id_usuario:
           type: integer
+          example: 7
         actual:
           type: string
+          example: "MiClaveActual123"
         nueva:
           type: string
+          example: "MiNuevaClave987"
 responses:
   200:
     description: Contraseña actualizada correctamente
@@ -40,4 +45,4 @@ responses:
   404:
     description: Usuario no encontrado
   500:
-    description: Error interno del servidor
+    description: Error interno

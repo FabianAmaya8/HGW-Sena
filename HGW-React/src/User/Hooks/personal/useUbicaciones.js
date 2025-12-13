@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { urlDB } from '../../../urlDB';
 
 export default function useUbicaciones() {
@@ -14,8 +14,7 @@ export default function useUbicaciones() {
       try {
         const url = await urlDB('api/ubicacion/paises');
         const res = await fetch(url);
-        const data = await res.json();
-        setPaises(data);
+        setPaises(await res.json());
       } catch (err) {
         setError('Error al cargar países');
       } finally {
@@ -26,19 +25,18 @@ export default function useUbicaciones() {
   }, []);
 
   // Cargar ciudades según país seleccionado
-  const fetchCiudades = async (paisId) => {
+  const fetchCiudades = useCallback(async (paisId) => {
     setLoading(true);
     try {
       const url = await urlDB(`api/ubicacion/ciudades?paisId=${paisId}`);
       const res = await fetch(url);
-      const data = await res.json();
-      setCiudades(data);
+      setCiudades(await res.json());
     } catch (err) {
       setError('Error al cargar ciudades');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   return { paises, ciudades, fetchCiudades, loading, error };
 }

@@ -1,25 +1,37 @@
-summary: Obtener filas y columnas de una tabla
+summary: Consulta paginada de una tabla
 description: |
-  Lee todos los registros de la tabla indicada y retorna  
-  `filas` con lookup de FKs y `columnas` con metadatos para UI.
+  Devuelve filas y columnas de la tabla solicitada.  
+  Incluye paginación, búsqueda general y serialización con lookup de FKs.
+
 tags:
-  - Tablas
+  - 👁️‍🗨️ Tablas
+
 consumes:
   - application/json
+
 parameters:
   - in: body
     name: req
+    required: true
     schema:
       type: object
-      required:
-        - table
       properties:
         table:
           type: string
-          description: Nombre de la tabla (minusculas)
+          required: true
+        page:
+          type: integer
+          example: 0
+        limit:
+          type: integer
+          example: 10
+        busqueda:
+          type: string
+          example: "juan"
+
 responses:
   200:
-    description: Estructura de datos de tabla
+    description: Información completa de la tabla
     schema:
       type: object
       properties:
@@ -36,5 +48,17 @@ responses:
                 type: string
               field:
                 type: string
+        total:
+          type: integer
+          example: 25
+
+  400:
+    description: Tabla no encontrada
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+
   200:
     description: Respuesta OPTIONS válida

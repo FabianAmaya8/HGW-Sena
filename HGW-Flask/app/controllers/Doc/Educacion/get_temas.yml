@@ -1,37 +1,35 @@
 tags:
-  - Educacion
+  - 🎓 Educación
 summary: Obtener todos los temas de educación
-description: Devuelve la lista completa de temas registrados en la base de datos
+description: |
+  Devuelve la lista completa de temas registrados en la tabla `educacion`.
 responses:
   200:
     description: Lista de temas obtenida exitosamente
-    content:
+    schema:
+      type: array
+      items:
+        type: object
+        properties:
+          id_tema:
+            type: integer
+            example: 1
+          tema:
+            type: string
+            example: "Matemáticas"
+    examples:
       application/json:
-        schema:
-          type: array
-          items:
-            type: object
-            properties:
-              id_tema:
-                type: integer
-                example: 1
-              tema:
-                type: string
-                example: "Matemáticas"
-        example:
-          - id_tema: 1
-            tema: "Matemáticas"
-          - id_tema: 2
-            tema: "Historia"
-          - id_tema: 3
-            tema: "Ciencias Naturales"
+        - id_tema: 1
+          tema: "Matemáticas"
+        - id_tema: 2
+          tema: "Historia"
+        - id_tema: 3
+          tema: "Ciencias Naturales"
   500:
     description: Error interno al obtener temas
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            error:
-              type: string
-              example: "Error interno al obtener temas"
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Error interno al obtener temas"
