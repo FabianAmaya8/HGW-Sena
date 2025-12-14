@@ -5,7 +5,7 @@ class ApiConfig {
   static String get baseUrl {
     if (kIsWeb) {
       // Para Flutter Web
-      return 'https://hgwflask.up.railway.app';
+      return 'http://127.0.0.1:3000/';
     } else if (defaultTargetPlatform == TargetPlatform.android) {
       // Para emulador Android
       return 'https://hgwflask.up.railway.app';
