@@ -11,7 +11,7 @@ class PersonalProvider extends ChangeNotifier {
   Usuario? _usuario;
   bool _isLoading = false;
   String? _error;
-  int _puntosActuales = 45;
+  int _puntosActuales = 0;
   int _comprasRealizadas = 0;
   int _personasEnRed = 0;
   int _lineasDirectas = 0;
@@ -104,7 +104,6 @@ class PersonalProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Obtener el userId de la sesión actual
       int? userId = await AuthService.getCurrentUserId();
 
       if (userId == null) {
@@ -124,7 +123,7 @@ class PersonalProvider extends ChangeNotifier {
         }
         await cargarMiRed();
         await cargarLineasDirectas();
-        _comprasRealizadas = 15;
+        _comprasRealizadas = await _service.obtenerConteoCompras(userId);
       }
     } catch (e) {
       _error = 'Error al cargar datos personales: $e';
@@ -223,13 +222,10 @@ class PersonalProvider extends ChangeNotifier {
     }
   }
 
-  // NUEVO: Método para cerrar sesión
   Future<void> cerrarSesion() async {
     try {
-      // Limpiar la sesión guardada
       await AuthService.clearSession();
 
-      // Limpiar todos los datos en memoria
       _usuario = null;
       _puntosActuales = 0;
       _comprasRealizadas = 0;
@@ -239,7 +235,6 @@ class PersonalProvider extends ChangeNotifier {
       _lineasDirectasList = [];
       _error = null;
 
-      // Notificar a los listeners para actualizar la UI
       notifyListeners();
     } catch (e) {
       print('Error al cerrar sesión: $e');
