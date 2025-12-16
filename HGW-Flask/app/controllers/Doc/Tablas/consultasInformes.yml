@@ -1,0 +1,48 @@
+summary: Obtener métricas y estadísticas generales del sistema
+description: |
+  Devuelve estadísticas generales de ventas, ingresos, clientes y comportamiento mensual.
+  Incluye:
+    - Ventas del día
+    - Ventas del mes
+    - Total de clientes registrados
+    - Ingresos hoy y del mes
+    - Productos más vendidos
+    - Ingresos de los últimos 6 meses
+    - Categorías más compradas
+tags:
+  - 👁️‍🗨️ Tablas
+
+responses:
+  200:
+    description: Datos de informes generados correctamente
+    schema:
+      type: object
+      properties:
+        ventas_hoy: { type: number, example: 5 }
+        ventas_mes: { type: number, example: 128 }
+        total_clientes: { type: number, example: 842 }
+        ingresos_hoy: { type: number, example: 250000 }
+        ingresos_mes: { type: number, example: 7800000 }
+        productos_destacados:
+          type: array
+          items:
+            type: object
+            properties:
+              id_producto: { type: integer, example: 12 }
+              nombre_producto: { type: string, example: "Té Verde" }
+              cantidad_productos: { type: integer, example: 42 }
+        Ingresos Mes:
+          type: array
+          description: Ingresos de los últimos 6 meses
+          items:
+            type: object
+            properties:
+              mes: { type: string, example: "Enero" }
+              data: { type: number, example: 1200000 }
+        categorias_destacadas:
+          type: array
+          items:
+            type: object
+            properties:
+              nombre_categoria: { type: string, example: "Bebidas" }
+              cantidad_compras: { type: integer, example: 58 }

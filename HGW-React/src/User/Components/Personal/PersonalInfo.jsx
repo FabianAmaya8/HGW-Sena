@@ -4,10 +4,13 @@ import usePersonalInfo from '../../Hooks/personal/usePersonalInfo';
 import useUbicaciones from '../../Hooks/personal/useUbicaciones';
 import { useState, useEffect } from 'react';
 import ModalCambiarContrasena from './ModalCambiarContrasena';
+import ModalCrearDireccion from "./ModalCrearDireccion";
 import useCambiarContrasena from '../../Hooks/personal/useCambiarContrasena';
 import eliminarFotoPerfil from '../../Hooks/personal/eliminarFotoPerfil';
 import Swal from 'sweetalert2';
 import '../../../assets/css/personal/info-personal.css';
+import { useNavigate } from 'react-router';
+import useDirecciones from '../../Hooks/personal/useDirecciones';
 
 export default function PersonalInfo() {
     const {
@@ -15,14 +18,25 @@ export default function PersonalInfo() {
         loading,
         error,
         editing,
-        formData,
-        setFormData,
-        handleChange,
+        formUsuario,
+        formDireccion,
+        direccionSeleccionada,
+        setDireccionSeleccionada,
+        seleccionarDireccion,
+        handleChangeUsuario,
+        handleChangeDireccion,
         handleEdit,
         handleCancel,
-        handleSubmit
+        updateUsuario,
+        updateDireccion,
+        crearDireccion,
+        loadingCrearDireccion,
+        refetch
     } = usePersonalInfo();
+
     const imgUrl = useImageUrl(personal?.url_foto_perfil);
+    const navigate = useNavigate();
+    const {eliminarDireccion} = useDirecciones(personal?.id_usuario);
     const {
         paises,
         ciudades,
@@ -37,59 +51,76 @@ export default function PersonalInfo() {
     const [showModal, setShowModal] = useState(false);
     const [feedback, setFeedback] = useState(null);
     const [fotoPreview, setFotoPreview] = useState(null);
+    const [showModalCrear, setShowModalCrear] = useState(false);
 
-    // Cuando comienza edición — cargar ciudades del país actual
+    // 🔄 Cargar ciudades cuando se está editando y cambia el país
     useEffect(() => {
-        if (editing && formData.pais) {
-            fetchCiudades(formData.pais);
+        if (editing && formDireccion.pais) {
+            fetchCiudades(formDireccion.pais);
         }
-    }, [editing, formData.pais]);
+    }, [editing, formDireccion.pais]);
 
-    // Limpiar preview al cancelar edición
+
+    // Limpiar preview si cancelan edición
     useEffect(() => {
         if (!editing) setFotoPreview(null);
     }, [editing]);
 
-    if (loading) {
-        return (
-            <div className="cargando">
-                <Infinity size="150" stroke="10" color="#47BF26" />
-            </div>
-        );
-    }
 
-    if (error || errorUbic) {
-        return (
-            <div className="cargando">
-                <i className="bx bx-error"></i>
-                <p>Error: {error || errorUbic}</p>
-            </div>
-        );
-    }
+    if (loading) return (
+        <div className="cargando">
+            <Infinity size="150" stroke="10" color="#47BF26" />
+        </div>
+    );
+
+    if (error || errorUbic) return (
+        <div className="cargando">
+            <i className="bx bx-error"></i>
+            <p>Error: {error || errorUbic}</p>
+        </div>
+    );
 
     if (!personal) return null;
 
 
-    // VALIDAR Y GUARDAR
+
+    // ============================================
+    // GUARDAR TODO (usuario + dirección)
+    // ============================================
+
     const handleGuardar = async () => {
-        if (!formData.pais || !formData.ciudad || !formData.lugar_entrega) {
-            setFeedback({ type: 'danger', msg: 'País, ciudad y lugar de entrega son obligatorios.' });
-            return;
-        }
         setFeedback(null);
-        await handleSubmit(personal.id_usuario);
+
+        try {
+            // Validación dirección
+            if (!formDireccion.pais || !formDireccion.ciudad || !formDireccion.lugar_entrega) {
+                setFeedback({ type: "danger", msg: "País, ciudad y lugar de entrega son obligatorios." });
+                return;
+            }
+
+            await updateUsuario(personal.id_usuario);
+            await updateDireccion(personal.id_usuario);
+
+            setFeedback({ type: "success", msg: "Datos actualizados correctamente." });
+            setTimeout(() => setFeedback(null), 1500);
+
+        } catch (err) {
+            setFeedback({ type: "danger", msg: err.message });
+        }
     };
 
-    // Subir foto
+
+    // ======================
+    // FOTO DE PERFIL
+    // ======================
+
     const handleFotoChange = (e) => {
         if (e.target.files?.[0]) {
             const file = e.target.files[0];
-            setFormData(prev => ({ ...prev, foto_perfil: file }));
             setFotoPreview(URL.createObjectURL(file));
         }
     };
 
-    // Eliminar foto
     const handleEliminarFoto = async () => {
         try {
             const result = await eliminarFotoPerfil(personal.id_usuario);
@@ -105,8 +136,9 @@ export default function PersonalInfo() {
 
     return (
         <main className="contenido container">
+            {/* BOTÓN VOLVER */}
             <div className="volver">
-                <button className="btn btn-secondary" onClick={() => window.history.back()}>
+                <button className="btn btn-secondary" onClick={() => navigate(-1)}>
                     <i className='bx bx-left-arrow-alt'></i> Volver
                 </button>
             </div>
@@ -126,7 +158,10 @@ export default function PersonalInfo() {
                     <p>Membresía: {personal.membresia?.nombre_membresia}</p>
                 </div>
             </div>
-            {/* DATOS PERSONALES */}
+
+            {/* ============================================
+                DATOS PERSONALES
+            ============================================ */}
             <div className="conten-item datos-personales p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                     <h4>Datos personales</h4>
@@ -139,111 +174,212 @@ export default function PersonalInfo() {
                         </>
                     )}
                 </div>
+
                 <div className="row g-3">
-                    {/* Campos automáticos */}
-                    {Object.entries(formData).map(([key, value]) => {
-                        if (['pais', 'ciudad', 'lugar_entrega', 'foto_perfil'].includes(key)) return null;
-                        const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        return (
-                            <div className="col-md-6" key={key}>
-                                <label className="form-label">{label}</label>
-                                <input
-                                    type={key === 'correo_electronico' ? 'email' : 'text'}
-                                    className="form-control"
-                                    name={key}
-                                    value={value}
-                                    onChange={handleChange}
-                                    readOnly={!editing}
-                                />
-                            </div>
-                        );
-                    })}
-                    {/* PAÍS */}
-                    <div className="col-md-6">
-                        <label className="form-label">País</label>
-                        <select
-                            className="form-control"
-                            name="pais"
-                            value={formData.pais}
-                            disabled={!editing}
-                            onChange={(e) => {
-                                const pid = e.target.value;
-                                handleChange(e);
-                                setFormData(prev => ({ ...prev, ciudad: '' }));
-                                fetchCiudades(pid);
-                            }}
-                        >
-                            <option value="">Seleccione un país</option>
-                            {paises.map(p => (
-                                <option key={p.id_ubicacion} value={p.id_ubicacion}>
-                                    {p.nombre}
-                                </option>
-                            ))}
-                        </select>
-                        {loadingUbic && editing && <Infinity size="40" stroke="5" />}
-                    </div>
-                    {/* CIUDAD */}
-                    <div className="col-md-6">
-                        <label className="form-label">Ciudad</label>
-                        <select
-                            className="form-control"
-                            name="ciudad"
-                            value={formData.ciudad}
-                            onChange={handleChange}
-                            disabled={!editing || !formData.pais || loadingUbic}
-                        >
-                            <option value="">Seleccione una ciudad</option>
-                            {ciudades.map(c => (
-                                <option key={c.id_ubicacion} value={c.id_ubicacion}>
-                                    {c.nombre}
-                                </option>
-                            ))}
-                        </select>
-                        {loadingUbic && editing && <Infinity size="40" stroke="5" />}
-                    </div>
-                    {/* LUGAR DE ENTREGA */}
-                    <div className="col-md-6">
-                        <label className="form-label">Lugar de entrega</label>
-                        <select
-                            className="form-control"
-                            name="lugar_entrega"
-                            value={formData.lugar_entrega}
-                            onChange={handleChange}
-                            disabled={!editing}
-                        >
-                            <option value="">Seleccione una opción</option>
-                            <option value="Casa">Casa</option>
-                            <option value="Apartamento">Apartamento</option>
-                            <option value="Hotel">Hotel</option>
-                            <option value="Oficina">Oficina</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                    </div>
+                    {/* Campos del usuario */}
+                    {Object.entries(formUsuario).map(([key, value]) => (
+                        <div className="col-md-6" key={key}>
+                            <label className="form-label">
+                                {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </label>
+                            <input
+                                type={key === 'correo_electronico' ? 'email' : 'text'}
+                                className="form-control"
+                                name={key}
+                                value={value}
+                                onChange={handleChangeUsuario}
+                                readOnly={!editing}
+                            />
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            {/* FOTO / CONTRASEÑA */}
-            <div className="conten-item datos-personales p-4 text-center">
+            {/* ============================================
+                DIRECCIONES (LISTA + EDICIÓN)
+            ============================================ */}
+            <div className="conten-item datos-personales p-4 mt-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Direcciones</h4>
+                </div>
+
+                {/* LISTADO DE DIRECCIONES */}
+                {!editing && (
+                    <div className="row g-3 mt-2">
+                        {personal.direcciones.map((dir) => (
+                            <div className="col-md-6" key={dir.id_direccion}>
+                                <div className="card p-3 shadow-sm">
+
+                                    <button
+                                        className="md-eliminar-btn"
+                                        onClick={async () => {
+                                            const result = await eliminarDireccion(dir.id_direccion);
+
+                                            if (result.success) {
+                                                Swal.fire({
+                                                    icon: "success",
+                                                    title: "Eliminada",
+                                                    text: "La dirección fue eliminada correctamente.",
+                                                    timer: 1200,
+                                                    showConfirmButton: false
+                                                });
+                                                
+                                                refetch();
+                                            }
+                                        }}
+                                    >
+                                        <i className='bx bx-trash'></i>
+                                    </button>
+
+                                    <h5 className="fw-bold mb-2">{dir.lugar_entrega}</h5>
+                                    <p className="mb-1"><strong>País:</strong> {dir.pais}</p>
+                                    <p className="mb-1"><strong>Ciudad:</strong> {dir.ciudad}</p>
+                                    <p className="mb-1"><strong>Dirección:</strong> {dir.direccion}</p>
+                                    <p className="mb-3"><strong>Código Postal:</strong> {dir.codigo_postal}</p>
+
+                                    <button
+                                        className="btn btn-primary w-100"
+                                        onClick={() => seleccionarDireccion(dir)}
+                                    >
+                                        Editar dirección
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Nueva dirección</h4>
+                    <button className="btn btn-primary" onClick={() => setShowModalCrear(true)}>
+                        Crear dirección
+                    </button>
+                </div>
+
+                {/* FORMULARIO DE EDICIÓN */}
+                {editing && direccionSeleccionada && (
+                    <div className="mt-4">
+                        <h5 className="fw-bold mb-3">
+                            Editando dirección #{direccionSeleccionada.id_direccion}
+                        </h5>
+                        <div className="row g-3">
+                            {/* PAÍS */}
+                            <div className="col-md-6">
+                                <label className="form-label">País</label>
+                                <select
+                                    className="form-control"
+                                    name="pais"
+                                    value={formDireccion.pais}
+                                    disabled={!editing}
+                                    onChange={(e) => {
+                                        const pid = e.target.value;
+                                        handleChangeDireccion(e);
+                                        fetchCiudades(pid);
+                                    }}
+                                >
+                                    <option value="">Seleccione un país</option>
+                                    {paises.map((p) => (
+                                        <option key={p.id_ubicacion} value={p.id_ubicacion}>
+                                            {p.nombre}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* CIUDAD */}
+                            <div className="col-md-6">
+                                <label className="form-label">Ciudad</label>
+                                <select
+                                    className="form-control"
+                                    name="ciudad"
+                                    value={formDireccion.ciudad}
+                                    onChange={handleChangeDireccion}
+                                    disabled={!editing}
+                                >
+                                    <option value="">Seleccione una ciudad</option>
+                                    {ciudades.map((c) => (
+                                        <option key={c.id_ubicacion} value={c.id_ubicacion}>
+                                            {c.nombre}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* DIRECCIÓN */}
+                            <div className="col-md-6">
+                                <label className="form-label">Dirección</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    name="direccion"
+                                    value={formDireccion.direccion}
+                                    disabled={!editing}
+                                    onChange={handleChangeDireccion}
+                                />
+                            </div>
+
+                            {/* CÓDIGO POSTAL */}
+                            <div className="col-md-6">
+                                <label className="form-label">Código postal</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    name="codigo_postal"
+                                    value={formDireccion.codigo_postal}
+                                    disabled={!editing}
+                                    onChange={handleChangeDireccion}
+                                />
+                            </div>
+
+                            {/* LUGAR ENTREGA */}
+                            <div className="col-md-6">
+                                <label className="form-label">Lugar de entrega</label>
+                                <select
+                                    className="form-control"
+                                    name="lugar_entrega"
+                                    value={formDireccion.lugar_entrega}
+                                    disabled={!editing}
+                                    onChange={handleChangeDireccion}
+                                >
+                                    <option value="">Seleccione una opción</option>
+                                    <option value="Casa">Casa</option>
+                                    <option value="Apartamento">Apartamento</option>
+                                    <option value="Hotel">Hotel</option>
+                                    <option value="Oficina">Oficina</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="d-flex gap-3 mt-4">
+                            <button className="btn btn-success" onClick={handleGuardar}>
+                                Guardar cambios
+                            </button>
+                            <button className="btn btn-secondary" onClick={handleCancel}>
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* ============================================
+                FOTO / CONTRASEÑA
+            ============================================ */}
+            <div className="conten-item datos-personales p-4 text-center mt-4">
+
                 <h4 className="text-start">Otros datos</h4>
+
                 <div className="d-flex flex-column align-items-center justify-content-center">
+
                     <label
                         htmlFor="profile-pic"
                         className="profile-pic-container d-block mb-3"
                         style={{ cursor: editing ? "pointer" : "not-allowed" }}
                     >
                         {fotoPreview ? (
-                            <img
-                                id="preview-profile-pic"
-                                src={fotoPreview}
-                                alt="Vista previa"
-                                className="rounded-circle border"
-                            />
+                            <img src={fotoPreview} alt="Vista previa" className="rounded-circle border" />
                         ) : personal.url_foto_perfil ? (
-                            <img
-                                src={imgUrl}
-                                alt="Foto de perfil"
-                                className="rounded-circle border"
-                            />
+                            <img src={imgUrl} alt="Foto" className="rounded-circle border" />
                         ) : (
                             <div className="texto-preview rounded-circle border d-flex align-items-center justify-content-center">
                                 <i className="bx bx-user" style={{ fontSize: "150px" }}></i>
@@ -251,7 +387,6 @@ export default function PersonalInfo() {
                         )}
                     </label>
 
-                    {/* Input real (oculto visualmente) */}
                     <input
                         type="file"
                         id="profile-pic"
@@ -264,27 +399,12 @@ export default function PersonalInfo() {
                     <div className="bts d-flex flex-column align-items-center gap-2">
 
                         {personal.url_foto_perfil && !editing && (
-                            <button
-                                className="btn btn-danger"
-                                type="button"
-                                onClick={handleEliminarFoto}
-                            >
+                            <button className="btn btn-danger" onClick={handleEliminarFoto}>
                                 Eliminar foto de perfil
                             </button>
                         )}
 
-                        {feedback && (
-                            <div className={`alert alert-${feedback.type}`}>{feedback.msg}</div>
-                        )}
-
-                        {feedbackCambio && (
-                            <div className={`alert alert-${feedbackCambio.type}`}>{feedbackCambio.msg}</div>
-                        )}
-
-                        <button
-                            className="btn btn-primary"
-                            onClick={() => setShowModal(true)}
-                        >
+                        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
                             Cambiar contraseña
                         </button>
                     </div>
@@ -296,6 +416,16 @@ export default function PersonalInfo() {
                         await cambiarContrasena({ actual: form.actual, nueva: form.nueva });
                     }}
                     loading={loadingCambio}
+                />
+
+                <ModalCrearDireccion
+                    show={showModalCrear}
+                    onClose={() => setShowModalCrear(false)}
+                    loading={loadingCrearDireccion}
+                    onSubmit={async (data) => {
+                        await crearDireccion(data);
+                        setShowModalCrear(false);
+                    }}
                 />
             </div>
         </main>

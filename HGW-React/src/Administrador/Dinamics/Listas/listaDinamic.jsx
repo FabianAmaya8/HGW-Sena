@@ -22,6 +22,7 @@ import { findWorkingBaseUrl } from '../../../urlDB';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { styled } from '@mui/material/styles';
 import titulos from '../Funciones/Titulos';
+import { generarPDFOrden } from '../../../View/hooks/generarPDF';
 
 const DinamicForm = lazy(() => import('../formularios/Dinamics'));
 const BACKEND = (findWorkingBaseUrl() || "").replace(/\/$/, "");
@@ -164,6 +165,9 @@ const OrdenDetalleModal = memo(({ open, onClose, ordenId }) => {
                 ${data.orden.total.toFixed(2)}
               </Typography>
             </Box>
+            <Button variant="contained" onClick={() => generarPDFOrden(data)}>
+              Ver PDF
+            </Button>
           </Box>
         )}
       </DialogContent>

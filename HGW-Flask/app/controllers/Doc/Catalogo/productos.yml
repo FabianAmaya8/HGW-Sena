@@ -1,9 +1,9 @@
 summary: Listar productos activos con stock
 description: |
-  Devuelve la lista de productos que están activos y cuyo stock es mayor a cero,
-  incluyendo categoría y subcategoría.
+  Devuelve los productos activos con stock mayor a 0.
+  Incluye la categoría, subcategoría y datos principales del producto.
 tags:
-  - Catálogo
+  - 🛍️ Catálogo
 responses:
   200:
     description: Productos obtenidos con éxito
@@ -14,25 +14,28 @@ responses:
         properties:
           id_producto:
             type: integer
-            example: 123
+            example: 25
           categoria:
             type: string
             example: "Electrónica"
           subcategoria:
             type: string
-            example: "Smartphones"
+            example: "Auriculares"
           nombre:
             type: string
-            example: "Teléfono Modelo X"
+            example: "Audífonos Modelo X"
           precio:
             type: number
-            example: 499.99
+            example: 129.99
+          puntos_bv:
+            type: integer
+            example: 20
           imagen:
             type: string
-            example: "https://.../imagen.jpg"
+            example: "https://dominio.com/uploads/productos/imagen.jpg"
           stock:
             type: integer
-            example: 25
+            example: 15
   500:
     description: Error interno al obtener productos
     schema:

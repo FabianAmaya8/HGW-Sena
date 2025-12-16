@@ -1,14 +1,14 @@
 summary: Obtener direcciones del usuario
-description: |
-  Devuelve las direcciones registradas para un usuario dado.
+description: Devuelve las direcciones registradas para un usuario dado, junto con ciudad y país cuando estén disponibles.
 tags:
-  - Carrito
+  - 🚩 Direcciones
 parameters:
   - name: id
     in: query
     type: integer
     required: true
     description: ID del usuario
+    example: 1
 responses:
   200:
     description: Direcciones obtenidas con éxito
@@ -23,22 +23,33 @@ responses:
           items:
             type: object
             properties:
+              id_usuario:
+                type: integer
+                example: 1
               id_direccion:
                 type: integer
+                example: 7
               direccion:
                 type: string
+                example: "Calle 123 #45-67"
               codigo_postal:
                 type: string
+                example: "110111"
               lugar_entrega:
                 type: string
+                example: "Casa"
               ciudad_id:
                 type: integer
+                example: 34
               ciudad:
                 type: string
+                example: "Bogotá"
               pais_id:
                 type: integer
+                example: 2
               pais:
                 type: string
+                example: "Colombia"
   500:
     description: Error interno al obtener direcciones
     schema:

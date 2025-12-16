@@ -13,15 +13,21 @@ def test_crear_orden_faltan_campos(client):
 
 def test_crear_orden_exitoso(monkeypatch, client, fake_conn):
     cursor = fake_conn.cursor()
-    # El controlador hace:
-    # - INSERT orden -> commit
-    # - SELECT LAST_INSERT_ID() -> fetchone -> {'id_orden': 55}
-    # Según eso, configuramos fetchone_responses para devolver id_orden
-    cursor.set_fetchone_responses([{"id_orden": 55}])
+
+    # Respuestas simuladas en el orden en que se llaman los SELECT
+    cursor.set_fetchone_responses([
+        # 1. Validación de stock del producto 1
+        {"stock": 10, "nombre_producto": "Producto 1"},
+        # 2. Validación de stock del producto 2
+        {"stock": 5, "nombre_producto": "Producto 2"},
+        # 3. LAST_INSERT_ID()
+        {"id_orden": 55}
+    ])
 
     monkeypatch.setattr(
         "app.controllers.User.Carrito.carrito_routes.get_db",
-        lambda: fake_conn)
+        lambda: fake_conn
+    )
 
     payload = {
         "id_usuario": 2,
@@ -33,7 +39,9 @@ def test_crear_orden_exitoso(monkeypatch, client, fake_conn):
             {"id_producto": 2, "cantidad": 1, "precio_unitario": 15000}
         ]
     }
+
     resp = client.post("/api/ordenes", json=payload)
+
     assert resp.status_code == 201
     body = resp.get_json()
     assert "id_orden" in body

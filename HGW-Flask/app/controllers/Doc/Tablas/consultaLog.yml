@@ -1,0 +1,34 @@
+summary: Consultar el historial de acciones sobre un registro
+description: |
+  Retorna los últimos 6 registros de auditoría (logs) asociados a una tabla y una fila específica.
+
+tags:
+  - 👁️‍🗨️ Tablas
+
+parameters:
+  - in: body
+    name: consulta
+    required: true
+    schema:
+      type: object
+      properties:
+        table_log:
+          type: string
+          example: "productos"
+        id:
+          type: integer
+          example: 48
+
+responses:
+  200:
+    description: Logs obtenidos correctamente
+    schema:
+      type: array
+      items:
+        type: object
+        properties:
+          id_usuario: { type: integer, example: 3 }
+          nombre: { type: string, example: "Fabian" }
+          apellido: { type: string, example: "Amaya" }
+          accion: { type: string, example: "Actualizó producto" }
+          fecha_registro: { type: string, example: "2025-02-18 10:22:13" }

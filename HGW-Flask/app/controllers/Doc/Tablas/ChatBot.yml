@@ -1,0 +1,29 @@
+summary: ChatBot básico por palabras clave
+description: |
+  Analiza el texto enviado, elimina tildes y lo compara con palabras clave en la base de conocimientos.
+  Si encuentra coincidencia, responde con el mensaje configurado.
+  Si no, devuelve un mensaje por defecto ofreciendo ser atendido por un asesor humano.
+
+tags:
+  - 👁️‍🗨️ Tablas
+
+consumes:
+  - application/json
+
+parameters:
+  - in: body
+    name: datos
+    schema:
+      type: object
+      properties:
+        el:
+          type: string
+          description: Texto enviado por el usuario
+          example: "Necesito información sobre membresías"
+
+responses:
+  200:
+    description: Respuesta generada por el ChatBot
+    schema:
+      type: string
+      example: "Claro, para conocer las membresías disponibles visita la sección de Perfil → Membresías."

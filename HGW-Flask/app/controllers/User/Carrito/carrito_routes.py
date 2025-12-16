@@ -231,7 +231,7 @@ def obtener_direcciones():
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT 
-                    d.id_usuario,d.id_direccion, d.direccion, d.codigo_postal, d.lugar_entrega,
+                    d.id_usuario,d.id_direccion as id, d.direccion, d.codigo_postal, d.lugar_entrega,
                     ciudad.id_ubicacion AS ciudad_id, pais.id_ubicacion AS pais_id,
                     ciudad.nombre AS ciudad, pais.nombre AS pais
                 FROM direcciones d
@@ -366,3 +366,44 @@ def listar_medios_pago():
     except Exception as e:
         current_app.logger.error(f"Error listando medios de pago: {e}")
         return jsonify({"error": "No se pudieron cargar los medios"}), 500
+
+@carrito_bp.route("/api/ordenes-usuario", methods=["GET"])
+@swag_from("../../Doc/Carrito/ordenes_usuario.yml")
+def obtener_ordenes_usuario():
+    connection = get_db()
+    id_usuario = request.args.get("id", type=int)
+
+    if not id_usuario:
+        return jsonify({"error": "Faltan datos obligatorios: id"}), 400
+
+    try:
+        with connection.cursor() as cursor:
+
+            # 1. Obtener todas las órdenes del usuario
+            cursor.execute(r"""
+                SELECT 
+                    o.id_orden,
+                    o.total,
+                    DATE_FORMAT(o.fecha_creacion, '%%Y-%%m-%%d %%H:%%i:%%s') AS fecha_creacion,
+                    mp.nombre_medio AS medio_pago,
+                    d.direccion,
+                    ciudad.nombre AS ciudad
+                FROM ordenes o
+                JOIN medios_pago mp ON mp.id_medio = o.id_medio_pago
+                JOIN direcciones d ON d.id_direccion = o.id_direccion
+                LEFT JOIN ubicaciones ciudad ON d.id_ubicacion = ciudad.id_ubicacion
+                LEFT JOIN ubicaciones pais ON ciudad.ubicacion_padre = pais.id_ubicacion
+                WHERE o.id_usuario = %s
+                ORDER BY o.fecha_creacion DESC
+            """, (id_usuario,))
+            
+            ordenes = cursor.fetchall()
+
+            if not ordenes:
+                return jsonify({"success": True, "ordenes": [], "mensaje": "El usuario no tiene órdenes registradas"}), 200
+
+        return jsonify({"success": True, "ordenes": ordenes}), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Error al obtener órdenes del usuario: {str(e)}")
+        return jsonify({"error": "Error interno al obtener órdenes del usuario"}), 500

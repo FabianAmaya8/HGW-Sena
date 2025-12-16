@@ -19,12 +19,14 @@ import Catalogo from "./View/Components/catalogo/catalogo";
 import ProductoDetalle from "./View/Components/ProductoDetalle";
 import Personal from "./User/Components/Personal/Personal";
 import PersonalInfo from "./User/Components/Personal/PersonalInfo";
+import Ordenes from "./User/Components/Personal/Ordenes";
 import Educacion from "./User/Components/Educacion/Educacion";
 import CarritoMultistep from "./View/Components/carrito/CarritoMultistep";
 
 // --- Admin ---
 import Controlador from "./controlador";
 import LogoutWrapper from "./View/Components/Logout";
+import Red from "./User/Components/Personal/Red";
 
 
 const router = createBrowserRouter([
@@ -56,6 +58,8 @@ const router = createBrowserRouter([
             { path: "/inicio", element: <InicioView /> },
             { path: "/personal", element: <Personal /> },
             { path: "/informacion-personal", element: <PersonalInfo /> },
+            { path: "/mis-ordenes", element: <Ordenes /> },
+            { path: "/mi-red", element: <Red /> },
             { path: "/educacion", element: <Educacion /> },
             { path: "/carrito", element: <CarritoMultistep /> },
         ]

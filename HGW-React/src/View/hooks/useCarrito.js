@@ -187,6 +187,7 @@ export function useCarrito() {
 
     function clearCart() {
         setCarrito([]);
+        refreshHeader();
     }
 
     return {

@@ -1,0 +1,75 @@
+summary: Obtener todas las órdenes realizadas por un usuario
+description: |
+  Recupera todas las órdenes asociadas al usuario especificado, incluyendo la información
+  principal de cada orden.
+
+  La consulta devuelve:
+    - Datos básicos de la orden (total, fecha, forma de pago)
+    - Dirección usada para la compra
+    - Ciudad de entrega
+
+tags:
+  - 🛒 Carrito
+
+parameters:
+  - name: id
+    in: query
+    required: true
+    type: integer
+    description: ID del usuario del cual se desean obtener las órdenes
+    example: 12
+
+responses:
+  200:
+    description: Órdenes obtenidas exitosamente
+    schema:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        mensaje:
+          type: string
+          example: "El usuario no tiene órdenes registradas"
+        ordenes:
+          type: array
+          description: Lista de órdenes realizadas por el usuario
+          items:
+            type: object
+            properties:
+              id_orden:
+                type: integer
+                example: 45
+              total:
+                type: number
+                example: 259000
+              fecha_creacion:
+                type: string
+                example: "2025-01-18 14:33:11"
+              medio_pago:
+                type: string
+                example: "PayPal"
+              direccion:
+                type: string
+                example: "Calle 45 #12-90"
+              ciudad:
+                type: string
+                example: "Bogotá"
+
+  400:
+    description: Faltan parámetros obligatorios
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Faltan datos obligatorios: id"
+
+  500:
+    description: Error interno al obtener las órdenes del usuario
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Error interno al obtener órdenes del usuario"

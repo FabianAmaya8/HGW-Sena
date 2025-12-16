@@ -1,8 +1,10 @@
 summary: Listar catálogo de categorías y subcategorías
 description: |
   Recupera todas las categorías con sus subcategorías asociadas.
+  La consulta devuelve un arreglo de categorías repetidas tantas veces
+  como subcategorías tenga cada una (JOIN simple).
 tags:
-  - Catálogo
+  - 🛍️ Catálogo
 responses:
   200:
     description: Catálogo obtenido con éxito
@@ -23,6 +25,9 @@ responses:
           nombre_subcategoria:
             type: string
             example: "Smartphones"
+          categoria:
+            type: integer
+            example: 1
   500:
     description: Error interno del servidor
     schema:
@@ -30,4 +35,4 @@ responses:
       properties:
         error:
           type: string
-          example: "Descripción del error"
+          example: "Ocurrió un error inesperado"

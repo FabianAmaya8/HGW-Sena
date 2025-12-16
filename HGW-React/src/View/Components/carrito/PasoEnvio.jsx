@@ -95,7 +95,12 @@ export default function PasoEnvio({
                                     </div>
                                 ))
                             )}
-
+                        <button
+                            className="btn btn-primary w-100 mt-3"
+                            onClick={navigation.bind(null, "/Informacion-Personal")}
+                            >
+                            Agregar/Editar Dirección
+                        </button>
                         </div>
                     </div>
                 </div>

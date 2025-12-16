@@ -1,0 +1,41 @@
+.redContent {
+    padding: 20px;
+}
+
+.redResumen {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.redItems {
+    display: grid;
+    gap: 15px;
+}
+
+.red-card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.08);
+}
+
+.red-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.red-header img {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.red-info {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #444;
+}

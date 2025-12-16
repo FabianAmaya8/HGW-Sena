@@ -1,10 +1,13 @@
-summary: Eliminar un registro genérico
+summary: Eliminar un registro de una tabla automapeada
 description: |
-  Borra el registro de la tabla indicada por su ID.
+  Elimina el registro según su ID y registra la acción en la tabla `registro_logs`.
+
 tags:
-  - Tablas
+  - 👁️‍🗨️ Tablas
+
 consumes:
   - application/json
+
 parameters:
   - in: body
     name: datos
@@ -13,19 +16,32 @@ parameters:
       required:
         - table
         - id
+        - log
       properties:
         table:
           type: string
         id:
           type: integer
+        log:
+          type: object
+          properties:
+            id:
+              type: integer
+            accion:
+              type: string
+
 responses:
   200:
-    description: Registro eliminado con éxito
+    description: Registro eliminado exitosamente
     schema:
       type: object
       properties:
         respuesta:
           type: string
-          example: "se ha eliminado el registro"
+          example: "Se ha eliminado el registro"
+
+  404:
+    description: Registro no encontrado
+
   200:
     description: Respuesta OPTIONS válida
