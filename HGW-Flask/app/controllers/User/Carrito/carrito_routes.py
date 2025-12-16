@@ -275,11 +275,10 @@ def crear_orden():
             return jsonify({"error": "Items debe ser una lista no vacía"}), 400
 
         with connection.cursor() as cursor:
-
-            # 1. Validar stock de CADA producto antes de crear la orden
+            total_bv_compra = 0
             for item in items:
                 cursor.execute("""
-                    SELECT stock, nombre_producto 
+                    SELECT stock, nombre_producto, bv_puntos 
                     FROM productos 
                     WHERE id_producto = %s AND activo = 1
                 """, (item["id_producto"],))
@@ -292,7 +291,8 @@ def crear_orden():
                     }), 404
 
                 stock_actual = producto["stock"]
-                cantidad_solicitada = item["cantidad"]
+                puntos_producto = producto["bv_puntos"] if producto["bv_puntos"] else 0
+                cantidad_solicitada = int(item["cantidad"])
 
                 if cantidad_solicitada > stock_actual:
                     return jsonify({
@@ -302,8 +302,9 @@ def crear_orden():
                         "stock_disponible": stock_actual,
                         "solicitado": cantidad_solicitada
                     }), 400
+                
+                total_bv_compra += (puntos_producto * cantidad_solicitada)
 
-            # 2. Crear la orden principal
             cursor.execute("""
                 INSERT INTO ordenes (id_usuario, id_direccion, id_medio_pago, total)
                 VALUES (%s, %s, %s, %s)
@@ -311,7 +312,8 @@ def crear_orden():
             connection.commit()
 
             cursor.execute("SELECT LAST_INSERT_ID() AS id_orden")
-            id_orden = cursor.fetchone()["id_orden"]
+            res_id = cursor.fetchone()
+            id_orden = res_id["id_orden"]
 
             # 3. Insertar productos de la orden
             sql_insert = """
@@ -338,14 +340,49 @@ def crear_orden():
                 """, (item["cantidad"], item["id_producto"]))
             connection.commit()
 
-            # 5. Reiniciar el carrito
+            cursor.execute("SELECT bv_acumulados, membresia FROM usuarios WHERE id_usuario = %s", (id_usuario,))
+            usuario_data = cursor.fetchone()
+            
+            bv_actuales = usuario_data["bv_acumulados"] if usuario_data["bv_acumulados"] else 0
+            membresia_actual = usuario_data["membresia"]
+            
+            nuevo_bv_total = bv_actuales + total_bv_compra
+            
+            cursor.execute("SELECT id_membresia, nombre_membresia, bv FROM membresias ORDER BY bv ASC")
+            todas_membresias = cursor.fetchall()
+            
+            nueva_membresia_id = membresia_actual
+            nombre_nuevo_rango = ""
+            subio_rango = False
+
+            for mem in todas_membresias:
+                if nuevo_bv_total >= mem['bv']:
+                    nueva_membresia_id = mem['id_membresia']
+                    nombre_nuevo_rango = mem['nombre_membresia']
+            
+            if nueva_membresia_id != membresia_actual:
+                subio_rango = True
+            
+            cursor.execute("""
+                UPDATE usuarios 
+                SET bv_acumulados = %s, membresia = %s 
+                WHERE id_usuario = %s
+            """, (nuevo_bv_total, nueva_membresia_id, id_usuario))
+            
             cursor.execute("DELETE FROM carrito_compras WHERE id_usuario = %s", (id_usuario,))
             connection.commit()
 
             cursor.execute("INSERT INTO carrito_compras (id_usuario) VALUES (%s)", (id_usuario,))
             connection.commit()
 
-        return jsonify({"id_orden": id_orden}), 201
+        return jsonify({
+            "id_orden": id_orden,        
+            "success": True,              
+            "puntos_ganados": total_bv_compra,
+            "nuevo_total_bv": nuevo_bv_total,
+            "subio_rango": subio_rango,
+            "nombre_nuevo_rango": nombre_nuevo_rango if subio_rango else None
+        }), 201
 
     except Exception as e:
         current_app.logger.error(f"Error al crear orden: {str(e)}")

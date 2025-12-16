@@ -146,6 +146,7 @@ class PersonalService {
       return [];
     }
   }
+
   Future<List<Map<String, dynamic>>> obtenerLineasDirectas(int userId) async {
     try {
       final response = await http.get(
@@ -164,6 +165,7 @@ class PersonalService {
       return [];
     }
   }
+
   Future<bool> actualizarDireccion(
       int userId, int direccionId, Map<String, dynamic> direccion) async {
     try {
@@ -179,6 +181,25 @@ class PersonalService {
     } catch (e) {
       print('Error actualizando dirección: $e');
       return false;
+    }
+  }
+
+  Future<int> obtenerConteoCompras(int userId) async {
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/api/ordenes-usuario?id=$userId'))
+          .timeout(ApiConfig.timeout);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true && data['ordenes'] != null) {
+          return (data['ordenes'] as List).length;
+        }
+      }
+      return 0; 
+    } catch (e) {
+      print('Error obteniendo conteo de compras: $e');
+      return 0;
     }
   }
 }

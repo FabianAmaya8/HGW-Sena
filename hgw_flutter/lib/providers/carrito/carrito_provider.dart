@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/carrito/carrito_item.dart';
 import '../../models/carrito/direccion.dart';
 import '../../models/carrito/medio_pago.dart';
+import '../../models/carrito/respuesta_compra.dart';
 import '../../services/carrito/carrito_service.dart';
 
 class CarritoProvider extends ChangeNotifier {
@@ -52,24 +53,25 @@ class CarritoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void limpiarMensaje() {
+    _mensaje = null;
+    notifyListeners();
+  }
+
   Future<void> cargarCarrito() async {
     if (_userId == null) return;
-
     _isLoading = true;
     notifyListeners();
-
     try {
       final result = await _service.obtenerCarrito(_userId!);
       _items = result['items'] ?? [];
       _mensaje = result['mensaje'];
-
       if (result['eliminados'] != null &&
           (result['eliminados'] as List).isNotEmpty) {
         _mensaje =
             'Algunos productos fueron eliminados: ${result['eliminados'].join(', ')}';
       }
     } catch (e) {
-      print('Error cargando carrito: $e');
       _mensaje = 'Error al cargar el carrito';
     } finally {
       _isLoading = false;
@@ -77,160 +79,109 @@ class CarritoProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> agregarProducto(int idProducto, int cantidad) async {
+  Future<bool> agregarProducto(int id, int cant) async {
     if (_userId == null) return false;
+    if (await _service.agregarProducto(_userId!, id, cant)) {
+      await cargarCarrito();
+      return true;
+    }
+    return false;
+  }
 
-    try {
-      final success =
-          await _service.agregarProducto(_userId!, idProducto, cantidad);
-      if (success) {
-        await cargarCarrito();
-        return true;
-      }
-      return false;
-    } catch (e) {
-      print('Error agregando producto: $e');
-      return false;
+  Future<void> actualizarCantidad(int id, int cant) async {
+    if (_userId != null &&
+        cant > 0 &&
+        await _service.actualizarCantidad(_userId!, id, cant)) {
+      _items.firstWhere((i) => i.idProducto == id).cantidad = cant;
+      notifyListeners();
     }
   }
 
-  Future<void> actualizarCantidad(int idProducto, int nuevaCantidad) async {
-    if (_userId == null || nuevaCantidad <= 0) return;
-
-    try {
-      final success = await _service.actualizarCantidad(
-          _userId!, idProducto, nuevaCantidad);
-      if (success) {
-        final item = _items.firstWhere((i) => i.idProducto == idProducto);
-        item.cantidad = nuevaCantidad;
-        notifyListeners();
-      }
-    } catch (e) {
-      print('Error actualizando cantidad: $e');
-    }
-  }
-
-  Future<void> eliminarProducto(int idProducto) async {
-    if (_userId == null) return;
-
-    try {
-      final success = await _service.eliminarProducto(_userId!, idProducto);
-      if (success) {
-        _items.removeWhere((item) => item.idProducto == idProducto);
-        notifyListeners();
-      }
-    } catch (e) {
-      print('Error eliminando producto: $e');
+  Future<void> eliminarProducto(int id) async {
+    if (_userId != null && await _service.eliminarProducto(_userId!, id)) {
+      _items.removeWhere((i) => i.idProducto == id);
+      notifyListeners();
     }
   }
 
   Future<void> cargarDirecciones() async {
     if (_userId == null) return;
+    _direcciones = await _service.obtenerDirecciones(_userId!);
+    if (_direccionSeleccionada != null &&
+        !_direcciones.any((d) => d.id == _direccionSeleccionada!.id)) {
+      _direccionSeleccionada = null;
+    }
+    if (_direcciones.isNotEmpty && _direccionSeleccionada == null) {
+      _direccionSeleccionada = _direcciones.first;
+    }
+    notifyListeners();
+  }
 
-    try {
-      _direcciones = await _service.obtenerDirecciones(_userId!);
+  Future<bool> agregarDireccion(
+      {required String lugarEntrega,
+      required String direccion,
+      required String ciudad,
+      required String pais,
+      required String codigoPostal}) async {
+    if (_userId != null &&
+        await _service.crearDireccion(
+            userId: _userId!,
+            lugarEntrega: lugarEntrega,
+            direccion: direccion,
+            ciudad: ciudad,
+            pais: pais,
+            codigoPostal: codigoPostal)) {
+      await cargarDirecciones();
+      return true;
+    }
+    return false;
+  }
 
-      if (_direccionSeleccionada != null &&
-          !_direcciones.any((d) => d.id == _direccionSeleccionada!.id)) {
-        _direccionSeleccionada = null;
+  Future<bool> eliminarDireccion(int id) async {
+    if (_userId != null && await _service.eliminarDireccion(_userId!, id)) {
+      _direcciones.removeWhere((d) => d.id == id);
+      if (_direccionSeleccionada?.id == id) {
+        _direccionSeleccionada =
+            _direcciones.isNotEmpty ? _direcciones.first : null;
       }
-
-      if (_direcciones.isNotEmpty && _direccionSeleccionada == null) {
-        _direccionSeleccionada = _direcciones.first;
-      }
-
       notifyListeners();
-    } catch (e) {
-      print('Error cargando direcciones: $e');
+      return true;
     }
-  }
-
-  Future<bool> agregarDireccion({
-    required String lugarEntrega,
-    required String direccion,
-    required String ciudad,
-    required String pais,
-    required String codigoPostal,
-  }) async {
-    if (_userId == null) return false;
-
-    try {
-      final success = await _service.crearDireccion(
-        userId: _userId!,
-        lugarEntrega: lugarEntrega,
-        direccion: direccion,
-        ciudad: ciudad,
-        pais: pais,
-        codigoPostal: codigoPostal,
-      );
-
-      if (success) {
-        await cargarDirecciones();
-        return true;
-      }
-      return false;
-    } catch (e) {
-      print('Error agregando dirección: $e');
-      return false;
-    }
-  }
-
-  Future<bool> eliminarDireccion(int direccionId) async {
-    if (_userId == null) return false;
-
-    try {
-      final success = await _service.eliminarDireccion(_userId!, direccionId);
-
-      if (success) {
-        _direcciones.removeWhere((d) => d.id == direccionId);
-
-        if (_direccionSeleccionada?.id == direccionId) {
-          _direccionSeleccionada =
-              _direcciones.isNotEmpty ? _direcciones.first : null;
-        }
-
-        notifyListeners();
-        return true;
-      }
-      return false;
-    } catch (e) {
-      print('Error eliminando dirección: $e');
-      return false;
-    }
+    return false;
   }
 
   Future<void> cargarMediosPago() async {
-    try {
-      _mediosPago = await _service.obtenerMediosPago();
-      if (_mediosPago.isNotEmpty && _medioPagoSeleccionado == null) {
-        _medioPagoSeleccionado = _mediosPago.first;
-      }
-      notifyListeners();
-    } catch (e) {
-      print('Error cargando medios de pago: $e');
+    _mediosPago = await _service.obtenerMediosPago();
+    if (_mediosPago.isNotEmpty && _medioPagoSeleccionado == null) {
+      _medioPagoSeleccionado = _mediosPago.first;
     }
-  }
-
-  void seleccionarDireccion(Direccion direccion) {
-    _direccionSeleccionada = direccion;
     notifyListeners();
   }
 
-  void seleccionarMedioPago(MedioPago medio) {
-    _medioPagoSeleccionado = medio;
+  void seleccionarDireccion(Direccion d) {
+    _direccionSeleccionada = d;
     notifyListeners();
   }
 
-  Future<int?> crearOrden() async {
+  void seleccionarMedioPago(MedioPago m) {
+    _medioPagoSeleccionado = m;
+    notifyListeners();
+  }
+
+  Future<Map<String, List<String>>> obtenerUbicaciones() async =>
+      await _service.obtenerUbicaciones();
+
+  Future<RespuestaCompra> crearOrden() async {
     if (_userId == null ||
         _direccionSeleccionada == null ||
         _medioPagoSeleccionado == null ||
         _items.isEmpty) {
-      return null;
+      return RespuestaCompra(
+          success: false, message: "Faltan datos para la orden");
     }
 
     try {
-      final idOrden = await _service.crearOrden(
+      final respuesta = await _service.crearOrden(
         _userId!,
         _direccionSeleccionada!.id,
         _medioPagoSeleccionado!.id,
@@ -238,31 +189,17 @@ class CarritoProvider extends ChangeNotifier {
         _items,
       );
 
-      if (idOrden != null) {
+      if (respuesta.success) {
         _items.clear();
         _direccionSeleccionada = null;
         _medioPagoSeleccionado = null;
         notifyListeners();
       }
 
-      return idOrden;
+      return respuesta;
     } catch (e) {
       print('Error creando orden: $e');
-      return null;
+      return RespuestaCompra(success: false, message: "Error interno: $e");
     }
-  }
-
-  Future<Map<String, List<String>>> obtenerUbicaciones() async {
-    try {
-      return await _service.obtenerUbicaciones();
-    } catch (e) {
-      print('Error obteniendo ubicaciones: $e');
-      return {};
-    }
-  }
-
-  void limpiarMensaje() {
-    _mensaje = null;
-    notifyListeners();
   }
 }

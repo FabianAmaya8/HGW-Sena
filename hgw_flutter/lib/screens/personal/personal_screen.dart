@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/personal/personal_provider.dart';
-import '../../main.dart';
 import '../../utils/constants.dart';
 import '../../Login.dart';
 import 'editar_perfil_screen.dart';
@@ -14,8 +13,6 @@ class PersonalScreen extends StatefulWidget {
   @override
   State<PersonalScreen> createState() => _PersonalScreenState();
 }
-
-
 
 class _PersonalScreenState extends State<PersonalScreen>
     with TickerProviderStateMixin {
@@ -643,10 +640,6 @@ class _PersonalScreenState extends State<PersonalScreen>
 
                 try {
                   await context.read<PersonalProvider>().cerrarSesion();
-
-                  final authProvider =
-                      Provider.of<AuthProvider>(context, listen: false);
-                  authProvider.logout();
 
                   if (context.mounted) {
                     Navigator.pop(context);

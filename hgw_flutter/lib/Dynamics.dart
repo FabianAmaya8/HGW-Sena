@@ -6,12 +6,14 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show File;
+import './utils/constants.dart';
 
 String baseUrl = "http://127.0.0.1:3000/";
-final Color primaryGreen = Colors.green[400]!;
+final Color primaryGreen = AppColors.elegantGreenDark;
 final Map<String, Future<List<Map<String, String>>>> _optionsCache = {};
 
-Future<void> fetchJsonData(String url, Map<String, dynamic> data, BuildContext context) async {
+Future<void> fetchJsonData(
+    String url, Map<String, dynamic> data, BuildContext context) async {
   try {
     final response = await http.post(
       Uri.parse(url),
@@ -20,16 +22,22 @@ Future<void> fetchJsonData(String url, Map<String, dynamic> data, BuildContext c
     );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Operación exitosa")),
+        const SnackBar(
+            content: Text("✅ Operación exitosa"),
+            backgroundColor: AppColors.elegantGreenDark),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Error: ${response.body}")),
+        SnackBar(
+            content: Text("❌ Error: ${response.body}"),
+            backgroundColor: AppColors.errorColor),
       );
     }
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("⚠️ No se pudo conectar con el servidor")),
+      const SnackBar(
+          content: Text("⚠️ No se pudo conectar con el servidor"),
+          backgroundColor: AppColors.warningColor),
     );
   }
 }
@@ -38,19 +46,27 @@ void showGlobalAlert(BuildContext context, String message) {
   showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text("Mensaje"),
-      content: Text(message),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text("Mensaje",
+          style: TextStyle(
+              color: AppColors.elegantGreenDark, fontWeight: FontWeight.bold)),
+      content:
+          Text(message, style: const TextStyle(color: AppColors.textMedium)),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(),
-          child: const Text("Cerrar"),
+          child: const Text("Cerrar",
+              style: TextStyle(
+                  color: AppColors.elegantGreenDark,
+                  fontWeight: FontWeight.bold)),
         ),
       ],
     ),
   );
 }
 
-Future<void> fetch(String url, Map<String, dynamic> data, BuildContext context) async {
+Future<void> fetch(
+    String url, Map<String, dynamic> data, BuildContext context) async {
   try {
     final request = http.MultipartRequest('POST', Uri.parse(url));
     request.fields['nombres'] = data['nombre'] ?? '';
@@ -58,13 +74,15 @@ Future<void> fetch(String url, Map<String, dynamic> data, BuildContext context) 
     request.fields['patrocinador'] = data['patrocinador'] ?? '';
     request.fields['usuario'] = data['usuario'] ?? '';
     request.fields['contrasena'] = data['contrasena'] ?? '';
-    request.fields['confirmar_contrasena'] = data['confirmar_contrasena'] ?? data['contrasena'] ?? '';
+    request.fields['confirmar_contrasena'] =
+        data['confirmar_contrasena'] ?? data['contrasena'] ?? '';
     request.fields['correo'] = data['correo'] ?? '';
     request.fields['telefono'] = data['telefono'] ?? '';
     request.fields['direccion'] = data['direccion'] ?? '';
     request.fields['codigo_postal'] = data['postal'] ?? '';
     request.fields['lugar_entrega'] = data['lugar_entrega'] ?? '';
     request.fields['ciudad'] = data['ciudad'].toString();
+
     if (data['foto'] != null && data['foto'] is List<int>) {
       request.files.add(http.MultipartFile.fromBytes(
         'foto_perfil',
@@ -72,25 +90,34 @@ Future<void> fetch(String url, Map<String, dynamic> data, BuildContext context) 
         filename: 'perfil.png',
       ));
     }
+
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Registro exitoso")),
+        const SnackBar(
+            content: Text("✅ Registro exitoso"),
+            backgroundColor: AppColors.elegantGreenDark),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Error: $responseBody")),
+        SnackBar(
+            content: Text("❌ Error: $responseBody"),
+            backgroundColor: AppColors.errorColor),
       );
     }
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("⚠️ No se pudo conectar con el servidor")),
+      const SnackBar(
+          content: Text("⚠️ No se pudo conectar con el servidor"),
+          backgroundColor: AppColors.warningColor),
     );
   }
 }
 
-Future<List<Map<String, String>>> fetchOptionsUncached(String urlStr, BuildContext context) async {
+Future<List<Map<String, String>>> fetchOptionsUncached(
+    String urlStr, BuildContext context) async {
   final Uri url = Uri.parse(urlStr);
   final respuesta = await http.get(url);
   if (respuesta.statusCode == 200) {
@@ -115,14 +142,16 @@ Future<List<Map<String, String>>> fetchOptionsUncached(String urlStr, BuildConte
   return [];
 }
 
-Future<List<Map<String, String>>> _fetchOptionsCached(String url, BuildContext context) {
+Future<List<Map<String, String>>> _fetchOptionsCached(
+    String url, BuildContext context) {
   if (_optionsCache.containsKey(url)) return _optionsCache[url]!;
   final future = fetchOptionsUncached(url, context);
   _optionsCache[url] = future;
   return future;
 }
 
-String? _matchingValue(List<Map<String, String>> opciones, dynamic currentValue) {
+String? _matchingValue(
+    List<Map<String, String>> opciones, dynamic currentValue) {
   if (currentValue == null) return null;
   final cur = currentValue.toString();
   final exists = opciones.any((o) => o['id'] == cur);
@@ -146,30 +175,48 @@ class MobileSelect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String displayText = value != null
-        ? options.firstWhere((o) => o['id'] == value, orElse: () => {'nombre': label})['nombre']!
+        ? options.firstWhere((o) => o['id'] == value,
+            orElse: () => {'nombre': label})['nombre']!
         : label;
     return GestureDetector(
       onTap: () async {
         final selected = await showModalBottomSheet<String>(
           context: context,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
+          backgroundColor: Colors.transparent,
           builder: (ctx) => Container(
-            height: 300,
+            height: 350,
             decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            child: ListView(
-              children: options
-                  .map(
-                    (o) => ListTile(
-                      title: Text(o['nombre']!),
-                      onTap: () => Navigator.pop(ctx, o['id']),
-                    ),
-                  )
-                  .toList(),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(label,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: AppColors.elegantGreenDark)),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView(
+                    children: options
+                        .map((o) => ListTile(
+                              title: Text(o['nombre']!,
+                                  style: const TextStyle(
+                                      color: AppColors.textDark)),
+                              onTap: () => Navigator.pop(ctx, o['id']),
+                              trailing: value == o['id']
+                                  ? const Icon(Icons.check,
+                                      color: AppColors.elegantGreenDark)
+                                  : null,
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -183,9 +230,9 @@ class MobileSelect extends StatelessWidget {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          border: Border.all(color: Colors.grey.shade400, width: 1.5),
+          color: AppColors.backgroundLight,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.transparent),
         ),
         alignment: Alignment.centerLeft,
         child: Row(
@@ -194,11 +241,12 @@ class MobileSelect extends StatelessWidget {
             Text(
               displayText,
               style: TextStyle(
-                color: value == null ? Colors.grey[700] : Colors.black,
+                color: value == null ? AppColors.textLight : AppColors.textDark,
                 fontSize: 16,
               ),
             ),
-            Icon(Icons.arrow_drop_down, color: primaryGreen, size: 28),
+            const Icon(Icons.arrow_drop_down,
+                color: AppColors.textLight, size: 28),
           ],
         ),
       ),
@@ -213,28 +261,42 @@ List<Widget> Forms(
   Map<String, dynamic> values,
   Color primaryGreen,
 ) {
-  OutlineInputBorder border(Color color) => OutlineInputBorder(
+  InputDecoration getDecoration(String label, {Widget? suffixIcon}) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: AppColors.textLight),
+      floatingLabelStyle: const TextStyle(
+          color: AppColors.elegantGreenDark, fontWeight: FontWeight.bold),
+      filled: true,
+      fillColor: AppColors.backgroundLight,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: color, width: 2),
-      );
+        borderSide:
+            const BorderSide(color: AppColors.elegantGreenDark, width: 1.5),
+      ),
+      suffixIcon: suffixIcon,
+    );
+  }
 
   return campos.map((campo) {
     final String name = campo["name"];
 
     if (campo["tipo"] == "input") {
-      return TextFormField(
-        key: ValueKey(name),
-        cursorColor: primaryGreen,
-        initialValue: values[name]?.toString() ?? '',
-        decoration: InputDecoration(
-          labelText: campo["placeholder"],
-          labelStyle: TextStyle(color: Colors.grey[700]),
-          floatingLabelStyle: TextStyle(color: primaryGreen),
-          border: border(Colors.grey.shade400),
-          enabledBorder: border(Colors.grey.shade400),
-          focusedBorder: border(primaryGreen),
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12.0),
+        child: TextFormField(
+          key: ValueKey(name),
+          cursorColor: AppColors.elegantGreenDark,
+          initialValue: values[name]?.toString() ?? '',
+          style: const TextStyle(color: AppColors.textDark),
+          decoration: getDecoration(campo["placeholder"]),
+          onChanged: (val) => onChanged(name, val),
         ),
-        onChanged: (val) => onChanged(name, val),
       );
     }
 
@@ -242,58 +304,83 @@ List<Widget> Forms(
       bool obscureText = true;
       return StatefulBuilder(
         key: ValueKey(name),
-        builder: (context, setStateSB) => TextFormField(
-          cursorColor: primaryGreen,
-          initialValue: values[name]?.toString() ?? '',
-          obscureText: obscureText,
-          decoration: InputDecoration(
-            labelText: campo["placeholder"],
-            labelStyle: TextStyle(color: Colors.grey[700]),
-            floatingLabelStyle: TextStyle(color: primaryGreen),
-            border: border(Colors.grey.shade400),
-            enabledBorder: border(Colors.grey.shade400),
-            focusedBorder: border(primaryGreen),
-            suffixIcon: IconButton(
-              icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility, color: primaryGreen),
-              onPressed: () => setStateSB(() => obscureText = !obscureText),
+        builder: (context, setStateSB) => Padding(
+          padding: const EdgeInsets.only(bottom: 12.0),
+          child: TextFormField(
+            cursorColor: AppColors.elegantGreenDark,
+            initialValue: values[name]?.toString() ?? '',
+            obscureText: obscureText,
+            style: const TextStyle(color: AppColors.textDark),
+            decoration: getDecoration(
+              campo["placeholder"],
+              suffixIcon: IconButton(
+                icon: Icon(
+                    obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: AppColors.textLight),
+                onPressed: () => setStateSB(() => obscureText = !obscureText),
+              ),
             ),
+            onChanged: (val) => onChanged(name, val),
           ),
-          onChanged: (val) => onChanged(name, val),
         ),
       );
     }
 
     if (campo["tipo"] == "select") {
       final childs = campo["childs"];
+      Widget selectWidget = const SizedBox.shrink();
+
       if (childs is List) {
         final opciones = childs.map<Map<String, String>>((e) {
-          String idValue = (e is Map && e.containsKey("id") ? e["id"] : UniqueKey()).toString();
-          String nameValue = (e is Map && e.containsKey("nombre") ? e["nombre"] : "Sin nombre").toString();
+          String idValue =
+              (e is Map && e.containsKey("id") ? e["id"] : UniqueKey())
+                  .toString();
+          String nameValue =
+              (e is Map && e.containsKey("nombre") ? e["nombre"] : "Sin nombre")
+                  .toString();
           return {"id": idValue, "nombre": nameValue};
         }).toList();
         final valorActual = _matchingValue(opciones, values[name]);
-        return MobileSelect(
+        selectWidget = MobileSelect(
           label: campo["placeholder"],
           options: opciones,
           value: valorActual,
           onChanged: (val) => onChanged(name, val),
-          primaryGreen: primaryGreen,
+          primaryGreen: AppColors.elegantGreenDark,
         );
-      }
-      if (childs is String) {
+      } else if (childs is String) {
         String urlFinal = childs;
         if (values.containsKey("pais") && values["pais"] != '') {
           urlFinal = "$childs?paisId=${values["pais"]}";
         }
         final future = _fetchOptionsCached(urlFinal, context);
-        return FutureBuilder<List<Map<String, String>>>(
+        selectWidget = FutureBuilder<List<Map<String, String>>>(
           future: future,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox(height: 56, child: Center(child: CircularProgressIndicator()));
+              return Container(
+                height: 56,
+                decoration: BoxDecoration(
+                    color: AppColors.backgroundLight,
+                    borderRadius: BorderRadius.circular(12)),
+                child: const Center(
+                    child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.elegantGreenDark))),
+              );
             }
-            if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Text("No hay opciones disponibles");
+            if (snapshot.hasError ||
+                !snapshot.hasData ||
+                snapshot.data!.isEmpty) {
+              return MobileSelect(
+                  label: "${campo["placeholder"]} (Sin datos)",
+                  options: const [],
+                  value: null,
+                  onChanged: (_) {},
+                  primaryGreen: AppColors.elegantGreenDark);
             }
             final opciones = snapshot.data!;
             final valorActual = _matchingValue(opciones, values[name]);
@@ -302,12 +389,13 @@ List<Widget> Forms(
               options: opciones,
               value: valorActual,
               onChanged: (val) => onChanged(name, val),
-              primaryGreen: primaryGreen,
+              primaryGreen: AppColors.elegantGreenDark,
             );
           },
         );
       }
-      return const SizedBox.shrink();
+      return Padding(
+          padding: const EdgeInsets.only(bottom: 12.0), child: selectWidget);
     }
 
     if (campo["tipo"] == "imagen" || campo["tipo"] == "image") {
@@ -318,34 +406,53 @@ List<Widget> Forms(
       } else if (!kIsWeb && currentValue is String && currentValue.isNotEmpty) {
         provider = FileImage(File(currentValue));
       }
-      return Column(
-        key: ValueKey(name),
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: () async {
-              final result = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
-              if (result != null && result.files.isNotEmpty) {
-                final file = result.files.single;
-                if (file.bytes != null) {
-                  onChanged(name, file.bytes);
-                } else if (!kIsWeb && file.path != null) {
-                  onChanged(name, file.path);
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Column(
+          key: ValueKey(name),
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: () async {
+                final result = await FilePicker.platform
+                    .pickFiles(type: FileType.image, withData: true);
+                if (result != null && result.files.isNotEmpty) {
+                  final file = result.files.single;
+                  if (file.bytes != null) {
+                    onChanged(name, file.bytes);
+                  } else if (!kIsWeb && file.path != null) {
+                    onChanged(name, file.path);
+                  }
                 }
-              }
-            },
-            child: CircleAvatar(
-              radius: 60,
-              backgroundColor: Colors.grey.shade200,
-              backgroundImage: provider,
-              child: provider == null
-                  ? const Icon(Icons.add_a_photo, size: 40, color: Colors.grey)
-                  : null,
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border:
+                        Border.all(color: AppColors.elegantGreenDark, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5))
+                    ]),
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: AppColors.backgroundLight,
+                  backgroundImage: provider,
+                  child: provider == null
+                      ? const Icon(Icons.add_a_photo_rounded,
+                          size: 35, color: AppColors.elegantGreenDark)
+                      : null,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(campo["placeholder"], style: TextStyle(fontWeight: FontWeight.w500, color: Colors.grey[700])),
-        ],
+            const SizedBox(height: 12),
+            Text(campo["placeholder"],
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, color: AppColors.textMedium)),
+          ],
+        ),
       );
     }
 

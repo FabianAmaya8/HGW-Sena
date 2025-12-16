@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/carrito/carrito_item.dart';
 import '../../models/carrito/direccion.dart';
+import '../../models/carrito/respuesta_compra.dart';
 import '../../providers/carrito/carrito_provider.dart';
-import '../../providers/personal/personal_provider.dart'; // Importante
+import '../../providers/personal/personal_provider.dart';
 import '../../utils/constants.dart';
 import 'confirmacion_screen.dart';
 
@@ -31,43 +32,34 @@ class _PagoScreenState extends State<PagoScreen> {
 
     setState(() => _loading = true);
 
-    // 1. Guardamos copia de los datos para el recibo (antes de que se borren)
     final itemsParaRecibo = List<CarritoItem>.from(carritoProvider.items);
     final totalParaRecibo = carritoProvider.total;
     final direccionParaRecibo = carritoProvider.direccionSeleccionada;
 
-    // 2. Creamos la orden
-    final idOrden = await carritoProvider.crearOrden();
+    final RespuestaCompra respuesta = await carritoProvider.crearOrden();
 
-    if (idOrden != null) {
-      // 3. Recargamos los puntos del usuario (para que suba la barra)
-      // Obtenemos el ID del usuario actual desde el provider
-      // Nota: Si tu CarritoProvider no expone el userId públicamente,
-      // asegúrate de obtenerlo de donde lo tengas guardado (AuthService, etc.)
-      // Aquí asumo que lo tienes disponible o lo sacas del Auth.
-      // Por seguridad, usamos un try-catch silencioso para la recarga
+    if (respuesta.success && respuesta.idOrden != null) {
       try {
         if (mounted) {
-          // Ajusta esto según cómo obtengas tu ID real.
-          // Si está en el PersonalProvider, úsalo.
-          final personalProvider = context.read<PersonalProvider>();
-          final userId = personalProvider.usuario?.idUsuario;
-
-          if (userId != null) {
-            await personalProvider.cargarDatosPersonales();
-          }
+          await context.read<PersonalProvider>().cargarDatosPersonales();
         }
       } catch (_) {}
 
       if (!mounted) return;
       setState(() => _loading = false);
 
-      // 4. Navegamos a confirmación pasando los datos
+      if (respuesta.subioRango) {
+        await _mostrarAlertaAscenso(
+            respuesta.nuevoRango!, respuesta.puntosGanados);
+      }
+
+      if (!mounted) return;
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (_) => ConfirmacionScreen(
-            idOrden: idOrden.toString(),
+            idOrden: respuesta.idOrden.toString(),
             itemsCompra: itemsParaRecibo,
             totalCompra: totalParaRecibo,
             direccionCompra: direccionParaRecibo,
@@ -79,11 +71,86 @@ class _PagoScreenState extends State<PagoScreen> {
       if (!mounted) return;
       setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Error al procesar el pago'),
-            backgroundColor: AppColors.errorColor),
+        SnackBar(
+          content: Text(respuesta.message ?? 'Error al procesar el pago'),
+          backgroundColor: AppColors.errorColor,
+        ),
       );
     }
+  }
+
+  Future<void> _mostrarAlertaAscenso(String nuevoRango, int puntos) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.emoji_events_rounded,
+                size: 80, color: Colors.amber),
+            const SizedBox(height: 15),
+            Text(
+              "¡FELICIDADES!",
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.amber[800],
+                  letterSpacing: 1.2),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              "Has alcanzado un nuevo nivel:",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.black54),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              nuevoRango.toUpperCase(),
+              style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primaryGreen),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                  color: AppColors.primaryGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10)),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.add_circle,
+                      color: AppColors.primaryGreen, size: 20),
+                  const SizedBox(width: 8),
+                  Text("Ganaste +$puntos BV",
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryGreen)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryGreen,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 12)),
+              onPressed: () {
+                Navigator.pop(ctx);
+              },
+              child:
+                  const Text("¡GENIAL!", style: TextStyle(color: Colors.white)),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -93,7 +160,7 @@ class _PagoScreenState extends State<PagoScreen> {
       appBar: AppBar(
         title: const Text('Método de Pago'),
         backgroundColor: AppColors.primaryGreen,
-        foregroundColor: Colors.white, // Texto blanco en AppBar
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: Consumer<CarritoProvider>(
@@ -209,7 +276,7 @@ class _PagoScreenState extends State<PagoScreen> {
                                   style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white)), // Texto blanco
+                                      color: Colors.white)),
                         ),
                       ),
                     ],
