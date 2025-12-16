@@ -153,32 +153,93 @@ def consultaTabla():
     page = req.get("page", 0)
     limit = req.get("limit", 10)
     busqueda = req.get("busqueda", "")
+    Usuarios = get_tabla("usuarios")
+    Direcciones = get_tabla("direcciones")
+    Ordenes = get_tabla("ordenes")
+    MediosPago = get_tabla("medios_pago")
 
     tabla = get_tabla(tabla_nombre)
-    if not tabla:
-        return jsonify({"error": f"Tabla '{tabla_nombre}' no encontrada"}), 400
-    query_base = db.session.query(tabla)
-    total_count = 0
-    if(not busqueda):
+    if tabla_nombre == "ordenes":
+        # Selección con alias para facilitar serialización y columnas
+        query_base = (
+            db.session.query(
+                Ordenes.id_orden.label("id_orden"),
+                Usuarios.id_usuario.label("id_usuario"),
+                Direcciones.direccion.label("direccion"),
+                MediosPago.nombre_medio.label("nombre_medio")
+            )
+            .join(Usuarios, Ordenes.id_usuario == Usuarios.id_usuario)
+            .join(Direcciones, Ordenes.id_direccion == Direcciones.id_direccion)
+            .join(MediosPago, Ordenes.id_medio_pago == MediosPago.id_medio)
+        )
+
+        if busqueda:
+            if busqueda.isnumeric():
+                query_base = query_base.filter(
+                    or_(
+                        Ordenes.id_orden == int(busqueda),
+                        Usuarios.id_usuario == int(busqueda)
+                    )
+                )
+            else:
+                like = f"%{busqueda}%"
+                query_base = query_base.filter(
+                    or_(
+                        Direcciones.direccion.ilike(like),
+                        MediosPago.nombre_medio.ilike(like)
+                    )
+                )
+
         total_count = query_base.count()
         objetos = query_base.offset(page * limit).limit(limit).all()
+
+        filas = [
+            {
+                "id_orden": row.id_orden,
+                "id_usuario": row.id_usuario,
+                "direccion": row.direccion,
+                "nombre_medio": row.nombre_medio
+            }
+            for row in objetos
+        ]
+
+        columnas = [
+            {"name": "id_orden", "field": "id_orden"},
+            {"name": "id_usuario", "field": "id_usuario"},
+            {"name": "dirección", "field": "direccion"},
+            {"name": "medio_de_pago", "field": "nombre_medio"}
+        ]
+
+        if not filas:
+            filas = "No se encontrarón registros"
+            total_count = 1
+
+        return jsonify({"filas": filas, "columnas": columnas, "total": total_count})
     else:
-        if(busqueda.isnumeric()):
-            nombreColumna = [objColumna.ilike(f"%{busqueda}%") for objColumna in tabla.__table__.columns if objColumna.primary_key]
-            objetos = query_base.filter(*nombreColumna).offset(page * limit).limit(limit).all()
-            total_count = query_base.filter(*nombreColumna).count()
+        if not tabla:
+            return jsonify({"error": f"Tabla '{tabla_nombre}' no encontrada"}), 400
+        query_base = db.session.query(tabla)
+        total_count = 0
+        if(not busqueda):
+            total_count = query_base.count()
+            objetos = query_base.offset(page * limit).limit(limit).all()
         else:
-            columnas = [objColumna.ilike(f"{busqueda}%") for objColumna in tabla.__table__.columns]
-            objetos = query_base.filter(or_(*columnas)).offset(page * limit).limit(limit).all()
-            total_count = query_base.filter(or_(*columnas)).count()
-    filas = serializar_con_fk_lookup(objetos)
-    columnas = [
-        {"name": col.name.replace("_", " ").title(), "field": col.name} 
-        for col in tabla.__table__.columns if col.name != "editor" and col.name != "creador" and col.name.lower() != "activo"
-    ]
-    if(not filas):
-        filas = "No se encontrarón registros"
-        total_count = 1
+            if(busqueda.isnumeric()):
+                nombreColumna = [objColumna.ilike(f"%{busqueda}%") for objColumna in tabla.__table__.columns if objColumna.primary_key]
+                objetos = query_base.filter(*nombreColumna).offset(page * limit).limit(limit).all()
+                total_count = query_base.filter(*nombreColumna).count()
+            else:
+                columnas = [objColumna.ilike(f"{busqueda}%") for objColumna in tabla.__table__.columns]
+                objetos = query_base.filter(or_(*columnas)).offset(page * limit).limit(limit).all()
+                total_count = query_base.filter(or_(*columnas)).count()
+        filas = serializar_con_fk_lookup(objetos)
+        columnas = [
+            {"name": col.name.replace("_", " ").title(), "field": col.name} 
+            for col in tabla.__table__.columns if col.name != "editor" and col.name != "creador" and col.name.lower() != "activo"
+        ]
+        if(not filas):
+            filas = "No se encontrarón registros"
+            total_count = 1
     return jsonify({"filas": filas, "columnas": columnas, "total": total_count})
 
 @bp_tablas.route("/ordenDetalle/<int:id_orden>", methods=["GET","OPTIONS"])
