@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -20,6 +23,8 @@
     "@nivo/pie": "^0.99.0",
     "bootstrap": "^5.3.6",
     "boxicons": "^2.1.4",
+    "canvg": "^4.0.3",
+    "html2canvas": "^1.4.1",
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
     "jwt-decode": "^4.0.0",

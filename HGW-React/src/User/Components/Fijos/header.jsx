@@ -22,7 +22,7 @@ export default function Header() {
     const toggleMenu = () => setMenuOpen((v) => !v);
     const closeMenu = () => setMenuOpen(false);
 
-    const urlApp = "https://bwgufixmrvvtsfrcpuwu.supabase.co/storage/v1/object/public/imgs/Apk/HGW.apk";
+    const urlApp = "https://bwgufixmrvvtsfrcpuwu.supabase.co/storage/v1/object/public/imgs/Apk/HGW_Movin.apk";
 
     // --------------------------
     // HEADER SI NO ESTÁ LOGUEADO

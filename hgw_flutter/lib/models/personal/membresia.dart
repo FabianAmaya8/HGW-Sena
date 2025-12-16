@@ -31,6 +31,12 @@ class Membresia {
     };
 
     String nombre = json['nombre_membresia'] ?? 'Cliente';
+    int puntosReales = 0;
+    if (json['bv_acumulados'] != null) {
+      puntosReales = int.tryParse(json['bv_acumulados'].toString()) ?? 0;
+    } else if (json['puntos_actuales'] != null) {
+      puntosReales = int.tryParse(json['puntos_actuales'].toString()) ?? 0;
+    }
 
     return Membresia(
       idMembresia: json['membresia'] ?? json['id_membresia'] ?? 1,
@@ -38,12 +44,13 @@ class Membresia {
       precioMembresia:
           json['precio_membresia']?.toDouble() ?? preciosPorNivel[nombre],
       puntosRequeridos: puntosPorNivel[nombre] ?? 0,
-      puntosActuales: json['puntos_actuales'] ?? 0,
+      puntosActuales: puntosReales,
     );
   }
 
   double get progreso {
     if (puntosRequeridos == 0) return 0;
+    if (puntosActuales >= puntosRequeridos) return 1.0;
     return (puntosActuales / puntosRequeridos).clamp(0.0, 1.0);
   }
 
