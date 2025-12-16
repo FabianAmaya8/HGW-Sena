@@ -46,7 +46,6 @@ export default function Home() {
       body: JSON.stringify({id_usuario: token.id, table: "usuarios"}),
     }).then((stream)=>stream.json()).then((res)=>setUsuario(res));
   }, []);
-  console.log(usuario);
   useEffect(() => {
     setShow(true);
 

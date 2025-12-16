@@ -24,7 +24,6 @@ export default function ChatBot() {
                 arreglo.push(copia)
                 input.current.value = "";
                 setMensaje({el: "", bot: null});
-                console.log(arreglo);
                 return arreglo
         })};
     return (
