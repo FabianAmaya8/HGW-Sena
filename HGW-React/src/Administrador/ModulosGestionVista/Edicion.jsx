@@ -64,12 +64,11 @@ const EditarModulo = React.memo(({ vistas }) => {
             <Box
                 sx={{
                     backgroundColor: tema.palette.mode === 'light' ? '#fafafa' : '#1e1e1e',
-                    borderRadius: 4,
+                    borderRadius: medidas === 'movil' ? 4 : '10px 0 0 10px',
                     width: medidas === 'movil' ? '90%' : '96.5%',
                     overflow: 'auto',
                     p: 4,
                     maxHeight: '80vh',
-                    
                     mx: 'auto',
                     mt: '2rem',
                     boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
@@ -82,8 +81,9 @@ const EditarModulo = React.memo(({ vistas }) => {
                         backgroundColor: '#9BCC4B',
                         color: 'white',
                     },
-                    borderRadius: '10px 0 0 10px',
-                    ...(medidas == "movil" ? {m: '3.5vh 1%'} :  {marginRight: "0.8%"}),
+                    ...(medidas === 'movil'
+                        ? { m: '3.5vh 1%' }
+                        : { marginRight: '0.8%' }),
                     background: 'white',
                     height: '78.5vh',
                 }}
